@@ -48,22 +48,23 @@
       margin-top: 6px;
       font-size: 0.95rem;
     }
-    .nav-links {
-      margin-top: 14px;
+    /* Phase */
+    /* Top nav */
+    .topnav {
       display: flex;
-      gap: 12px;
       justify-content: center;
-      flex-wrap: wrap;
+      gap: 24px;
+      padding: 20px 20px 0;
+      font-size: 0.85rem;
     }
-    .nav-links a {
+    .topnav a {
       color: var(--text-dim);
       text-decoration: none;
-      font-size: 0.85rem;
       transition: color 0.15s;
     }
-    .nav-links a:hover { color: var(--accent); }
+    .topnav a:hover { color: var(--accent); }
+    .topnav a.active { color: var(--accent); font-weight: 600; }
 
-    /* Phase */
     .phase {
       margin-bottom: 48px;
     }
@@ -234,14 +235,16 @@
 <body>
 <div class="container">
 
+  <div class="topnav">
+    <a href="index.html">Home</a>
+    <a href="story.html" class="active">Story</a>
+    <a href="progress.html">Progress</a>
+    <a href="https://github.com/Rex188/csmusic">GitHub</a>
+  </div>
+
   <header>
-    <h1>📖 The Origin Story</h1>
+    <h1>🌱 The Origin Story</h1>
     <p class="sub">How Music-Self went from zero to a locked concept — in one day.</p>
-    <div class="nav-links">
-      <a href="index.html">← Home</a>
-      <a href="progress.html">Progress</a>
-      <a href="https://github.com/Rex188/csmusic">GitHub</a>
-    </div>
   </header>
 
   <!-- Phase 1 -->
@@ -536,7 +539,7 @@
   <hr>
 
   <footer>
-    Music-Self &nbsp;·&nbsp; Full story documented in <a href="https://github.com/Rex188/csmusic/blob/master/CLAUDE.md">CLAUDE.md</a> &nbsp;·&nbsp; <a href="index.html">Home</a>
+    Music-Self &nbsp;·&nbsp; Full story documented in <a href="https://github.com/Rex188/csmusic/blob/master/CLAUDE.md">CLAUDE.md</a>
   </footer>
 
 </div>

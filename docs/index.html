@@ -24,9 +24,25 @@
       line-height: 1.6;
     }
 
+    /* Top nav */
+    .topnav {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      padding: 20px 20px 0;
+      font-size: 0.85rem;
+    }
+    .topnav a {
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .topnav a:hover { color: var(--accent); }
+    .topnav a.active { color: var(--accent); font-weight: 600; }
+
     .hero {
       text-align: center;
-      padding: 80px 24px 48px;
+      padding: 60px 24px 48px;
       max-width: 600px;
       margin: 0 auto;
     }
@@ -155,8 +171,15 @@
 </head>
 <body>
 
+  <div class="topnav">
+    <a href="index.html" class="active">Home</a>
+    <a href="story.html">Story</a>
+    <a href="progress.html">Progress</a>
+    <a href="https://github.com/Rex188/csmusic">GitHub</a>
+  </div>
+
   <div class="hero">
-    <div class="emoji-big">👁️</div>
+    <div class="emoji-big">🌱</div>
     <h1>Music-<span>Self</span></h1>
     <p class="sub"><strong>Music is how you perceive the world.</strong> Your lens, made visible.</p>
     <div class="quote">

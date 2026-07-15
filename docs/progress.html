@@ -58,6 +58,22 @@
     }
     .back-link:hover { opacity: 1; text-decoration: underline; }
 
+    /* Top nav */
+    .topnav {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      padding: 20px 20px 0;
+      font-size: 0.85rem;
+    }
+    .topnav a {
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .topnav a:hover { color: var(--accent); }
+    .topnav a.active { color: var(--accent); font-weight: 600; }
+
     .status-summary {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -192,11 +208,16 @@
 <body>
 <div class="container">
 
+  <div class="topnav">
+    <a href="index.html">Home</a>
+    <a href="story.html">Story</a>
+    <a href="progress.html" class="active">Progress</a>
+    <a href="https://github.com/Rex188/csmusic">GitHub</a>
+  </div>
+
   <header>
-    <h1>👁️ Music-Self</h1>
+    <h1>🌱 Music-Self</h1>
     <p>Project progress — tracking the build from concept to launch</p>
-    <a class="back-link" href="index.html">← Back to main page</a>
-    <div style="margin-top:6px;"><a class="back-link" href="story.html" style="opacity:0.5;">📖 Read the origin story →</a></div>
   </header>
 
   <!-- Status -->
