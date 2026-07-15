@@ -1,8 +1,8 @@
-# 🌱 Music-Self
+# 👁️ Music-Self
 
-**Your music taste is your identity. Watch it grow.**
+**Music is how you perceive the world. Your lens, made visible.**
 
-A private, introspective space where your listening becomes a living landscape. No dashboards. No stats. No pressure. Just you and your music-self, evolving over time — like bringing up a kid.
+You're not sharing a playlist. You're showing someone how you process reality.
 
 ---
 
@@ -10,58 +10,46 @@ A private, introspective space where your listening becomes a living landscape. 
 
 | | |
 |---|---|
-| 🧪 | **Concept phase** — direction decided, no code written yet |
+| 🧪 | **Concept locked** — no code written yet |
 | ✅ | Python 3.11 + librosa + scikit-learn + Streamlit ready |
 | ✅ | DeepSeek (implementation) + Claude Opus (architecture) ready |
-| ✅ | Design questions answered — see [`project/design-questions.md`](project/design-questions.md) |
+| ✅ | Design decisions fully documented |
 
 [👉 See full progress page →](https://rex188.github.io/csmusic/progress.html)
 
 ---
 
-## 🌿 What Is Music-Self?
+## 👁️ What Is Music-Self?
 
-Inspired by the movie **SOUL** — where souls are abstract proto-personalities that develop through experience. Your music-self is the same idea: **becoming, not finished.**
+A private space where your music becomes a **living landscape** — one that reflects how you see the world. The way you hear music *is* the way you see everything else.
 
-| What it IS | What it is NOT |
+### The reframe
+
+| ✗ Old (cringe) | ✓ New (sharp) |
 |---|---|
-| A visual garden that grows with your music | A dashboard or stats page |
-| A private space to explore yourself | A social network |
-| Gentle awareness ("you've added a lot of quiet music lately") | AI explaining your emotions |
-| Optional notes attached to songs | Forced journaling |
-| Social masks — share facets, not the whole you | Full profile sharing |
+| Discover yourself through music | **Music IS how you perceive the world** |
+| Your emotional support garden | Your lens, made visible |
+| Share your feelings | Share your perspective |
+| The app understands you | You see yourself — and others see you too |
 
-**The core idea:** Music is not just sounds. It's a reflection of how you perceive the world. The app helps you see that reflection — without analyzing it to death.
+**Why sharing matters:** Consensus isn't agreeing on facts. It's recognizing a shared way of *perceiving*. If someone resonates with your lens, the connection is already deeper than small talk ever gets.
 
-### What makes it different from everything else?
+### Key features
 
-| Project | What it does | Music-Self difference |
+- **🔍 Self-perception** — See the shape of your own lens. Patterns you'd never notice in a playlist.
+- **🤝 Deep connection** — Show someone your music-self = show them how you process reality.
+- **🎭 Facets, not profiles** — Social masks for different contexts. Different sides of you for different people.
+
+### What none of the existing tools do
+
+| Project | What it does | Missing |
 |---|---|---|
-| **n-gen art (Bloom)** | Spotify → flower visualization per artist/genre | One snapshot. Music-Self *evolves.* |
-| **Sonosphere** | 3D world from listening *behavior* | Behavior is part of it, but Music-Self grows like a relationship, not a map. |
-| **Soundgaze** | 3D UMAP of audio features | Similarity mapping — cool but cold. Music-Self is *warm.* |
-| **Spotify Wrapped** | Year-end stats | One moment. Music-Self is a continuous companion. |
+| **Bloom** | Spotify → one-shot flower visualization | Doesn't evolve over time |
+| **Sonosphere** | 3D world from listening behavior | No user reflection layer |
+| **Soundgaze** | 3D similarity map of audio features | Cold — no relationship feel |
+| **Spotify Wrapped** | Year-end stats | One moment, then gone |
 
----
-
-## 💬 Help Shape This
-
-This is still early. The design direction is set, but the details — the visual metaphor, the features, the feel — are wide open.
-
-**If you have a thought, a critique, or a wild idea:**
-📮 [Open a GitHub Issue](https://github.com/Rex188/csmusic/issues/new)
-
----
-
-## 📅 Timeline
-
-| Date | Event |
-|---|---|
-| 2026-07-15 | **Project initialized.** Folder set up as CS + music therapy workspace. |
-| 2026-07-15 | **Python environment created.** All dependencies installed. |
-| 2026-07-15 | **Two-model workflow defined.** DeepSeek + Claude Opus. |
-| 2026-07-15 | **Design questions answered.** Music-Self concept defined — SOUL-inspired, garden metaphor, no pressure, social masks. Three earlier therapy directions superseded. |
-| 2026-07-15 | **Progress page & landing page** published on GitHub Pages. |
+**Music-Self fills this gap.** It grows with you. It incorporates your reflection. It feels like a relationship, not a snapshot.
 
 ---
 
@@ -75,8 +63,15 @@ This is still early. The design direction is set, but the details — the visual
 | Streamlit | Rapid prototyping |
 | DeepSeek (API) | Implementation engineer |
 | Claude Opus 4.8 | Software architect |
-| *React / Next.js* | *TBD — web frontend* |
 
 ---
 
-*Built by [Rex188](https://github.com/Rex188) — Ideas welcome.*
+## 💬 Share your perspective
+
+This is early. The direction is set, but every detail is negotiable.
+
+📮 [Open a GitHub Issue](https://github.com/Rex188/csmusic/issues/new) — a thought, a critique, a wild idea. I read everything.
+
+---
+
+*Built by [Rex188](https://github.com/Rex188) — Your perspective matters.*

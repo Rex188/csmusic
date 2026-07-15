@@ -108,12 +108,8 @@
     .timeline { position: relative; padding-left: 28px; }
     .timeline::before {
       content: '';
-      position: absolute;
-      left: 8px;
-      top: 8px;
-      bottom: 8px;
-      width: 2px;
-      background: var(--border);
+      position: absolute; left: 8px; top: 8px; bottom: 8px;
+      width: 2px; background: var(--border);
     }
     .timeline-item {
       position: relative;
@@ -125,14 +121,9 @@
     }
     .timeline-item::before {
       content: '';
-      position: absolute;
-      left: -22px;
-      top: 18px;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--accent);
-      border: 2px solid var(--bg);
+      position: absolute; left: -22px; top: 18px;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--accent); border: 2px solid var(--bg);
     }
     .timeline-item .date { font-size: 0.75rem; color: var(--text-dim); margin-bottom: 4px; }
     .timeline-item .title { font-weight: 600; font-size: 0.92rem; }
@@ -141,12 +132,8 @@
     .task-board { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     @media (max-width: 600px) { .task-board { grid-template-columns: 1fr; } }
     .task-col h3 {
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--text-dim);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
+      font-size: 0.82rem; font-weight: 600; color: var(--text-dim);
+      margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.06em;
     }
     .task-card {
       background: var(--surface);
@@ -170,24 +157,9 @@
     .ref-card h4 { font-size: 0.85rem; font-weight: 600; margin-bottom: 2px; }
     .ref-card p { font-size: 0.8rem; color: var(--text-dim); }
 
-    .link-list { display: flex; flex-wrap: wrap; gap: 8px; }
-    .link-chip {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 6px 14px;
-      font-size: 0.82rem;
-      color: var(--text);
-      text-decoration: none;
-      transition: background 0.15s;
-    }
-    .link-chip:hover { background: var(--surface-hover); }
-
     footer {
-      text-align: center;
-      padding: 40px 0 20px;
-      font-size: 0.78rem;
-      color: var(--text-dim);
+      text-align: center; padding: 40px 0 20px;
+      font-size: 0.78rem; color: var(--text-dim);
     }
 
     .log-entry {
@@ -203,14 +175,26 @@
     .log-entry .log-msg { color: var(--text); margin-top: 2px; }
 
     hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+    .pitch-mini {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+      border-radius: var(--radius); overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .pitch-mini .side { padding: 12px 14px; font-size: 0.84rem; }
+    .pitch-mini .side.old { background: #1a1111; color: #fca5a5; }
+    .pitch-mini .side.new { background: #11181f; color: var(--text); }
+    .pitch-mini .side h5 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .pitch-mini .side.old h5 { color: #f87171; }
+    .pitch-mini .side.new h5 { color: var(--green); }
   </style>
 </head>
 <body>
 <div class="container">
 
   <header>
-    <h1>🌱 Music-Self</h1>
-    <p>Project progress — tracking decisions, next steps &amp; inspiration</p>
+    <h1>👁️ Music-Self</h1>
+    <p>Project progress — tracking the build from concept to launch</p>
     <a class="back-link" href="index.html">← Back to main page</a>
   </header>
 
@@ -226,7 +210,7 @@
     </div>
     <div class="stat-card">
       <div class="number" style="color:var(--accent)">4</div>
-      <div class="label">References</div>
+      <div class="label">Inspirations</div>
     </div>
     <div class="stat-card">
       <div class="number" style="color:var(--blue)">2</div>
@@ -234,80 +218,74 @@
     </div>
   </div>
 
-  <!-- Current Status -->
+  <!-- Core pitch -->
   <section>
-    <div class="section-title">📍 Current Status</div>
+    <div class="section-title">🎯 The Core Idea</div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;">
-      <p style="font-size:0.9rem;">
-        <span class="tag tag-wip">CONCEPT</span>
-        &ensp;Direction decided. Moving toward prototype planning.
+      <p style="font-size:0.95rem;font-weight:600;margin-bottom:8px;">Music is how you perceive the world. Your lens, made visible.</p>
+      <p style="font-size:0.84rem;color:var(--text-dim);">
+        The way you hear music <em>is</em> the way you see everything else. Show someone your music-self and you're showing them your perspective — not your taste, your <em>lens</em>. Consensus isn't agreeing on facts. It's recognizing a shared way of perceiving.
       </p>
-      <p style="font-size:0.84rem;color:var(--text-dim);margin-top:8px;">
-        Music-Self — a private visual garden that grows with your music taste. Inspired by SOUL (Pixar), Bloom, Sonosphere.
-        Full design doc in <code>project/design-questions.md</code>.
-      </p>
+    </div>
+    <div class="pitch-mini" style="margin-top:10px;">
+      <div class="side old">
+        <h5>✗ Old framing (cringe)</h5>
+        Discover yourself through music<br>
+        Your emotional support garden<br>
+        Share your feelings<br>
+        The app understands you
+      </div>
+      <div class="side new">
+        <h5>✓ New framing (sharp)</h5>
+        Music IS how you perceive the world<br>
+        Your lens, made visible<br>
+        Share your perspective<br>
+        You see yourself — and others see you too
+      </div>
     </div>
   </section>
 
-  <!-- Core Concept -->
+  <!-- Design decisions -->
   <section>
-    <div class="section-title">🎯 Core Concept</div>
-    <div class="card-grid">
-      <div class="ref-card" style="border-left:3px solid var(--green);">
-        <h4>Private introspective space</h4>
-        <p>Your music taste = your identity. A landscape, not a dashboard.</p>
-      </div>
-      <div class="ref-card" style="border-left:3px solid var(--accent);">
-        <h4>Evolves over time</h4>
-        <p>Like bringing up a kid. Grows forever, changes with you.</p>
-      </div>
-      <div class="ref-card" style="border-left:3px solid var(--blue);">
-        <h4>No pressure</h4>
-        <p>No streaks, no gamification, no pop-ups. You don't have to do anything.</p>
-      </div>
-      <div class="ref-card" style="border-left:3px solid var(--yellow);">
-        <h4>Social masks</h4>
-        <p>Share a facet of your music-self, not the whole thing. Like in real life.</p>
-      </div>
+    <div class="section-title">⚙️ Design Decisions</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;">
+      <ul style="font-size:0.84rem; color:var(--text-dim); padding-left:18px; display:flex; flex-direction:column; gap:6px;">
+        <li><strong>Music source:</strong> Streaming APIs (Spotify primary), offline files supported</li>
+        <li><strong>Identity model:</strong> One evolving self — "like bringing up a kid"</li>
+        <li><strong>Deep analysis:</strong> Heavy ML under the hood so the landscape feels accurate — users never see charts unless they dig</li>
+        <li><strong>Reflection:</strong> User recognizes themselves in the visual. Optional notes encouraged, not required.</li>
+        <li><strong>Social:</strong> Share a facet of your music-self via social masks. Different masks for different people.</li>
+        <li><strong>Platform:</strong> Web first, then iOS. Simple email/password.</li>
+        <li><strong>Vibe:</strong> Apple-style minimalism, dark, interactive, scroll-reactive. No p5.js.</li>
+        <li><strong>No-go:</strong> No ads, no force, no pop-ups, no gamification, no feed, no AI explaining emotions.</li>
+      </ul>
     </div>
   </section>
 
-  <!-- References -->
+  <!-- Inspirations -->
   <section>
     <div class="section-title">📚 Inspirations</div>
     <div class="card-grid">
       <div class="ref-card">
         <h4>🎬 SOUL (Pixar)</h4>
-        <p>Souls as abstract personalities developing through experience. Your music-self is <em>becoming</em>.</p>
+        <p>Souls as abstract personalities developing through experience. Your music-self is <em>becoming</em>, not finished.</p>
       </div>
       <div class="ref-card">
         <h4>🌸 n-gen art (Bloom)</h4>
-        <p>Spotify → flower per artist/ genre. Garden metaphor proven to work visually.</p>
+        <p>Spotify → flower per artist/genre. Garden metaphor proven. Went viral.</p>
       </div>
       <div class="ref-card">
         <h4>🌍 Sonosphere</h4>
-        <p>3D world from listening behavior (repetition, exploration, curation). Behavior shapes landscape.</p>
+        <p>3D world from listening <em>behavior</em> (repetition, exploration, curation). Behavior shapes landscape.</p>
       </div>
       <div class="ref-card">
         <h4>🔮 Soundgaze</h4>
         <p>UMAP on audio features → 3D point cloud. Similar songs = close together.</p>
       </div>
-    </div>
-  </section>
-
-  <!-- Design Decisions -->
-  <section>
-    <div class="section-title">⚙️ Key Design Decisions</div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;">
-      <ul style="font-size:0.84rem; color:var(--text-dim); padding-left:18px; display:flex; flex-direction:column; gap:6px;">
-        <li><strong>Music source:</strong> Streaming APIs (Spotify primary), offline files supported</li>
-        <li><strong>Deep analysis:</strong> Heavy ML under the hood — users never see charts unless they dig</li>
-        <li><strong>Reflection:</strong> Optional notes attached to songs, rewarded but not required</li>
-        <li><strong>Identity model:</strong> One evolving self, like bringing up a kid</li>
-        <li><strong>Platform:</strong> Web first, then iOS</li>
-        <li><strong>Vibe:</strong> Apple-style minimalism, dark mode, interactive, scroll-reactive</li>
-        <li><strong>No p5.js</strong> — user explicitly rejected it</li>
-      </ul>
+      <div class="ref-card" style="border:1px dashed var(--accent);">
+        <h4>✨ The gap we fill</h4>
+        <p>None evolve over time. None incorporate user reflection. None feel like a relationship. That's where Music-Self sits.</p>
+      </div>
     </div>
   </section>
 
@@ -319,26 +297,30 @@
         <h3>Pending</h3>
         <div class="task-card">
           <div class="task-title">Choose frontend framework</div>
-          <div class="task-meta">React / Next.js likely. Visual-first, interactive, dark mode.</div>
+          <div class="task-meta">Visual-first, interactive, dark mode. React / Next.js likely.</div>
         </div>
         <div class="task-card">
           <div class="task-title">Music API integration</div>
-          <div class="task-meta">Spotify Web API for metadata &amp; audio features (energy, valence, tempo).</div>
+          <div class="task-meta">Spotify API for metadata &amp; audio features (energy, valence, tempo).</div>
         </div>
         <div class="task-card">
           <div class="task-title">Design visual metaphor</div>
-          <div class="task-meta">Garden? Landscape? Geometry? How features → visual elements.</div>
+          <div class="task-meta">How do features → visual elements? Garden? Geometry? Something new?</div>
         </div>
         <div class="task-card">
           <div class="task-title">First prototype</div>
-          <div class="task-meta">Minimal version that feels like the real thing. Interactive visual + music import.</div>
+          <div class="task-meta">Minimal version: import music → see your landscape. Nothing else.</div>
         </div>
       </div>
       <div class="task-col">
-        <h3>Decided</h3>
+        <h3>Decided ✓</h3>
         <div class="task-card">
-          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Project direction</div>
-          <div class="task-meta">Music-Self concept locked. Design questions fully answered.</div>
+          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">LOCKED</span>Music-Self direction</div>
+          <div class="task-meta">"Music as perception" — private visual space that grows with you.</div>
+        </div>
+        <div class="task-card">
+          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Pitch reframed</div>
+          <div class="task-meta">From "emotional support garden" → "your lens, made visible." Sharp, not cringe.</div>
         </div>
         <div class="task-card">
           <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Infrastructure ready</div>
@@ -368,36 +350,46 @@
       </div>
       <div class="timeline-item">
         <div class="date">2026-07-15</div>
-        <div class="title">Deep research report reviewed &amp; rejected</div>
-        <div class="desc">"Emotion reflection" framing rejected as unconvincing. Three therapy-adjacent directions identified but not pursued.</div>
+        <div class="title">Deep research report rejected</div>
+        <div class="desc">"Emotion reflection" was a solution looking for a problem. User called it nonsense. Architect agreed.</div>
       </div>
       <div class="timeline-item">
         <div class="date">2026-07-15</div>
-        <div class="title">Music-Self direction decided</div>
-        <div class="desc">Design questions answered in project/design-questions.md. Inspired by SOUL, Bloom, Sonosphere, Soundgaze. Visual garden metaphor, no pressure, social masks.</div>
+        <div class="title">Breakthrough — the raw idea</div>
+        <div class="desc">"Music is a reflection of how you perceive this world." Self-exploration first, then connection.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">2026-07-15</div>
+        <div class="title">Design questions answered</div>
+        <div class="desc">8 sections in project/design-questions.md. SOUL metaphor, no pressure, social masks.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">2026-07-15</div>
+        <div class="title">Pitch reframed</div>
+        <div class="desc">"Music as perception" — from cringe to sharp. Your lens, made visible.</div>
       </div>
       <div class="timeline-item">
         <div class="date">2026-07-15</div>
         <div class="title">GitHub Pages published</div>
-        <div class="desc">Landing page (index.html) + progress page (progress.html) live at rex188.github.io/csmusic/.</div>
+        <div class="desc">Landing page + progress page live.</div>
       </div>
     </div>
   </section>
 
-  <!-- Activity Log -->
+  <!-- Activity -->
   <section>
     <div class="section-title">📝 Activity Log</div>
     <div class="log-entry">
       <span class="log-date">2026-07-15</span>
-      <div class="log-msg">Music-Self direction locked. Design questions fully documented.</div>
+      <div class="log-msg">Pitch reframed: "Music as perception." Landing page, progress page, README updated.</div>
     </div>
     <div class="log-entry">
       <span class="log-date">2026-07-15</span>
-      <div class="log-msg">GPT removed from workflow — too expensive. Research merged into Claude architect role.</div>
+      <div class="log-msg">Music-Self concept locked. Design questions fully documented in project/design-questions.md.</div>
     </div>
     <div class="log-entry">
       <span class="log-date">2026-07-15</span>
-      <div class="log-msg">Emotion reflection research report rejected by user as unconvincing.</div>
+      <div class="log-msg">Research report (emotion reflection) rejected by user as unconvincing.</div>
     </div>
     <div class="log-entry">
       <span class="log-date">2026-07-15</span>
@@ -407,12 +399,12 @@
 
   <!-- Feedback -->
   <section>
-    <div class="section-title">💬 Have thoughts?</div>
+    <div class="section-title">💬 Thoughts?</div>
     <div style="background:var(--accent-soft);border:1px solid var(--accent);border-radius:var(--radius);padding:20px 22px;text-align:center;">
       <p style="font-size:0.9rem;color:var(--text-dim);margin-bottom:12px;">
-        Ideas, critiques, wild thoughts — all welcome.
+        The concept is fresh — your take shapes where it goes next.
       </p>
-      <a class="btn" href="https://github.com/Rex188/csmusic/issues/new" target="_blank" style="display:inline-block;background:var(--accent);color:#0b0d14;font-weight:700;font-size:0.85rem;padding:10px 24px;border-radius:40px;text-decoration:none;">Open an Issue</a>
+      <a href="https://github.com/Rex188/csmusic/issues/new" target="_blank" style="display:inline-block;background:var(--accent);color:#0b0d14;font-weight:700;font-size:0.85rem;padding:10px 24px;border-radius:40px;text-decoration:none;">Open an Issue</a>
     </div>
   </section>
 

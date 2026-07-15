@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Music-Self — Your Music, Growing</title>
+  <title>Music-Self — Your Lens, Made Visible</title>
   <style>
     :root {
       --bg: #0b0d14;
@@ -46,7 +46,7 @@
     .hero .quote {
       margin-top: 20px;
       font-size: 0.9rem;
-      color: var(--text-dim);
+      color: var(--text);
       font-style: italic;
       padding: 14px 20px;
       background: var(--accent-soft);
@@ -76,16 +76,38 @@
     .card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
     .card p { font-size: 0.88rem; color: var(--text-dim); }
 
-    .pill-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-    .pill {
-      background: var(--surface);
+    .pitch-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border-radius: var(--radius);
+      overflow: hidden;
       border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 6px 14px;
-      font-size: 0.82rem;
-      color: var(--text-dim);
     }
-    .pill.active { border-color: var(--accent); color: var(--accent); }
+    .pitch-col { padding: 16px 18px; }
+    .pitch-col.old { background: #1a1111; }
+    .pitch-col.new { background: #11181f; }
+    .pitch-col h4 {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 12px;
+    }
+    .pitch-col.old h4 { color: #f87171; }
+    .pitch-col.new h4 { color: var(--green); }
+    .pitch-item { margin-bottom: 8px; font-size: 0.85rem; }
+    .pitch-item .old-text { color: #fca5a5; }
+    .pitch-item .new-text { color: var(--text); }
+    .pitch-divider {
+      text-align: center;
+      background: var(--surface);
+      padding: 6px;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
 
     .btn {
       display: inline-block;
@@ -115,17 +137,6 @@
     .cta-box h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 6px; }
     .cta-box p { font-size: 0.88rem; color: var(--text-dim); margin-bottom: 18px; max-width: 440px; margin-left: auto; margin-right: auto; }
 
-    .not { display: flex; align-items: start; gap: 10px; margin-bottom: 8px; font-size: 0.88rem; }
-    .not .x { color: #f87171; flex-shrink: 0; font-weight: 700; }
-    .not .check { color: var(--green); flex-shrink: 0; font-weight: 700; }
-
-    .vs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    @media (max-width: 500px) { .vs-grid { grid-template-columns: 1fr; } }
-    .vs-col { }
-    .vs-col h4 { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
-    .vs-col h4.is { color: var(--green); }
-    .vs-col h4.not { color: #f87171; }
-
     footer {
       text-align: center;
       padding: 40px 20px 32px;
@@ -138,70 +149,74 @@
     @media (max-width: 480px) {
       .hero h1 { font-size: 2.2rem; }
       .hero { padding: 48px 16px 32px; }
+      .pitch-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
   <div class="hero">
-    <div class="emoji-big">🌱</div>
+    <div class="emoji-big">👁️</div>
     <h1>Music-<span>Self</span></h1>
-    <p class="sub">Your music taste is your identity. Watch it grow.</p>
+    <p class="sub"><strong>Music is how you perceive the world.</strong> Your lens, made visible.</p>
     <div class="quote">
-      "It's like bringing up a kid — not building a report."
+      "You're not sharing a playlist. You're showing someone how you process reality."
     </div>
   </div>
 
   <div class="container">
 
-    <!-- What -->
+    <!-- Core -->
     <section>
       <div class="section-title">The idea</div>
       <div class="card">
-        <p>A private, introspective space where your listening becomes a <strong>living landscape</strong>. No dashboards. No stats. No pressure. Just you and your music-self, growing together.</p>
+        <p>A private space where your music becomes a <strong>living landscape</strong> — one that reflects how you see the world. The way you hear music <em>is</em> the way you see everything else.</p>
       </div>
       <div class="card" style="border-left: 3px solid var(--accent);">
-        <p style="color:var(--text);"><em>Music is not just sounds. It's a reflection of how you perceive the world.</em></p>
+        <p style="color:var(--text);font-size:0.95rem;">
+          Share your perspective — not your feelings. If someone resonates with your lens, the connection is already deeper than small talk ever gets.
+        </p>
       </div>
     </section>
 
-    <!-- What it IS vs NOT -->
+    <!-- Pitch reframe -->
     <section>
-      <div class="section-title">What this is</div>
-      <div class="vs-grid">
-        <div class="vs-col">
-          <h4 class="is">✓ IS</h4>
-          <div class="not"><span class="check">✓</span> A garden that grows with your music</div>
-          <div class="not"><span class="check">✓</span> A private space to explore yourself</div>
-          <div class="not"><span class="check">✓</span> Gentle awareness — quiet patterns noticed</div>
-          <div class="not"><span class="check">✓</span> Optional notes attached to songs</div>
-          <div class="not"><span class="check">✓</span> Social masks — share a facet, not the whole</div>
+      <div class="section-title">The reframe</div>
+      <div class="pitch-grid">
+        <div class="pitch-col old">
+          <h4>✗ Old (cringe)</h4>
+          <div class="pitch-item"><span class="old-text">Discover yourself through music</span></div>
+          <div class="pitch-item"><span class="old-text">Your emotional support garden</span></div>
+          <div class="pitch-item"><span class="old-text">Share your feelings</span></div>
+          <div class="pitch-item"><span class="old-text">The app understands you</span></div>
         </div>
-        <div class="vs-col">
-          <h4 class="not">✗ IS NOT</h4>
-          <div class="not"><span class="x">✗</span> A dashboard or stats page</div>
-          <div class="not"><span class="x">✗</span> AI that explains your emotions</div>
-          <div class="not"><span class="x">✗</span> Forced journaling or streaks</div>
-          <div class="not"><span class="x">✗</span> A social network / feed</div>
-          <div class="not"><span class="x">✗</span> Gamification or pop-ups</div>
+        <div class="pitch-col new">
+          <h4>✓ New (sharp)</h4>
+          <div class="pitch-item"><span class="new-text"><strong>Music IS how you perceive the world</strong></span></div>
+          <div class="pitch-item"><span class="new-text">Your lens, made visible</span></div>
+          <div class="pitch-item"><span class="new-text">Share your perspective</span></div>
+          <div class="pitch-item"><span class="new-text">You see yourself — and others see you too</span></div>
         </div>
+      </div>
+      <div class="card" style="margin-top:10px;">
+        <p><strong>Why sharing matters:</strong> Consensus isn't agreeing on facts. It's recognizing a shared way of <em>perceiving</em>.</p>
       </div>
     </section>
 
-    <!-- Inspiration -->
+    <!-- What it enables -->
     <section>
-      <div class="section-title">Inspired by</div>
+      <div class="section-title">What this enables</div>
       <div class="card">
-        <p><strong>🎬 SOUL (Pixar)</strong> — Souls as abstract personalities that develop through experience. Your music-self is <em>becoming</em>, not finished.</p>
+        <h3>🔍 Self-perception</h3>
+        <p>See the shape of your own lens. What do you repeat? What do you avoid? The patterns you'd never notice in a playlist view.</p>
       </div>
       <div class="card">
-        <p><strong>🌸 n-gen art (Bloom)</strong> — Spotify data → flower visualization per artist. Proves the garden metaphor works.</p>
+        <h3>🤝 Deep connection</h3>
+        <p>Show someone your music-self and you're showing them how you process reality, not what you "like." That's a different kind of intimacy.</p>
       </div>
       <div class="card">
-        <p><strong>🌍 Sonosphere</strong> — 3D world shaped by listening <em>behavior</em>, not just content. What you repeat, explore, curate.</p>
-      </div>
-      <div class="card">
-        <p><strong>🔮 Soundgaze</strong> — 3D point cloud of audio features. Similar songs = near each other.</p>
+        <h3>🎭 Facets, not profiles</h3>
+        <p>You have different lenses for different contexts. Social masks let you share the right facet with the right person — like real life.</p>
       </div>
     </section>
 
@@ -210,7 +225,7 @@
       <div class="section-title">Where it stands</div>
       <div class="card" style="text-align:center; padding:20px;">
         <p style="font-size:1.1rem; margin-bottom:4px;">🧪 Concept locked, no code yet</p>
-        <p style="font-size:0.85rem; color:var(--text-dim);">Design decisions documented, ML stack ready, frontend framework TBD.</p>
+        <p style="font-size:0.85rem; color:var(--text-dim);">Design decisions documented, ML stack ready, frontend TBD.</p>
       </div>
       <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:12px;">
         <a class="btn" href="progress.html">📋 Progress log</a>
@@ -221,9 +236,9 @@
     <!-- CTA -->
     <section>
       <div class="cta-box">
-        <h2>💬 What do you think?</h2>
-        <p>This is early — your input shapes everything. A thought, a critique, a wild idea — it's all welcome.</p>
-        <a class="btn" href="https://github.com/Rex188/csmusic/issues/new" target="_blank">Open an Issue →</a>
+        <h2>💬 Does this resonate?</h2>
+        <p>Or does it miss? The concept is fresh — your take shapes where it goes next. Open an issue, I read everything.</p>
+        <a class="btn" href="https://github.com/Rex188/csmusic/issues/new" target="_blank">Share your perspective →</a>
       </div>
     </section>
 
