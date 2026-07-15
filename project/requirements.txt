@@ -1,0 +1,24 @@
+# === Core ===
+numpy
+scipy
+
+# === Audio & Music Analysis ===
+librosa
+soundfile
+
+# === Visualization ===
+matplotlib
+seaborn
+
+# === ML / Affective Computing ===
+scikit-learn
+
+# === Interactive / Prototyping ===
+streamlit
+
+# === Development Tools ===
+jupyter
+ipykernel
+
+# === AI CLI Tools ===
+shell-gpt

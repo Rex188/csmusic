@@ -1,0 +1,13 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Large media — not tracking in git
+*.pdf
+*.epub
+
+# API keys — sensitive
+API.md
+project/*.sh
