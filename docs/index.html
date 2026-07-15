@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CS + Music Therapy</title>
+  <title>CS + Music Therapy — Help Shape This Project</title>
   <style>
     :root {
       --bg: #faf9f6;
@@ -13,7 +13,6 @@
       --text-dim: #6b6964;
       --accent: #7c3aed;
       --accent-bg: #7c3aed0c;
-      --green: #059669;
       --radius: 14px;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -27,31 +26,44 @@
     /* Hero */
     .hero {
       text-align: center;
-      padding: 64px 24px 40px;
-      max-width: 680px;
+      padding: 72px 24px 40px;
+      max-width: 640px;
       margin: 0 auto;
     }
+    .hero .tagline {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
     .hero h1 {
-      font-size: 2.6rem;
+      font-size: 2.8rem;
       font-weight: 800;
       letter-spacing: -0.03em;
-      line-height: 1.15;
+      line-height: 1.12;
     }
     .hero h1 span { color: var(--accent); }
     .hero p {
       font-size: 1.05rem;
       color: var(--text-dim);
-      margin-top: 14px;
-      max-width: 520px;
+      margin-top: 16px;
+      max-width: 500px;
       margin-left: auto;
       margin-right: auto;
+    }
+    .hero-cta {
+      margin-top: 28px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
     }
 
     /* Container */
     .container { max-width: 720px; margin: 0 auto; padding: 0 20px; }
-
-    /* Section */
-    section { margin-bottom: 40px; }
+    section { margin-bottom: 44px; }
     .section-title {
       font-size: 0.75rem;
       font-weight: 700;
@@ -61,103 +73,103 @@
       margin-bottom: 14px;
     }
 
-    /* Direction cards — friendly */
-    .direction-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 22px 24px;
-      margin-bottom: 12px;
-      transition: box-shadow 0.15s;
-    }
-    .direction-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
-    .direction-card h3 {
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-    .direction-card .sub {
-      font-size: 0.82rem;
-      color: var(--accent);
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-    .direction-card p {
-      font-size: 0.9rem;
-      color: var(--text-dim);
-    }
-    .direction-card .example {
-      margin-top: 10px;
-      font-size: 0.84rem;
-      padding: 10px 14px;
+    /* Invite banner */
+    .invite {
       background: var(--accent-bg);
-      border-radius: 8px;
-      color: var(--text);
-    }
-    .direction-card .example strong { color: var(--accent); }
-
-    /* Status & progress callout */
-    .status-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 18px 22px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-    .status-box p {
-      font-size: 0.9rem;
-      color: var(--text-dim);
-    }
-    .status-box a {
-      color: var(--accent);
-      font-weight: 600;
-      text-decoration: none;
-      font-size: 0.9rem;
-      white-space: nowrap;
-    }
-    .status-box a:hover { text-decoration: underline; }
-
-    /* Feedback section */
-    .feedback-box {
-      background: var(--accent-bg);
-      border: 1px solid var(--accent);
+      border: 1.5px solid var(--accent);
       border-radius: var(--radius);
       padding: 28px 24px;
       text-align: center;
     }
-    .feedback-box h3 {
-      font-size: 1.15rem;
+    .invite h2 {
+      font-size: 1.25rem;
       font-weight: 700;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
-    .feedback-box p {
+    .invite p {
       font-size: 0.9rem;
       color: var(--text-dim);
-      margin-bottom: 18px;
+      max-width: 480px;
+      margin: 0 auto 18px;
     }
+
+    /* Idea cards */
+    .idea-grid { display: grid; gap: 12px; }
+    .idea-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+    }
+    .idea-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+    .idea-card p { font-size: 0.88rem; color: var(--text-dim); }
+    .idea-card .prompt {
+      margin-top: 12px;
+      font-size: 0.84rem;
+      padding: 10px 14px;
+      background: var(--accent-bg);
+      border-radius: 8px;
+    }
+    .idea-card .prompt em { color: var(--accent); font-style: normal; font-weight: 600; }
+
+    /* What-ifs */
+    .question-list { display: grid; gap: 10px; }
+    .question-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: start;
+      gap: 10px;
+    }
+    .question-item .q { color: var(--accent); font-weight: 700; flex-shrink: 0; }
+
+    /* Buttons */
     .btn {
       display: inline-block;
       background: var(--accent);
       color: #fff;
       font-weight: 600;
-      font-size: 0.9rem;
-      padding: 11px 28px;
+      font-size: 0.92rem;
+      padding: 12px 30px;
       border-radius: 40px;
       text-decoration: none;
       transition: opacity 0.15s;
+      border: none;
+      cursor: pointer;
     }
     .btn:hover { opacity: 0.85; }
     .btn-outline {
       background: transparent;
       color: var(--accent);
       border: 1.5px solid var(--accent);
-      margin-left: 8px;
     }
     .btn-outline:hover { background: var(--accent-bg); }
+
+    /* How it works */
+    .steps { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    @media (max-width: 500px) { .steps { grid-template-columns: 1fr; } }
+    .step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      text-align: center;
+    }
+    .step .num {
+      display: inline-block;
+      width: 32px; height: 32px; line-height: 32px;
+      border-radius: 50%;
+      background: var(--accent-bg);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+    }
+    .step h4 { font-size: 0.88rem; font-weight: 600; }
+    .step p { font-size: 0.82rem; color: var(--text-dim); margin-top: 3px; }
 
     /* Footer */
     footer {
@@ -170,9 +182,8 @@
     footer a:hover { text-decoration: underline; }
 
     @media (max-width: 480px) {
-      .hero h1 { font-size: 2rem; }
-      .hero { padding: 40px 16px 28px; }
-      .direction-card { padding: 18px; }
+      .hero h1 { font-size: 2.1rem; }
+      .hero { padding: 48px 16px 28px; }
     }
   </style>
 </head>
@@ -180,61 +191,112 @@
 
   <!-- Hero -->
   <div class="hero">
-    <h1>Music × Computer Science<br><span>for Therapy</span></h1>
-    <p>I'm exploring how computer science can help music therapists and the people they work with. This page tracks the ideas — and I'd love your thoughts.</p>
+    <div class="tagline">Help me find the best direction</div>
+    <h1>Computer Science × Music<br><span>for Therapy</span></h1>
+    <p>I'm exploring how CS can serve music therapy — but I need <strong>your ideas</strong> to figure out what's worth building. This is an open brainstorming project.</p>
+    <div class="hero-cta">
+      <a class="btn" href="https://github.com/Rex188/csmusic/issues/new" target="_blank">💡 Submit an idea</a>
+      <a class="btn btn-outline" href="#directions">See what's being explored</a>
+    </div>
   </div>
 
   <div class="container">
 
-    <!-- Directions -->
+    <!-- Why your ideas matter -->
     <section>
-      <div class="section-title">Ideas I'm exploring</div>
-
-      <div class="direction-card">
-        <div class="sub">Direction 1</div>
-        <h3>Reading the hidden fingerprint of any song</h3>
-        <p>Every piece of music has a structure — tempo, key, energy, emotional color. Can we extract these automatically from audio, accurately and clearly? This is a signal-processing problem at heart, but it's the foundation for everything else.</p>
-        <div class="example"><strong>In plain terms:</strong> You upload a song, the computer tells you what makes it tick — fast or slow, major or minor, calm or tense — and shows you why it sounds the way it does.</div>
-      </div>
-
-      <div class="direction-card">
-        <div class="sub">Direction 2</div>
-        <h3>Finding the right sound for the right moment</h3>
-        <p>If we understand what makes music feel a certain way, we can search for or even generate music that matches a specific need — calm for anxiety, rhythm for movement, familiarity for comfort.</p>
-        <div class="example"><strong>In plain terms:</strong> "I need something energetic but not chaotic, for 15 minutes of exercise" — and the system finds or creates it.</div>
-      </div>
-
-      <div class="direction-card">
-        <div class="sub">Direction 3</div>
-        <h3>Building better tools for music therapists</h3>
-        <p>Music therapists currently do a lot of analysis and playlist building by hand. A purpose-built tool could save them hours and help them match music more precisely to each client's needs.</p>
-        <div class="example"><strong>In plain terms:</strong> Give professionals better instruments — not replacing their expertise, but removing the busywork so they can focus on people.</div>
+      <div class="section-title">Why this needs you</div>
+      <div class="invite">
+        <h2>🧠 I have the technical pieces — but not the right problem yet</h2>
+        <p>I've set up the tools (audio analysis libraries, ML stack, prototyping environment). What I don't have is a clear sense of what would actually be <em>useful</em> — and that's where you come in.</p>
+        <p style="margin-bottom:0;"><strong>If you're a therapist, a patient, a musician, a student, a researcher, or just someone with a hunch — I want to hear from you.</strong></p>
       </div>
     </section>
 
-    <!-- Status -->
-    <section>
-      <div class="section-title">Where things stand</div>
-      <div class="status-box">
-        <p>🧪 Early exploration — no code written yet. Infrastructure is ready (Python, audio libraries, etc.). Next step is picking a direction and building a prototype.</p>
-        <a href="progress.html">See detailed progress →</a>
+    <!-- Seeds I'm thinking about -->
+    <section id="directions">
+      <div class="section-title">Seeds I'm exploring (your ideas might be better)</div>
+      <div class="idea-grid">
+        <div class="idea-card">
+          <h3>🔍 Music analysis that explains itself</h3>
+          <p>Extract tempo, key, energy, emotional color from any song — and show <em>why</em> the analysis says what it says. A technical foundation for everything else.</p>
+          <div class="prompt"><em>Ask yourself:</em> If you could see the inner structure of any piece of music, what would you do with it?</div>
+        </div>
+        <div class="idea-card">
+          <h3>🎯 Find or create the perfect sound</h3>
+          <p>Search by feeling, not by genre. "Something calm but not sleepy, for 20 minutes of focused work" — and the system finds or generates it.</p>
+          <div class="prompt"><em>Ask yourself:</em> Have you ever needed a very specific kind of music and couldn't find it? What was the situation?</div>
+        </div>
+        <div class="idea-card">
+          <h3>🛠️ A better toolkit for music therapists</h3>
+          <p>Many therapists build playlists and analyze music by hand. A tool that handles the busywork could free them up to focus on people.</p>
+          <div class="prompt"><em>Ask yourself:</em> If you're a practitioner — what part of your workflow is the most tedious? If you're a patient — what would make sessions feel more personalized?</div>
+        </div>
       </div>
     </section>
 
-    <!-- Feedback -->
+    <!-- Questions I'm sitting with -->
     <section>
-      <div class="feedback-box">
-        <h3>💬 What do you think?</h3>
-        <p>Which direction sounds most interesting or useful? Have an idea I haven't thought of? I'd genuinely love to hear it.</p>
-        <a class="btn" href="https://github.com/Rex188/csmusic/issues/new" target="_blank">Share your thoughts</a>
-        <a class="btn btn-outline" href="https://github.com/Rex188/csmusic" target="_blank">View on GitHub</a>
+      <div class="section-title">Open questions (anything could go)</div>
+      <div class="question-list">
+        <div class="question-item">
+          <span class="q">Q1</span>
+          <span>Could an AI help people <em>understand</em> why a particular song moves them — not just classify it as "happy" or "sad"?</span>
+        </div>
+        <div class="question-item">
+          <span class="q">Q2</span>
+          <span>What would a useful music therapy tool look like for someone with dementia, autism, or PTSD — not a general "relaxation" app, but something targeted?</span>
+        </div>
+        <div class="question-item">
+          <span class="q">Q3</span>
+          <span>Is the biggest need in music therapy assessment, intervention, or education — and where does computer science fit best?</span>
+        </div>
+        <div class="question-item">
+          <span class="q">Q4</span>
+          <span>What's something you've wished existed — a playlist generator with a slider for "familiar vs novel" or "simple vs complex" — that no one has built?</span>
+        </div>
+        <div class="question-item" style="border:1px dashed var(--accent); background:var(--accent-bg);">
+          <span class="q" style="color:var(--accent);">+</span>
+          <span><strong>Your question here.</strong> The best directions often come from a question nobody asked. <a href="https://github.com/Rex188/csmusic/issues/new" target="_blank" style="color:var(--accent);">Add yours →</a></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section>
+      <div class="section-title">How it works</div>
+      <div class="steps">
+        <div class="step">
+          <div class="num">1</div>
+          <h4>You share an idea</h4>
+          <p>Open a GitHub Issue — a sentence, a paragraph, a sketch. No format required.</p>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <h4>I read and respond</h4>
+          <p>Every submission gets read. I'll reply with thoughts, questions, or next steps.</p>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <h4>Ideas shape the project</h4>
+          <p>The most promising directions get prototyped. You'll see your input in the progress log.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section>
+      <div class="invite">
+        <h2>💬 Got something in mind?</h2>
+        <p>A hunch, a critique, a wild idea, a real problem you've experienced — it's all welcome. This project is in its earliest stage, which means your input has outsized impact.</p>
+        <a class="btn" href="https://github.com/Rex188/csmusic/issues/new" target="_blank">Open an Issue →</a>
+        <a class="btn btn-outline" href="progress.html" style="margin-left:6px;">See project progress</a>
       </div>
     </section>
 
   </div>
 
   <footer>
-    CS + Music Therapy &nbsp;·&nbsp; Built by <a href="https://github.com/Rex188">Rex188</a> &nbsp;·&nbsp; <a href="progress.html">Progress log</a>
+    CS + Music Therapy &nbsp;·&nbsp; Built by <a href="https://github.com/Rex188">Rex188</a> &nbsp;·&nbsp; <a href="https://github.com/Rex188/csmusic">GitHub</a>
   </footer>
 
 </body>
