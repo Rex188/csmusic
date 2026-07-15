@@ -3,21 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CS + Music Therapy — Project Progress</title>
+  <title>Music-Self — Progress</title>
   <style>
     :root {
-      --bg: #0f1117;
-      --surface: #1a1d27;
-      --surface-hover: #222639;
-      --border: #2a2e3e;
-      --text: #e4e6f0;
-      --text-dim: #8b8fa3;
-      --accent: #7c5cfc;
-      --accent-soft: #7c5cfc22;
-      --green: #4ade80;
-      --yellow: #facc15;
-      --blue: #60a5fa;
+      --bg: #0b0d14;
+      --surface: #13171f;
+      --surface-hover: #1b202b;
+      --border: #1f2533;
+      --text: #e8eaf0;
+      --text-dim: #7a8099;
+      --accent: #a78bfa;
+      --accent-soft: #a78bfa10;
+      --green: #6ee7b7;
+      --yellow: #fcd34d;
       --red: #f87171;
+      --blue: #60a5fa;
       --radius: 10px;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -31,7 +31,6 @@
     }
     .container { max-width: 880px; margin: 0 auto; }
 
-    /* Header */
     header {
       text-align: center;
       padding: 48px 0 36px;
@@ -39,7 +38,7 @@
     header h1 {
       font-size: 2rem;
       font-weight: 700;
-      background: linear-gradient(135deg, #7c5cfc, #b96cfc);
+      background: linear-gradient(135deg, #a78bfa, #c084fc);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -59,10 +58,9 @@
     }
     .back-link:hover { opacity: 1; text-decoration: underline; }
 
-    /* Status bar */
     .status-summary {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 12px;
       margin-bottom: 32px;
     }
@@ -73,17 +71,9 @@
       padding: 16px 18px;
       text-align: center;
     }
-    .stat-card .number {
-      font-size: 1.6rem;
-      font-weight: 700;
-    }
-    .stat-card .label {
-      font-size: 0.8rem;
-      color: var(--text-dim);
-      margin-top: 2px;
-    }
+    .stat-card .number { font-size: 1.6rem; font-weight: 700; }
+    .stat-card .label { font-size: 0.78rem; color: var(--text-dim); margin-top: 2px; }
 
-    /* Section */
     section { margin-bottom: 28px; }
     .section-title {
       font-size: 1.1rem;
@@ -102,7 +92,6 @@
       color: var(--accent);
     }
 
-    /* Status tags */
     .tag {
       display: inline-block;
       font-size: 0.72rem;
@@ -111,13 +100,11 @@
       border-radius: 20px;
       letter-spacing: 0.02em;
     }
-    .tag-done { background: #14532d; color: var(--green); }
+    .tag-done { background: #064e3b; color: var(--green); }
     .tag-wip   { background: #422f12; color: var(--yellow); }
     .tag-pending { background: #1e293b; color: var(--text-dim); }
-    .tag-deprecated { background: #3b1f1f; color: var(--red); }
     .tag-decided { background: #1e3a5f; color: var(--blue); }
 
-    /* Timeline */
     .timeline { position: relative; padding-left: 28px; }
     .timeline::before {
       content: '';
@@ -147,25 +134,12 @@
       background: var(--accent);
       border: 2px solid var(--bg);
     }
-    .timeline-item .date {
-      font-size: 0.75rem;
-      color: var(--text-dim);
-      margin-bottom: 4px;
-    }
-    .timeline-item .title {
-      font-weight: 600;
-      font-size: 0.92rem;
-    }
-    .timeline-item .desc {
-      font-size: 0.84rem;
-      color: var(--text-dim);
-      margin-top: 4px;
-    }
+    .timeline-item .date { font-size: 0.75rem; color: var(--text-dim); margin-bottom: 4px; }
+    .timeline-item .title { font-weight: 600; font-size: 0.92rem; }
+    .timeline-item .desc { font-size: 0.84rem; color: var(--text-dim); margin-top: 4px; }
 
-    /* Kanban-ish task board */
     .task-board { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     @media (max-width: 600px) { .task-board { grid-template-columns: 1fr; } }
-    .task-col { }
     .task-col h3 {
       font-size: 0.82rem;
       font-weight: 600;
@@ -183,28 +157,19 @@
       font-size: 0.84rem;
     }
     .task-card .task-title { font-weight: 500; }
-    .task-card .task-meta {
-      font-size: 0.74rem;
-      color: var(--text-dim);
-      margin-top: 3px;
-    }
+    .task-card .task-meta { font-size: 0.74rem; color: var(--text-dim); margin-top: 3px; }
 
-    /* Card grid (directions) */
     .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     @media (max-width: 600px) { .card-grid { grid-template-columns: 1fr; } }
-    .direction-card {
+    .ref-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 14px 16px;
+      padding: 12px 14px;
     }
-    .direction-card h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; }
-    .direction-card p {
-      font-size: 0.82rem;
-      color: var(--text-dim);
-    }
+    .ref-card h4 { font-size: 0.85rem; font-weight: 600; margin-bottom: 2px; }
+    .ref-card p { font-size: 0.8rem; color: var(--text-dim); }
 
-    /* Links */
     .link-list { display: flex; flex-wrap: wrap; gap: 8px; }
     .link-chip {
       background: var(--surface);
@@ -218,7 +183,6 @@
     }
     .link-chip:hover { background: var(--surface-hover); }
 
-    /* Footer */
     footer {
       text-align: center;
       padding: 40px 0 20px;
@@ -226,7 +190,6 @@
       color: var(--text-dim);
     }
 
-    /* Scrollable log */
     .log-entry {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -236,8 +199,6 @@
       font-size: 0.82rem;
       font-family: 'SF Mono', 'Fira Code', monospace;
     }
-    .btn { transition: opacity 0.15s; }
-    .btn:hover { opacity: 0.85; }
     .log-entry .log-date { color: var(--text-dim); }
     .log-entry .log-msg { color: var(--text); margin-top: 2px; }
 
@@ -248,28 +209,28 @@
 <div class="container">
 
   <header>
-    <h1>♫ CS + Music Therapy</h1>
-    <p>Project workspace — tracking progress, decisions &amp; next steps</p>
+    <h1>🌱 Music-Self</h1>
+    <p>Project progress — tracking decisions, next steps &amp; inspiration</p>
     <a class="back-link" href="index.html">← Back to main page</a>
   </header>
 
-  <!-- Status Summary -->
+  <!-- Status -->
   <div class="status-summary">
     <div class="stat-card">
-      <div class="number" style="color:var(--green)">7</div>
-      <div class="label">Tasks Completed</div>
+      <div class="number" style="color:var(--green)">1</div>
+      <div class="label">Direction Chosen</div>
     </div>
     <div class="stat-card">
-      <div class="number" style="color:var(--yellow)">3</div>
-      <div class="label">Pending Decisions</div>
+      <div class="number" style="color:var(--yellow)">0</div>
+      <div class="label">Code Written</div>
     </div>
     <div class="stat-card">
-      <div class="number" style="color:var(--accent)">5</div>
-      <div class="label">Reference Books</div>
+      <div class="number" style="color:var(--accent)">4</div>
+      <div class="label">References</div>
     </div>
     <div class="stat-card">
       <div class="number" style="color:var(--blue)">2</div>
-      <div class="label">Active Models</div>
+      <div class="label">AI Models</div>
     </div>
   </div>
 
@@ -278,64 +239,115 @@
     <div class="section-title">📍 Current Status</div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;">
       <p style="font-size:0.9rem;">
-        <span class="tag tag-wip">BRAINSTORMING</span>
-        &ensp;No project direction selected yet. Infrastructure is ready.
+        <span class="tag tag-wip">CONCEPT</span>
+        &ensp;Direction decided. Moving toward prototype planning.
       </p>
       <p style="font-size:0.84rem;color:var(--text-dim);margin-top:8px;">
-        Python 3.11 + librosa + scikit-learn + Streamlit ready to go.
-        <span class="tag tag-done" style="margin-left:6px;">VENV</span>
-        <span class="tag tag-done" style="margin-left:4px;">REQS</span>
-        <span class="tag tag-done" style="margin-left:4px;">GIT</span>
+        Music-Self — a private visual garden that grows with your music taste. Inspired by SOUL (Pixar), Bloom, Sonosphere.
+        Full design doc in <code>project/design-questions.md</code>.
       </p>
     </div>
   </section>
 
-  <!-- Project Directions -->
+  <!-- Core Concept -->
   <section>
-    <div class="section-title">🧭 Possible Directions <span class="badge">not decided</span></div>
+    <div class="section-title">🎯 Core Concept</div>
     <div class="card-grid">
-      <div class="direction-card">
-        <h4>🔊 MIR Feature Extraction</h4>
-        <p>Extract tempo, key, timbre, emotional valence, energy from audio. Pure signal processing — a legitimate CS problem.</p>
+      <div class="ref-card" style="border-left:3px solid var(--green);">
+        <h4>Private introspective space</h4>
+        <p>Your music taste = your identity. A landscape, not a dashboard.</p>
       </div>
-      <div class="direction-card">
-        <h4>🎛️ Feature-informed Generation</h4>
-        <p>Use extracted features to find or generate music with target properties — useful for therapy, focus, exercise, scoring.</p>
+      <div class="ref-card" style="border-left:3px solid var(--accent);">
+        <h4>Evolves over time</h4>
+        <p>Like bringing up a kid. Grows forever, changes with you.</p>
       </div>
-      <div class="direction-card">
-        <h4>🛠️ Tools for Practitioners</h4>
-        <p>Music therapists do analysis manually. A tool that helps <em>them</em> — the professionals — solves a real problem.</p>
+      <div class="ref-card" style="border-left:3px solid var(--blue);">
+        <h4>No pressure</h4>
+        <p>No streaks, no gamification, no pop-ups. You don't have to do anything.</p>
       </div>
-      <div class="direction-card" style="opacity:0.5;">
-        <h4>❌ Emotion Reflection (Rejected)</h4>
-        <p>"Let me explain your emotions through your music" — unconvincing. People already know why they listen to what they do.</p>
+      <div class="ref-card" style="border-left:3px solid var(--yellow);">
+        <h4>Social masks</h4>
+        <p>Share a facet of your music-self, not the whole thing. Like in real life.</p>
       </div>
     </div>
   </section>
 
-  <!-- Two-Model Setup -->
+  <!-- References -->
   <section>
-    <div class="section-title">⚙️ Model Setup</div>
-    <div class="task-board">
-      <div class="task-col">
-        <h3>DeepSeek — Implementation Engineer</h3>
-        <div class="task-card">
-          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">ACTIVE</span>deepseek.sh</div>
-          <div class="task-meta">Points at DeepSeek API via ANTHROPIC_BASE_URL</div>
-        </div>
+    <div class="section-title">📚 Inspirations</div>
+    <div class="card-grid">
+      <div class="ref-card">
+        <h4>🎬 SOUL (Pixar)</h4>
+        <p>Souls as abstract personalities developing through experience. Your music-self is <em>becoming</em>.</p>
       </div>
-      <div class="task-col">
-        <h3>Claude Opus 4.8 — Architect</h3>
-        <div class="task-card">
-          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">ACTIVE</span>claude.sh</div>
-          <div class="task-meta">Clears proxy vars, runs bare Claude CLI</div>
-        </div>
+      <div class="ref-card">
+        <h4>🌸 n-gen art (Bloom)</h4>
+        <p>Spotify → flower per artist/ genre. Garden metaphor proven to work visually.</p>
+      </div>
+      <div class="ref-card">
+        <h4>🌍 Sonosphere</h4>
+        <p>3D world from listening behavior (repetition, exploration, curation). Behavior shapes landscape.</p>
+      </div>
+      <div class="ref-card">
+        <h4>🔮 Soundgaze</h4>
+        <p>UMAP on audio features → 3D point cloud. Similar songs = close together.</p>
       </div>
     </div>
-    <div style="margin-top:10px;">
-      <div class="task-card">
-        <div class="task-title"><span class="tag tag-deprecated" style="margin-right:6px;">REMOVED</span>GPT — Research Advisor</div>
-        <div class="task-meta">Removed 2026-07-15 due to cost. Research advising folded into Claude's architect role. gpt.sh &amp; gpt role.md kept on disk but deprecated.</div>
+  </section>
+
+  <!-- Design Decisions -->
+  <section>
+    <div class="section-title">⚙️ Key Design Decisions</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;">
+      <ul style="font-size:0.84rem; color:var(--text-dim); padding-left:18px; display:flex; flex-direction:column; gap:6px;">
+        <li><strong>Music source:</strong> Streaming APIs (Spotify primary), offline files supported</li>
+        <li><strong>Deep analysis:</strong> Heavy ML under the hood — users never see charts unless they dig</li>
+        <li><strong>Reflection:</strong> Optional notes attached to songs, rewarded but not required</li>
+        <li><strong>Identity model:</strong> One evolving self, like bringing up a kid</li>
+        <li><strong>Platform:</strong> Web first, then iOS</li>
+        <li><strong>Vibe:</strong> Apple-style minimalism, dark mode, interactive, scroll-reactive</li>
+        <li><strong>No p5.js</strong> — user explicitly rejected it</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- What's Next -->
+  <section>
+    <div class="section-title">🔮 What's Next</div>
+    <div class="task-board">
+      <div class="task-col">
+        <h3>Pending</h3>
+        <div class="task-card">
+          <div class="task-title">Choose frontend framework</div>
+          <div class="task-meta">React / Next.js likely. Visual-first, interactive, dark mode.</div>
+        </div>
+        <div class="task-card">
+          <div class="task-title">Music API integration</div>
+          <div class="task-meta">Spotify Web API for metadata &amp; audio features (energy, valence, tempo).</div>
+        </div>
+        <div class="task-card">
+          <div class="task-title">Design visual metaphor</div>
+          <div class="task-meta">Garden? Landscape? Geometry? How features → visual elements.</div>
+        </div>
+        <div class="task-card">
+          <div class="task-title">First prototype</div>
+          <div class="task-meta">Minimal version that feels like the real thing. Interactive visual + music import.</div>
+        </div>
+      </div>
+      <div class="task-col">
+        <h3>Decided</h3>
+        <div class="task-card">
+          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Project direction</div>
+          <div class="task-meta">Music-Self concept locked. Design questions fully answered.</div>
+        </div>
+        <div class="task-card">
+          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Infrastructure ready</div>
+          <div class="task-meta">Python venv, librosa, sklearn, gitignore, shell scripts all set.</div>
+        </div>
+        <div class="task-card">
+          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>GitHub Pages live</div>
+          <div class="task-meta">Landing page + progress page at rex188.github.io/csmusic/</div>
+        </div>
       </div>
     </div>
   </section>
@@ -347,83 +359,37 @@
       <div class="timeline-item">
         <div class="date">2026-07-15</div>
         <div class="title">Project initialized</div>
-        <div class="desc">Folder set up, CLAUDE.md created.</div>
+        <div class="desc">Folder, CLAUDE.md, Python venv created.</div>
       </div>
       <div class="timeline-item">
         <div class="date">2026-07-15</div>
-        <div class="title">Python environment created</div>
-        <div class="desc">venv at <code>project/venv/</code>, all dependencies installed (librosa, numpy, scipy, sklearn, matplotlib, seaborn, streamlit, jupyter, pymupdf).</div>
+        <div class="title">Two-model workflow defined</div>
+        <div class="desc">DeepSeek (implementation) + Claude Opus (architecture). GPT removed due to cost.</div>
       </div>
       <div class="timeline-item">
         <div class="date">2026-07-15</div>
-        <div class="title">Three-model workflow defined → reduced to two</div>
-        <div class="desc">DeepSeek (implementation) + Claude/Opus (architecture) + GPT (research) defined. GPT removed same day due to cost. Research folded into architect role.</div>
+        <div class="title">Deep research report reviewed &amp; rejected</div>
+        <div class="desc">"Emotion reflection" framing rejected as unconvincing. Three therapy-adjacent directions identified but not pursued.</div>
       </div>
       <div class="timeline-item">
         <div class="date">2026-07-15</div>
-        <div class="title">Role prompts &amp; shell scripts created</div>
-        <div class="desc">ds role.md, claude role.md, gpt role.md written. deepseek.sh, claude.sh, gpt.sh verified working.</div>
+        <div class="title">Music-Self direction decided</div>
+        <div class="desc">Design questions answered in project/design-questions.md. Inspired by SOUL, Bloom, Sonosphere, Soundgaze. Visual garden metaphor, no pressure, social masks.</div>
       </div>
       <div class="timeline-item">
         <div class="date">2026-07-15</div>
-        <div class="title">Deep research report reviewed</div>
-        <div class="desc">Report proposed "emotion reflection system" — user rejected it as unconvincing. Three alternative directions identified: MIR extraction, feature-informed generation, clinical tools.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2026-07-15</div>
-        <div class="title">Project progress page created</div>
-        <div class="desc">This page. Static HTML on GitHub Pages to track progress.</div>
+        <div class="title">GitHub Pages published</div>
+        <div class="desc">Landing page (index.html) + progress page (progress.html) live at rex188.github.io/csmusic/.</div>
       </div>
     </div>
   </section>
 
-  <!-- Reference Books -->
-  <section>
-    <div class="section-title">📚 Reference Library</div>
-    <div class="link-list">
-      <span class="link-chip">Bruscia — Defining Music Therapy</span>
-      <span class="link-chip">Thaut 2025 — Handbook of NMT 2ed</span>
-      <span class="link-chip">Levitin — This Is Your Brain on Music</span>
-      <span class="link-chip">Fundamentals of Music Processing</span>
-      <span class="link-chip">Picard — Affective Computing</span>
-    </div>
-  </section>
-
-  <!-- What's Next -->
-  <section>
-    <div class="section-title">🔮 What's Next?</div>
-    <div class="task-board">
-      <div class="task-col">
-        <h3>Pending</h3>
-        <div class="task-card">
-          <div class="task-title">Pick a project direction</div>
-          <div class="task-meta">Options listed above. Architect (Opus) to design, DeepSeek to implement.</div>
-        </div>
-        <div class="task-card">
-          <div class="task-title">First prototype</div>
-          <div class="task-meta">Depends on chosen direction. Likely MIR feature extraction or Streamlit demo.</div>
-        </div>
-      </div>
-      <div class="task-col">
-        <h3>Decided</h3>
-        <div class="task-card">
-          <div class="task-title"><span class="tag tag-decided" style="margin-right:6px;">DONE</span>Infrastructure ready</div>
-          <div class="task-meta">Python env, gitignore, requirements.txt, role prompts, shell scripts all set.</div>
-        </div>
-        <div class="task-card">
-          <div class="task-title"><span class="tag tag-decided" style="margin-right:6px;">DONE</span>Progress page on GitHub Pages</div>
-          <div class="task-meta">Static site at <code>docs/</code> — ready to push.</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Recent Activity Log -->
+  <!-- Activity Log -->
   <section>
     <div class="section-title">📝 Activity Log</div>
     <div class="log-entry">
       <span class="log-date">2026-07-15</span>
-      <div class="log-msg">Project progress page built (HTML/CSS static page for GitHub Pages).</div>
+      <div class="log-msg">Music-Self direction locked. Design questions fully documented.</div>
     </div>
     <div class="log-entry">
       <span class="log-date">2026-07-15</span>
@@ -431,15 +397,11 @@
     </div>
     <div class="log-entry">
       <span class="log-date">2026-07-15</span>
-      <div class="log-msg">Emotion reflection direction rejected by user. Three alternatives identified.</div>
+      <div class="log-msg">Emotion reflection research report rejected by user as unconvincing.</div>
     </div>
     <div class="log-entry">
       <span class="log-date">2026-07-15</span>
-      <div class="log-msg">All shell scripts (deepseek.sh, claude.sh, gpt.sh) verified working.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-15</span>
-      <div class="log-msg">Python venv created at project/venv/. All core libs installed.</div>
+      <div class="log-msg">Python venv created, all dependencies installed, shell scripts verified.</div>
     </div>
   </section>
 
@@ -448,16 +410,16 @@
     <div class="section-title">💬 Have thoughts?</div>
     <div style="background:var(--accent-soft);border:1px solid var(--accent);border-radius:var(--radius);padding:20px 22px;text-align:center;">
       <p style="font-size:0.9rem;color:var(--text-dim);margin-bottom:12px;">
-        Found this interesting? Have a suggestion? Open an issue on GitHub.
+        Ideas, critiques, wild thoughts — all welcome.
       </p>
-      <a class="btn" href="https://github.com/Rex188/csmusic/issues/new" target="_blank" style="display:inline-block;background:var(--accent);color:#fff;font-weight:600;font-size:0.85rem;padding:10px 24px;border-radius:40px;text-decoration:none;">Share feedback</a>
+      <a class="btn" href="https://github.com/Rex188/csmusic/issues/new" target="_blank" style="display:inline-block;background:var(--accent);color:#0b0d14;font-weight:700;font-size:0.85rem;padding:10px 24px;border-radius:40px;text-decoration:none;">Open an Issue</a>
     </div>
   </section>
 
   <hr>
 
   <footer>
-    CS + Music Therapy &nbsp;·&nbsp; Last updated 2026-07-15
+    Music-Self &nbsp;·&nbsp; Last updated 2026-07-15
   </footer>
 
 </div>

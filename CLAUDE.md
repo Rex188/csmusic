@@ -25,7 +25,12 @@ D:/music thera/
 │   ├── ds role.md            # Implementation Engineer system prompt
 │   ├── claude role.md        # Architect system prompt
 │   └── gpt role.md           # Research Advisor system prompt
-├── *.pdf / *.epub            # Reference books (music therapy, music processing, affective computing)
+├── *.pdf / *.epub            # Reference books (music therapy, music processing, affective computing) (not in git)
+├── docs/                     # GitHub Pages (public)
+│   ├── index.html            # Landing page — Music-Self concept
+│   └── progress.html         # Progress tracker
+├── README.md                 # GitHub repo front page
+├── .gitignore
 └── CLAUDE.md
 ```
 
@@ -52,6 +57,23 @@ Three directions that *do* have genuine utility:
 
 **Status:** No direction decided. The "emotional reflection" framing from the research report was rejected as unconvincing. The genuine CS problems are in signal processing, feature-informed retrieval/generation, and clinical tools.
 
+### 2026-07-15 — Music-Self App direction chosen
+
+**User** proposed a new concept: a private, introspective app where your music taste IS your identity. Core thesis: music is not just sounds — it's a reflection of how you perceive the world.
+
+Key design decisions:
+- **Metaphor:** A garden/landscape that grows over time, like bringing up a kid. Inspired by SOUL (Pixar).
+- **No pressure.** No streaks, no guilt, no obligation to check in.
+- **Visual-first.** Apple-style minimalism. Deep analysis happens under the hood — users see the garden, not charts.
+- **Social masks.** Sharing shows a facet of your music-self. Different masks for different people.
+- **Music from streaming APIs** (Spotify). Offline supported but secondary.
+- **Web-first, then iOS.** Simple email/password accounts.
+- **Research references:** n-gen art Bloom, Sonosphere, Soundgaze. None of them evolve over time or incorporate user reflection — that's the gap.
+
+**Design decisions documented in `project/design-questions.md`.**
+
+**Status:** Direction locked. Frontend-first V1. Architecture blueprint is the next deliverable.
+
 ---
 
 ## Timeline
@@ -65,3 +87,5 @@ Three directions that *do* have genuine utility:
 | 2026-07-15 | **Shell scripts verified.** All three `.sh` files pass syntax check; venv activation and role file reading confirmed working. |
 | 2026-07-15 | **Architect session documented.** Claude Opus 4.8 confirmed as Principal Software Architect; the project remains setup-only, with no selected direction or implemented CS + music therapy code. |
 | 2026-07-15 | **GPT removed.** Three-model workflow reduced to two-model (Claude + DeepSeek). GPT was too expensive; research advising folded into Claude's architect role. `gpt.sh` and `gpt role.md` kept on disk but deprecated. |
+| 2026-07-15 | **Music-Self direction decided.** Design questions answered in `project/design-questions.md`. Concept locked. |
+| 2026-07-15 | **GitHub Pages published.** Landing page + progress page live at `rex188.github.io/csmusic/`. |

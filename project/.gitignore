@@ -3,3 +3,6 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 .DS_Store
+setup.md
+gpt role.md
+deep-research-report (1).md

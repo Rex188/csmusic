@@ -1,6 +1,8 @@
-# 🎵 CS + Music Therapy
+# 🌱 Music-Self
 
-Exploring how computer science can serve music therapy. This project is in its **earliest stage** — infrastructure is ready, but no direction has been chosen yet. **Your ideas will shape what gets built.**
+**Your music taste is your identity. Watch it grow.**
+
+A private, introspective space where your listening becomes a living landscape. No dashboards. No stats. No pressure. Just you and your music-self, evolving over time — like bringing up a kid.
 
 ---
 
@@ -8,41 +10,46 @@ Exploring how computer science can serve music therapy. This project is in its *
 
 | | |
 |---|---|
-| 🧪 | **Brainstorming phase** — no code written yet |
+| 🧪 | **Concept phase** — direction decided, no code written yet |
 | ✅ | Python 3.11 + librosa + scikit-learn + Streamlit ready |
-| ✅ | Two-model workflow: DeepSeek (implementation) + Claude Opus (architecture) |
-| ❌ | GPT removed — too expensive, research folded into architect role |
+| ✅ | DeepSeek (implementation) + Claude Opus (architecture) ready |
+| ✅ | Design questions answered — see [`project/design-questions.md`](project/design-questions.md) |
 
 [👉 See full progress page →](https://rex188.github.io/csmusic/progress.html)
 
 ---
 
-## 🧭 Directions Being Explored
+## 🌿 What Is Music-Self?
 
-These are **seeds** — not commitments. Your input might point to something better.
+Inspired by the movie **SOUL** — where souls are abstract proto-personalities that develop through experience. Your music-self is the same idea: **becoming, not finished.**
 
-### 1. 🔍 Music analysis that explains itself
-Extract tempo, key, energy, emotional color from any song — and show *why* the analysis says what it says.
+| What it IS | What it is NOT |
+|---|---|
+| A visual garden that grows with your music | A dashboard or stats page |
+| A private space to explore yourself | A social network |
+| Gentle awareness ("you've added a lot of quiet music lately") | AI explaining your emotions |
+| Optional notes attached to songs | Forced journaling |
+| Social masks — share facets, not the whole you | Full profile sharing |
 
-### 2. 🎯 Find or create the perfect sound
-Search by feeling, not by genre. "Something calm but not sleepy, for 20 minutes of focused work" — and the system finds or generates it.
+**The core idea:** Music is not just sounds. It's a reflection of how you perceive the world. The app helps you see that reflection — without analyzing it to death.
 
-### 3. 🛠️ A better toolkit for music therapists
-Many therapists build playlists and analyze music by hand. A tool that handles the busywork could free them up to focus on people.
+### What makes it different from everything else?
+
+| Project | What it does | Music-Self difference |
+|---|---|---|
+| **n-gen art (Bloom)** | Spotify → flower visualization per artist/genre | One snapshot. Music-Self *evolves.* |
+| **Sonosphere** | 3D world from listening *behavior* | Behavior is part of it, but Music-Self grows like a relationship, not a map. |
+| **Soundgaze** | 3D UMAP of audio features | Similarity mapping — cool but cold. Music-Self is *warm.* |
+| **Spotify Wrapped** | Year-end stats | One moment. Music-Self is a continuous companion. |
 
 ---
 
-## 💬 Help Shape This Project
+## 💬 Help Shape This
 
-**The best ideas come from people who aren't me.** If you're a therapist, a patient, a musician, a student, or just someone with a hunch — I want to hear from you.
+This is still early. The design direction is set, but the details — the visual metaphor, the features, the feel — are wide open.
 
-### Open questions I'm sitting with:
-- Could an AI help people understand *why* a particular song moves them — not just classify it as "happy" or "sad"?
-- What would a useful tool look like for someone with dementia, autism, or PTSD?
-- What part of a music therapist's workflow is the most tedious?
-- What's something you've wished existed that nobody has built?
-
-📮 **Share your thoughts:** [Open a GitHub Issue](https://github.com/Rex188/csmusic/issues/new) — a sentence, a paragraph, a sketch. Everything gets read.
+**If you have a thought, a critique, or a wild idea:**
+📮 [Open a GitHub Issue](https://github.com/Rex188/csmusic/issues/new)
 
 ---
 
@@ -51,10 +58,9 @@ Many therapists build playlists and analyze music by hand. A tool that handles t
 | Date | Event |
 |---|---|
 | 2026-07-15 | **Project initialized.** Folder set up as CS + music therapy workspace. |
-| 2026-07-15 | **Python environment created.** `venv` with librosa, numpy, scipy, sklearn, matplotlib, seaborn, streamlit, jupyter, pymupdf. |
-| 2026-07-15 | **Two-model workflow defined.** DeepSeek (implementation), Claude Opus (architecture). |
-| 2026-07-15 | **Role prompts & shell scripts** created and verified. |
-| 2026-07-15 | **Deep research report reviewed.** "Emotion reflection" framing rejected as unconvincing. Three alternative directions identified. |
+| 2026-07-15 | **Python environment created.** All dependencies installed. |
+| 2026-07-15 | **Two-model workflow defined.** DeepSeek + Claude Opus. |
+| 2026-07-15 | **Design questions answered.** Music-Self concept defined — SOUL-inspired, garden metaphor, no pressure, social masks. Three earlier therapy directions superseded. |
 | 2026-07-15 | **Progress page & landing page** published on GitHub Pages. |
 
 ---
@@ -63,12 +69,13 @@ Many therapists build playlists and analyze music by hand. A tool that handles t
 
 | Tool | Purpose |
 |---|---|
-| Python 3.11 | Core language |
-| librosa | Audio feature extraction (MIR) |
-| scikit-learn | ML models |
-| Streamlit | Rapid prototyping (optional) |
+| Python 3.11 | Core language (ML pipeline) |
+| librosa | Audio feature extraction |
+| scikit-learn | ML / clustering models |
+| Streamlit | Rapid prototyping |
 | DeepSeek (API) | Implementation engineer |
 | Claude Opus 4.8 | Software architect |
+| *React / Next.js* | *TBD — web frontend* |
 
 ---
 

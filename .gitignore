@@ -11,3 +11,7 @@ __pycache__/
 # API keys — sensitive
 API.md
 project/*.sh
+
+# Local Claude config
+.claude/
+project/.claude/
