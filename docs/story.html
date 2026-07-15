@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music-Self — The Origin Story</title>
+  <style>
+    :root {
+      --bg: #0b0d14;
+      --surface: #13171f;
+      --surface-hover: #1b202b;
+      --border: #1f2533;
+      --text: #e8eaf0;
+      --text-dim: #7a8099;
+      --text-muted: #525669;
+      --accent: #a78bfa;
+      --accent-soft: #a78bfa10;
+      --green: #6ee7b7;
+      --yellow: #fcd34d;
+      --red: #f87171;
+      --radius: 12px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 24px;
+    }
+    .container { max-width: 720px; margin: 0 auto; }
+
+    header {
+      text-align: center;
+      padding: 48px 0 40px;
+    }
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #a78bfa, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    header .sub {
+      color: var(--text-dim);
+      margin-top: 6px;
+      font-size: 0.95rem;
+    }
+    .nav-links {
+      margin-top: 14px;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .nav-links a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+
+    /* Phase */
+    .phase {
+      margin-bottom: 48px;
+    }
+    .phase-header {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .phase-number {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+    .phase-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+    .phase-title .emoji { margin-right: 6px; }
+
+    .phase-body {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+    }
+    .phase-body p { margin-bottom: 12px; }
+    .phase-body strong { color: var(--text); }
+    .phase-body em { color: var(--accent); font-style: normal; font-weight: 600; }
+
+    .blockquote {
+      margin: 14px 0;
+      padding: 14px 18px;
+      background: var(--accent-soft);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      font-style: italic;
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+    .blockquote .attribution {
+      display: block;
+      margin-top: 6px;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      font-style: normal;
+    }
+
+    .insight {
+      margin: 14px 0;
+      padding: 14px 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.88rem;
+    }
+    .insight .label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--yellow);
+      margin-bottom: 4px;
+    }
+
+    /* Tables */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 14px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+    th, td {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      text-align: left;
+    }
+    th {
+      background: var(--surface);
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-dim);
+      font-weight: 700;
+    }
+    td { color: var(--text-dim); }
+    td strong { color: var(--text); }
+
+    /* Comparison */
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      margin: 14px 0;
+    }
+    .compare .side { padding: 12px 14px; font-size: 0.85rem; }
+    .compare .side.old { background: #1a1111; color: #fca5a5; }
+    .compare .side.new { background: #11181f; color: var(--text); }
+    .compare .side h5 {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+    .compare .side.old h5 { color: var(--red); }
+    .compare .side.new h5 { color: var(--green); }
+
+    /* Timeline section */
+    .timeline { position: relative; padding-left: 28px; }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 8px;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: var(--border);
+    }
+    .tl-item {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 10px;
+    }
+    .tl-item::before {
+      content: '';
+      position: absolute;
+      left: -22px;
+      top: 18px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid var(--bg);
+    }
+    .tl-item .date { font-size: 0.75rem; color: var(--text-dim); margin-bottom: 4px; }
+    .tl-item .title { font-weight: 600; font-size: 0.9rem; color: var(--text); }
+    .tl-item .desc { font-size: 0.82rem; color: var(--text-dim); margin-top: 4px; }
+
+    hr { border: none; border-top: 1px solid var(--border); margin: 36px 0; }
+
+    footer {
+      text-align: center;
+      padding: 40px 0 20px;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 500px) {
+      header h1 { font-size: 1.7rem; }
+      .compare { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>📖 The Origin Story</h1>
+    <p class="sub">How Music-Self went from zero to a locked concept — in one day.</p>
+    <div class="nav-links">
+      <a href="index.html">← Home</a>
+      <a href="progress.html">Progress</a>
+      <a href="https://github.com/Rex188/csmusic">GitHub</a>
+    </div>
+  </header>
+
+  <!-- Phase 1 -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-number">Phase 1</span>
+      <h2 class="phase-title">🧹 Setup & Cleanup</h2>
+    </div>
+    <div class="phase-body">
+      <p><strong>Context:</strong> Session opened with Claude as Principal Software Architect. Read <code>setup.md</code>, <code>CLAUDE.md</code>, <code>claude role.md</code>. Project is a blank workspace — Python env ready, reference books available, no code written.</p>
+      <p><strong>GPT removed.</strong> User said GPT is too expensive. Three-model → two-model (Claude + DeepSeek). Research advising folded into Claude's architect role. All docs updated.</p>
+    </div>
+  </div>
+
+  <!-- Phase 2 -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-number">Phase 2</span>
+      <h2 class="phase-title">📄 The Deep Research Report <span style="color:var(--red);font-size:0.9rem;">(and why it failed)</span></h2>
+    </div>
+    <div class="phase-body">
+      <p><strong>What happened:</strong> A deep research report proposed an "explainable music emotion reflection system" — the idea that AI could analyze music, map it to emotions, and help users understand <em>why</em> they feel what they feel through their music choices.</p>
+      <p><strong>User's response:</strong> Rejected hard.</p>
+      <div class="blockquote">
+        "Why should people understand their emotions through music? Very few people care. They feel sad and they listen to their favorite songs. That's common sense. Explaining this to the audiences will be nonsense."
+      </div>
+      <p><strong>Architect's response:</strong> Agreed. The report's premise — "let me explain your emotions to you through your music" — is a solution looking for a problem. People already know why they listen to what they listen to. That framing doesn't work for a consumer product.</p>
+      <p>Three directions that <em>do</em> have genuine utility:</p>
+      <ol style="padding-left:18px;margin-bottom:12px;">
+        <li style="margin-bottom:4px;">Music feature extraction (MIR) — a real CS signal-processing problem</li>
+        <li style="margin-bottom:4px;">Feature-informed music selection/generation — useful for therapy, focus, film scoring</li>
+        <li style="margin-bottom:4px;">Tools for practitioners, not consumers — music therapists need analysis tools</li>
+      </ol>
+      <div class="insight">
+        <span class="label">Lesson</span>
+        Don't build something that explains people to themselves. That's patronizing.
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 3 -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-number">Phase 3</span>
+      <h2 class="phase-title">🔭 Too Broad, Zoom In</h2>
+    </div>
+    <div class="phase-body">
+      <p><strong>User:</strong> <em>"The topic for us is too broad right now. Can we zoom in?"</em></p>
+      <p><strong>Architect</strong> proposed three concrete starting points (Extract features from MP3, Find similar tracks, Label with Streamlit). Each buildable in a day or two.</p>
+      <p><strong>User:</strong> <em>"Not like technique scope. You are the architect. We need to build blueprints."</em></p>
+      <p><strong>Architect</strong> proposed the <strong>Clinical Music Analysis Workstation</strong> — a full blueprint: 4-layer architecture, feature vector design, build phases, clinical relevance mapping.</p>
+      <p><strong>User</strong> didn't go for that either. Had a rougher, more personal idea brewing.</p>
+    </div>
+  </div>
+
+  <!-- Phase 4 -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-number">Phase 4</span>
+      <h2 class="phase-title">💡 The Raw Idea Emerges</h2>
+    </div>
+    <div class="phase-body">
+      <div class="blockquote">
+        "I have a very rough idea now. It's like a social media for music lovers. It's more private. You build your music-self by sharing your playlist with this app. The core idea is: music is not only just sounds. It's a reflection of how you perceive this world."
+        <span class="attribution">— User</span>
+      </div>
+      <p>This was the breakthrough. Three critical differences from the research report:</p>
+      <ol style="padding-left:18px;margin-bottom:12px;">
+        <li style="margin-bottom:4px;"><strong>The user is in control</strong> — they're <em>showing</em> their inner world, not having it explained</li>
+        <li style="margin-bottom:4px;"><strong>Music as perception, not emotion</strong> — how you hear the world, not what you feel</li>
+        <li style="margin-bottom:4px;"><strong>Private first, social second</strong> — self-understanding before connection</li>
+      </ol>
+      <p><strong>Architect</strong> probed deeper: what does "building your music-self" look like? What's the social mechanic? What do you DO when you see someone else's music-self?</p>
+      <p><strong>User clarified:</strong></p>
+      <div class="blockquote">
+        "It's more like an exploration of yourself. You first get to know yourself, know how you perceive this world, know what you really cherish. And then communications will be more deep and more interesting."
+        <span class="attribution">— User</span>
+      </div>
+      <div class="insight">
+        <span class="label">Key Insight</span>
+        Introspection first, social second. Music as a mirror — not the app telling you who you are, but the app giving you space where patterns emerge.
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 5 -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-number">Phase 5</span>
+      <h2 class="phase-title">🌳 Form Factor</h2>
+    </div>
+    <div class="phase-body">
+      <p><strong>User</strong> referenced <strong>Forest</strong> (contemplative, grows through repeated small actions, no pressure) and <strong>Snapchat</strong> (intimate, visual-first, identity expressed through what you share, when you share).</p>
+      <p><strong>Architect's synthesis:</strong> Something that doesn't feel like an app. No dashboards, no stats, no feeds. More like a personal space that evolves. A visual landscape that changes based on the music you share. Sharing isn't posting — it's showing someone your garden.</p>
+    </div>
+  </div>
+
+  <!-- Phase 6 -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-number">Phase 6</span>
+      <h2 class="phase-title">📋 The Design Questions</h2>
+    </div>
+    <div class="phase-body">
+      <p><strong>User:</strong> <em>"Let's fill out a form?"</em></p>
+      <p><strong>Architect</strong> created <code>design-questions.md</code> — 8 sections covering input, identity, visuals, audio analysis, reflection, social, platform, scope.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Question</th><th>Answer</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Where does music come from?</td><td>Mainstream music apps, collect playlists</td></tr>
+            <tr><td>One self or many?</td><td>One evolving self — <strong>"like bringing up a kid"</strong></td></tr>
+            <tr><td>Persistent or ephemeral?</td><td>Grows forever, <strong>like a garden</strong></td></tr>
+            <tr><td>What does the user DO?</td><td><strong>NO PRESSURE.</strong> No obligation. Avatar. Inspiration from <strong>SOUL (Pixar)</strong></td></tr>
+            <tr><td>Visual metaphor?</td><td>Garden/landscape + abstract geometry</td></tr>
+            <tr><td>How deep on analysis?</td><td>Deep — but for the app, not the user. "This is how we make users feel: <strong>this app really understands me</strong>"</td></tr>
+            <tr><td>Reflection?</td><td>User recognizes themselves in the visual. No forced writing. Optional notes encouraged but not mandatory</td></tr>
+            <tr><td>Social?</td><td>Like Snapchat. Share a facet with <strong>social masks</strong>. Consent not required</td></tr>
+            <tr><td>Platform?</td><td><strong>Web-first, then iOS</strong></td></tr>
+            <tr><td>Feeling?</td><td>Minimalism, 100% loyal to yourself, Apple-style design</td></tr>
+            <tr><td>No-go?</td><td>No ads, no force, no pop-ups</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p><strong>Architect's reactions:</strong></p>
+      <ul style="padding-left:18px;">
+        <li style="margin-bottom:6px;">The SOUL reference is perfect — souls as abstract proto-personalities that develop through experience. Your music-self is <em>becoming</em>, not finished.</li>
+        <li style="margin-bottom:6px;">"Like bringing up a kid" + "no pressure" = the app doesn't nag. When you check in, you notice growth. Quiet and powerful.</li>
+        <li style="margin-bottom:6px;">Social masks are smart. Different facets for different people. That's how real identity works.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Phase 7 -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-number">Phase 7</span>
+      <h2 class="phase-title">🔍 Reference Research</h2>
+    </div>
+    <div class="phase-body">
+      <p><strong>Architect</strong> searched for existing projects at the intersection of music data visualization, generative art, and identity.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Source</th><th>What it does</th><th>What we steal</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>n-gen art (Bloom)</strong></td><td>Spotify data → flower. Petals = artists. Color/size from audio features.</td><td>Garden metaphor works. Music → plant visually. Went viral.</td></tr>
+            <tr><td><strong>Sonosphere</strong></td><td>Spotify → interactive 3D world from listening <em>behavior</em> (repetition, exploration, time, curation).</td><td>Behavior shapes the landscape, not just content.</td></tr>
+            <tr><td><strong>Soundgaze</strong></td><td>Spotify → 3D point cloud. UMAP on features. Similar songs = proximity.</td><td>Similarity-as-proximity is intuitive and powerful.</td></tr>
+            <tr><td><strong>SOUL (Pixar)</strong></td><td>Souls as abstract proto-personalities that develop through experience.</td><td>The entire metaphor: your music-self is becoming, not finished.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p><strong>What none of them do:</strong></p>
+      <ul style="padding-left:18px;margin-bottom:12px;">
+        <li style="margin-bottom:4px;">❌ None evolve over time (they're one-shot snapshots)</li>
+        <li style="margin-bottom:4px;">❌ None incorporate user reflection</li>
+        <li style="margin-bottom:4px;">❌ None feel like a relationship — you generate, share, move on</li>
+      </ul>
+      <div class="insight">
+        <span class="label" style="color:var(--green);">The Gap</span>
+        <strong>That's the gap we're building in.</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 8 -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-number">Phase 8</span>
+      <h2 class="phase-title">🎯 The Pitch Problem</h2>
+    </div>
+    <div class="phase-body">
+      <p><strong>User:</strong> <em>"I want it to be more attractive when I describe this to others. It's now too cringe."</em></p>
+      <p>The original framing — "my emotional support garden where I discover myself through music 🥺" — was soft, therapeutic, self-help territory.</p>
+      <p><strong>User found the core:</strong> <em>"We can perceive this world from the scope of music — this can lead to consensus."</em></p>
+      <p><strong>Architect's synthesis:</strong></p>
+      <div class="blockquote">
+        <strong>Music as perception.</strong> The way you hear music IS the way you see the world. Show someone your music-self and you're showing them your <em>lens</em> — not your taste, your <em>perspective</em>.
+      </div>
+      <p>This re-frames everything:</p>
+
+      <div class="compare">
+        <div class="side old">
+          <h5>✗ Old (cringe)</h5>
+          Discover yourself through music<br>
+          Your emotional support garden<br>
+          Share your feelings<br>
+          The app understands you
+        </div>
+        <div class="side new">
+          <h5>✓ New (sharp)</h5>
+          Music IS how you perceive the world<br>
+          Your lens, made visible<br>
+          Share your perspective<br>
+          You see yourself — and others see you too
+        </div>
+      </div>
+
+      <div class="insight">
+        <span class="label" style="color:var(--accent);">Why sharing matters now</span>
+        You're not sending someone a playlist. You're showing them how you process reality. If they resonate with that lens, the connection is already deeper than small talk ever gets. Consensus isn't agreeing on facts — it's recognizing a shared way of <em>perceiving</em>.
+      </div>
+    </div>
+  </div>
+
+  <!-- Where We Landed -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-number" style="color:var(--green);">✦</span>
+      <h2 class="phase-title">📍 Where We Landed</h2>
+    </div>
+    <div class="phase-body">
+      <div class="blockquote" style="border-left-color: var(--green);">
+        <strong>A visual space that grows from your music — showing not what you listen to, but how you perceive the world.</strong>
+      </div>
+      <p><strong>Architecture direction:</strong></p>
+      <ul style="padding-left:18px;margin-bottom:12px;">
+        <li style="margin-bottom:4px;">Frontend-first. The visual experience IS the product. Apple-style minimalism, dark, interactive.</li>
+        <li style="margin-bottom:4px;">Music from streaming APIs (Spotify). Offline supported but secondary.</li>
+        <li style="margin-bottom:4px;">Deep analysis under the hood — users never see charts unless they choose to.</li>
+        <li style="margin-bottom:4px;">Social masks. Share a facet, not the whole self.</li>
+        <li style="margin-bottom:4px;">Web-first, then iOS. Simple email/password accounts.</li>
+      </ul>
+      <p><strong>No-go list:</strong></p>
+      <ul style="padding-left:18px;margin-bottom:12px;">
+        <li style="margin-bottom:4px;">No ads · No force / obligation · No pop-ups</li>
+        <li style="margin-bottom:4px;">No dashboards / stats / numbers by default</li>
+        <li style="margin-bottom:4px;">No AI explaining emotions to the user</li>
+        <li style="margin-bottom:4px;">No gamification · No feed / algorithm · No p5.js</li>
+      </ul>
+      <p><strong>V1 priority:</strong> Frontend/visual experience first. Spotify API for music data (energy, valence, tempo). Custom ML pipeline later.</p>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- Timeline -->
+  <section>
+    <h2 style="font-size:1.3rem;font-weight:700;margin-bottom:16px;">📅 Timeline</h2>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="date">2026-07-15</div>
+        <div class="title">Project initialized</div>
+        <div class="desc">Folder set up, CLAUDE.md created.</div>
+      </div>
+      <div class="tl-item">
+        <div class="date">2026-07-15</div>
+        <div class="title">Python environment created</div>
+        <div class="desc">venv at project/venv/, all core libs installed (librosa, numpy, scipy, sklearn, matplotlib, seaborn, streamlit, jupyter, pymupdf).</div>
+      </div>
+      <div class="tl-item">
+        <div class="date">2026-07-15</div>
+        <div class="title">Two-model workflow defined</div>
+        <div class="desc">DeepSeek (implementation) + Claude Opus (architecture). GPT removed due to cost.</div>
+      </div>
+      <div class="tl-item">
+        <div class="date">2026-07-15</div>
+        <div class="title">Deep research report rejected</div>
+        <div class="desc">"Emotion reflection" was a solution looking for a problem. User called it nonsense. Architect agreed.</div>
+      </div>
+      <div class="tl-item">
+        <div class="date">2026-07-15</div>
+        <div class="title">Breakthrough — the raw idea</div>
+        <div class="desc">"Music is a reflection of how you perceive this world." Self-exploration first, then connection.</div>
+      </div>
+      <div class="tl-item">
+        <div class="date">2026-07-15</div>
+        <div class="title">Design questions answered</div>
+        <div class="desc">8 sections in project/design-questions.md. SOUL metaphor, no pressure, social masks.</div>
+      </div>
+      <div class="tl-item">
+        <div class="date">2026-07-15</div>
+        <div class="title">Pitch reframed</div>
+        <div class="desc">"Music as perception" — from cringe to sharp. Your lens, made visible.</div>
+      </div>
+      <div class="tl-item">
+        <div class="date">2026-07-15</div>
+        <div class="title">GitHub Pages published</div>
+        <div class="desc">Landing page + progress page + story page live at rex188.github.io/csmusic/.</div>
+      </div>
+    </div>
+  </section>
+
+  <hr>
+
+  <footer>
+    Music-Self &nbsp;·&nbsp; Full story documented in <a href="https://github.com/Rex188/csmusic/blob/master/CLAUDE.md">CLAUDE.md</a> &nbsp;·&nbsp; <a href="index.html">Home</a>
+  </footer>
+
+</div>
+</body>
+</html>
