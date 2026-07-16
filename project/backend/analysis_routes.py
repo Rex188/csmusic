@@ -201,7 +201,7 @@ def analyze_playlist(playlist_id):
         conn.close()
         return jsonify({"error": "Playlist not found"}), 404
 
-    # Check if there's an existing completed analysis
+    # Check if there's an existing completed analysis that actually succeeded
     existing = conn.execute(
         "SELECT id, status, summary FROM analysis_jobs "
         "WHERE playlist_id = ? AND user_id = ? ORDER BY created_at DESC LIMIT 1",
@@ -209,12 +209,18 @@ def analyze_playlist(playlist_id):
     ).fetchone()
 
     if existing and existing["status"] == "completed" and existing["summary"]:
-        conn.close()
-        return jsonify({
-            "job_id": existing["id"],
-            "status": "completed",
-            "analysis": json.loads(existing["summary"])
-        })
+        cached = json.loads(existing["summary"])
+        # Don't return cached failures — re-run if the vibe is an error message
+        vibe = cached.get("vibe", "")
+        if vibe and not vibe.startswith("Analysis failed") and not vibe.startswith("LLM not configured"):
+            conn.close()
+            return jsonify({
+                "job_id": existing["id"],
+                "status": "completed",
+                "analysis": cached
+            })
+        # Mark stale failed job for re-run
+        print(f"[analysis] re-running playlist {playlist_id} (previous attempt failed: {vibe[:60]})")
 
     tracks = _get_tracks_for_playlist(playlist_id)
     if not tracks:
