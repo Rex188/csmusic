@@ -25,7 +25,7 @@ def admin_dashboard():
     conn = models.get_db()
 
     users = [dict(r) for r in conn.execute(
-        "SELECT id, email, created_at FROM users ORDER BY id"
+        "SELECT id, email, email_verified, created_at FROM users ORDER BY id"
     ).fetchall()]
 
     netease = [dict(r) for r in conn.execute("""

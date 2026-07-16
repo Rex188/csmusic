@@ -172,6 +172,9 @@ export default function Admin() {
           }}>
             <span style={{ color: '#555', width: 28 }}>{u.id}</span>
             <span style={{ flex: 1 }}>{u.email}</span>
+            <span style={{ color: u.email_verified ? '#4ade80' : '#f87171', fontSize: 12, width: 90 }}>
+              {u.email_verified ? '✓ Verified' : '○ Unverified'}
+            </span>
             <span style={{ color: '#666', width: 140 }}>{u.created_at}</span>
             {confirming === `user-${u.id}` ? (
               <div style={{ display: 'flex', gap: 6 }}>

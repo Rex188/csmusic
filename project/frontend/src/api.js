@@ -35,6 +35,10 @@ export const api = {
   getPlaylists: () => request('/playlists'),
   importPlaylists: () => request('/playlists/import', { method: 'POST' }),
 
+  // Email verification
+  verifyEmail: (token) => request(`/auth/verify/${token}`),
+  resendVerification: () => request('/auth/resend-verification', { method: 'POST' }),
+
   // Analysis
   getPlaylistTracks: (playlistId) => request(`/analysis/tracks/${playlistId}`),
   analyzePlaylist: (playlistId) => request(`/analysis/analyze/${playlistId}`, { method: 'POST' }),

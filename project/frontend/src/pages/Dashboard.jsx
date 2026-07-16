@@ -71,6 +71,7 @@ export default function Dashboard() {
   const [tracksLoading, setTracksLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
+  const [resendingVerification, setResendingVerification] = useState(false);
 
   // QR login state
   const [qrStatus, setQrStatus] = useState('');
@@ -298,6 +299,17 @@ export default function Dashboard() {
     setAnalyzing(false);
   };
 
+  const handleResendVerification = async () => {
+    setResendingVerification(true);
+    try {
+      await api.resendVerification();
+      addToast('📧 Verification email resent!', 'success', 3000);
+    } catch (err) {
+      addToast(`❌ ${err.message}`, 'error');
+    }
+    setResendingVerification(false);
+  };
+
   const handleLogout = async () => {
     if (pollRef.current) clearTimeout(pollRef.current);
     if (waitedRef.current) clearTimeout(waitedRef.current);
@@ -317,6 +329,24 @@ export default function Dashboard() {
           Logout
         </button>
       </div>
+
+      {/* Verification banner */}
+      {user && !user.email_verified && (
+        <div className="card" style={{
+          marginBottom: 20, padding: '12px 16px',
+          background: '#1a1a2a', border: '1px solid #a78bfa44',
+          display: 'flex', alignItems: 'center', gap: 12, fontSize: 13
+        }}>
+          <span style={{ fontSize: 16 }}>✉️</span>
+          <span style={{ flex: 1, color: '#ccc' }}>
+            Please verify your email address. Check your inbox for the verification link.
+          </span>
+          <button onClick={handleResendVerification} disabled={resendingVerification}
+            style={{ background: '#a78bfa22', color: '#a78bfa', padding: '6px 14px', fontSize: 12, whiteSpace: 'nowrap' }}>
+            {resendingVerification ? 'Sending...' : 'Resend'}
+          </button>
+        </div>
+      )}
 
       {/* Welcome card */}
       <div className="card" style={{ marginBottom: 24 }}>

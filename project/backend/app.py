@@ -31,11 +31,11 @@ def me():
         return jsonify({"user": None}), 401
     import models
     conn = models.get_db()
-    row = conn.execute("SELECT id, email FROM users WHERE id = ?", (uid,)).fetchone()
+    row = conn.execute("SELECT id, email, email_verified FROM users WHERE id = ?", (uid,)).fetchone()
     conn.close()
     if not row:
         return jsonify({"user": None}), 401
-    return jsonify({"user": {"id": row["id"], "email": row["email"]}})
+    return jsonify({"user": {"id": row["id"], "email": row["email"], "email_verified": bool(row["email_verified"])}})
 
 
 # --- Serve built React frontend in production ---

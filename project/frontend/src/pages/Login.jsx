@@ -11,8 +11,12 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.login({ email, password });
-      addToast('✅ Logged in', 'success', 2000);
+      const result = await api.login({ email, password });
+      if (result.user && !result.user.email_verified) {
+        addToast('⚠️ Email not verified. Check your inbox.', 'warning', 6000);
+      } else {
+        addToast('✅ Logged in', 'success', 2000);
+      }
       setTimeout(() => navigate('/dashboard'), 300);
     } catch (err) {
       addToast(`❌ ${err.message}`, 'error');
