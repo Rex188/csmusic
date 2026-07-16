@@ -46,7 +46,7 @@ export const api = {
 
   // Admin (protected by ADMIN_KEY env var)
   adminDashboard: (key) => request(`/admin?key=${key}`),
-  adminDeleteUser: (key, userId) => request(`/admin/user/${userId}`, { method: 'DELETE', body: JSON.stringify({ key }) }),
-  adminDeletePlaylist: (key, playlistId) => request(`/admin/playlist/${playlistId}`, { method: 'DELETE', body: JSON.stringify({ key }) }),
-  adminDisconnectNetease: (key, userId) => request(`/admin/disconnect/${userId}`, { method: 'POST', body: JSON.stringify({ key }) }),
+  adminDeleteUser: (key, userId) => request(`/admin/user/${userId}?key=${key}`, { method: 'DELETE' }),
+  adminDeletePlaylist: (key, playlistId) => request(`/admin/playlist/${playlistId}?key=${key}`, { method: 'DELETE' }),
+  adminDisconnectNetease: (key, userId) => request(`/admin/disconnect/${userId}?key=${key}`, { method: 'POST' }),
 };
