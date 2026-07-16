@@ -231,11 +231,11 @@
       <div class="label">V1 Skeleton Done</div>
     </div>
     <div class="stat-card">
-      <div class="number" style="color:var(--accent)">4</div>
-      <div class="label">Inspirations</div>
+      <div class="number" style="color:var(--green)">2</div>
+      <div class="label">Services Deployed</div>
     </div>
     <div class="stat-card">
-      <div class="number" style="color:var(--green)">6</div>
+      <div class="number" style="color:var(--green)">8</div>
       <div class="label">Bugs Fixed</div>
     </div>
   </div>
@@ -336,6 +336,10 @@
       </div>
       <div class="task-col">
         <h3>Decided ✓</h3>
+        <div class="task-card">
+          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Deployed to Render</div>
+          <div class="task-meta">2 services: api-enhanced (Node.js) + music-self (Flask). Live at music-self.onrender.com. Admin endpoint with API key auth.</div>
+        </div>
         <div class="task-card">
           <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Playlist import &amp; rendering</div>
           <div class="task-meta">Import uses parallel ThreadPoolExecutor. Tracks saved with artist/album/duration. Dashboard shows cover + track count.</div>
@@ -442,12 +446,30 @@
         <div class="title">JSON-safe API client + error resilience</div>
         <div class="desc">Fixed "body stream already read" error in api.js by checking content-type before .json(). Added _unwrap() helper to both netease_routes.py and playlist_routes.py for consistent response handling.</div>
       </div>
+      <div class="timeline-item">
+        <div class="date">2026-07-16</div>
+        <div class="title">Deployed to Render (production)</div>
+        <div class="desc">2 services on Render: api-enhanced (Node, free) + music-self (Flask Python, free). Flask serves built React frontend statically. NCM_API env var configurable. SPA catch-all route for client-side routing.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">2026-07-16</div>
+        <div class="title">Admin endpoint + CLI script</div>
+        <div class="desc">Added /api/admin?key=xxx endpoint protected by ADMIN_KEY env var. Returns all users, netease connections, playlists, track count. Local admin.py CLI (python admin.py all) for database inspection.</div>
+      </div>
     </div>
   </section>
 
   <!-- Activity -->
   <section>
     <div class="section-title">📝 Activity Log</div>
+    <div class="log-entry">
+      <span class="log-date">2026-07-16</span>
+      <div class="log-msg">Admin endpoint + CLI: /api/admin?key=xxx (ADMIN_KEY protected) and local admin.py (python admin.py all) for inspecting users, playlists, tracks, netease connections.</div>
+    </div>
+    <div class="log-entry">
+      <span class="log-date">2026-07-16</span>
+      <div class="log-msg">Deployed to Render: 2 services (api-enhanced Node + Flask Python). Flask serves built React frontend statically. NCM_API configurable via env var. Live at <a href="https://music-self.onrender.com" target="_blank" style="color:var(--accent);">music-self.onrender.com</a>.</div>
+    </div>
     <div class="log-entry">
       <span class="log-date">2026-07-16</span>
       <div class="log-msg">JSON-safe api.js: content-type check before .json() to prevent "body stream already read". <em>_unwrap()</em> helper added to both netease_routes.py and playlist_routes.py for consistent api-enhanced response handling.</div>

@@ -10,14 +10,15 @@ You're not sharing a playlist. You're showing someone how you process reality.
 
 | | |
 |---|---|
+| ✅ | **Live on Render** — `https://music-self.onrender.com` |
 | ✅ | **V1 skeleton working** — Flask backend + React frontend live |
 | ✅ | Sign up / login with bcrypt auth |
-| ✅ | Netease Cloud Music QR login |
-| ✅ | Playlist import from Netease (parallel fetching) |
-| ✅ | QR login UX — generating/waiting/scanning/connecting states + countdown |
+| ✅ | Netease Cloud Music QR login (5-state UX + countdown) |
+| ✅ | Playlist import from Netease (parallel fetching, error-resilient) |
+| ✅ | Admin endpoint / API key protected (`/api/admin?key=xxx`) |
+| ✅ | QR login UX — generating/waiting/scanning/connecting/expired states |
 | ✅ | Error handling — JSON-safe API client, informative error messages |
-| ✅ | Playlist import fixed — artist NoneType crash, DB lock recovery |
-| ✅ | 3-server stack: Netease API (:3000) → Flask (:5000) → Vite (:5173) |
+| ✅ | 2-server production stack: api-enhanced (Render Node) → Flask (Render Python) |
 | 🧪 | Next: visual landscape, audio analysis, social features |
 | 📖 | [Full progress page →](https://rex188.github.io/csmusic/progress.html) |
 
@@ -59,13 +60,14 @@ A private space where your music becomes a **living landscape** — one that ref
 
 ## 🛠️ Tech Stack
 
-| Layer | Tech |
-|---|---|
-| Backend | Flask (Python 3.11), SQLite, bcrypt sessions |
-| Frontend | React + Vite, dark Apple-minimal CSS |
-| Music source | Netease Cloud Music API Enhanced (Node.js :3000) |
-| ML stack (ready) | librosa, numpy, scipy, scikit-learn, Streamlit |
-| AI workflow | DeepSeek (implementation) + Claude Opus (architecture) |
+| Layer | Tech | Deployed To |
+|---|---|---|
+| Backend | Flask (Python 3.11), SQLite, bcrypt sessions | Render (gunicorn) |
+| Frontend | React + Vite, dark Apple-minimal CSS | Flask serves built static files |
+| Music source | Netease Cloud Music API Enhanced (Node.js) | Render (separate service) |
+| Admin | `/api/admin?key=xxx` + local CLI `python admin.py all` | Built-in |
+| ML stack (ready) | librosa, numpy, scipy, scikit-learn, Streamlit | Local |
+| AI workflow | DeepSeek (implementation) + Claude Opus (architecture) | — |
 
 ---
 

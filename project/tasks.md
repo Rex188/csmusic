@@ -4,7 +4,7 @@
 **Architecture by:** Claude Opus 4.8 (Principal Software Architect)
 **Date:** 2026-07-16
 
-**Status:** V1 fully functional. QR login (5 states, countdown, polling) + playlist import (parallel, error-resilient) + dashboard rendering all verified working. Bugfixes applied session 2026-07-16.
+**Status:** V1 fully functional, deployed to Render. QR login (5-state UX, countdown, polling) + playlist import (parallel, error-resilient) + admin endpoint + dashboard rendering all verified working.
 
 You are building the V1 skeleton of Music-Self. **Do not redesign anything.** Implement exactly what's specified. If something is ambiguous or broken, flag it — don't improvise.
 
