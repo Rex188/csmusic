@@ -67,6 +67,29 @@ def _init_sqlite():
             added_at TIMESTAMP,
             PRIMARY KEY (playlist_id, track_id)
         );
+
+        CREATE TABLE IF NOT EXISTS analysis_jobs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL REFERENCES users(id),
+            playlist_id INTEGER NOT NULL REFERENCES playlists(id),
+            status TEXT DEFAULT 'pending',
+            summary TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            completed_at TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS track_features (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            track_id INTEGER NOT NULL REFERENCES tracks(id),
+            analysis_job_id INTEGER REFERENCES analysis_jobs(id),
+            energy REAL,
+            valence REAL,
+            tempo REAL,
+            loudness REAL,
+            danceability REAL,
+            analyzed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(track_id, analysis_job_id)
+        );
     """)
     conn.commit()
     conn.close()
@@ -136,6 +159,31 @@ def _init_postgres():
             track_id INTEGER REFERENCES tracks(id),
             added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (playlist_id, track_id)
+        )
+    """)
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS analysis_jobs (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL REFERENCES users(id),
+            playlist_id INTEGER NOT NULL REFERENCES playlists(id),
+            status TEXT DEFAULT 'pending',
+            summary TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            completed_at TIMESTAMP
+        )
+    """)
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS track_features (
+            id SERIAL PRIMARY KEY,
+            track_id INTEGER NOT NULL REFERENCES tracks(id),
+            analysis_job_id INTEGER REFERENCES analysis_jobs(id),
+            energy REAL,
+            valence REAL,
+            tempo REAL,
+            loudness REAL,
+            danceability REAL,
+            analyzed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(track_id, analysis_job_id)
         )
     """)
     db.commit()

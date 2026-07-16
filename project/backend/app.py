@@ -13,10 +13,12 @@ CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
 from auth import auth_bp
 from netease_routes import netease_bp
 from playlist_routes import playlist_bp
+from analysis_routes import analysis_bp
 
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
 app.register_blueprint(netease_bp, url_prefix="/api/netease")
 app.register_blueprint(playlist_bp, url_prefix="/api/playlists")
+app.register_blueprint(analysis_bp, url_prefix="/api/analysis")
 
 
 @app.route("/api/me")

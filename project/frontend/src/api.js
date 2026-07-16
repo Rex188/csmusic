@@ -34,4 +34,9 @@ export const api = {
   // Playlists
   getPlaylists: () => request('/playlists'),
   importPlaylists: () => request('/playlists/import', { method: 'POST' }),
+
+  // Analysis
+  getPlaylistTracks: (playlistId) => request(`/analysis/tracks/${playlistId}`),
+  analyzePlaylist: (playlistId) => request(`/analysis/analyze/${playlistId}`, { method: 'POST' }),
+  getAnalysisStatus: (jobId) => request(`/analysis/status/${jobId}`),
 };

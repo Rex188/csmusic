@@ -38,15 +38,16 @@ D:/music thera/                        # ← Project root
     │
     ├── backend/                       # Flask REST API (port 5000)
     │   ├── app.py                     #     Flask entry point — import this to find all routes
-    │   ├── config.py                  #     Env var loading (SECRET_KEY, DATABASE_PATH)
-    │   ├── models.py                  #     SQLite init_db() + get_db() — 5 tables
+    │   ├── config.py                  #     Env var loading (SECRET_KEY, DATABASE_PATH, NCM_API)
+    │   ├── models.py                  #     DB init — SQLite local, PostgreSQL production (DATABASE_URL)
     │   ├── auth.py                    #     Blueprint: signup, login, logout
     │   ├── netease_routes.py          #     Blueprint: QR key/create/check, connect, status, disconnect
     │   ├── playlist_routes.py         #     Blueprint: GET /playlists, POST /playlists/import
-    │   ├── requirements.txt           #     flask, flask-cors, bcrypt, python-dotenv, requests
+    │   ├── admin.py                   #     CLI: python admin.py <users|playlists|tracks|netease|all>
+    │   ├── requirements.txt           #     flask, flask-cors, bcrypt, python-dotenv, requests, psycopg2-binary
     │   ├── .env.example               #     Config template → copy to .env and edit
     │   ├── .env                       #     Actual config (SECRET_KEY) — git-ignored
-    │   └── database.db                #     SQLite database — auto-created on first run
+    │   └── database.db                #     SQLite database — auto-created on first run (local only)
     │
     ├── frontend/                      # React + Vite (port 5173)
     │   ├── package.json               #     react, react-dom, react-router-dom, vite

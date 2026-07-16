@@ -3,9 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import { addToast } from '../components/Toast';
 
-function PlaylistCard({ pl }) {
+function PlaylistCard({ pl, selected, onSelect }) {
   return (
-    <div className="card" style={{ padding: 14 }}>
+    <div
+      className="card"
+      onClick={() => onSelect(pl)}
+      style={{
+        padding: 14, cursor: 'pointer',
+        border: selected ? '1px solid #a78bfa' : undefined,
+        transition: 'border-color 0.2s, box-shadow 0.2s'
+      }}
+    >
       {pl.image_url ? (
         <img src={pl.image_url} alt={pl.name} style={{ width: '100%', aspectRatio: '1/1', borderRadius: 8, objectFit: 'cover' }} />
       ) : (
@@ -58,6 +66,11 @@ export default function Dashboard() {
   const [playlists, setPlaylists] = useState([]);
   const [importing, setImporting] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+  const [selectedTracks, setSelectedTracks] = useState(null);
+  const [tracksLoading, setTracksLoading] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState(null);
 
   // QR login state
   const [qrStatus, setQrStatus] = useState('');
@@ -249,6 +262,43 @@ export default function Dashboard() {
     setImporting(false);
   };
 
+  const handleSelectPlaylist = async (pl) => {
+    if (selectedPlaylist?.id === pl.id) {
+      setSelectedPlaylist(null);
+      setSelectedTracks(null);
+      setAnalysisResult(null);
+      return;
+    }
+    setSelectedPlaylist(pl);
+    setSelectedTracks(null);
+    setAnalysisResult(null);
+    setTracksLoading(true);
+    try {
+      const data = await api.getPlaylistTracks(pl.id);
+      setSelectedTracks(data.tracks);
+    } catch (err) {
+      addToast(`Failed to load tracks: ${err.message}`, 'error');
+    }
+    setTracksLoading(false);
+  };
+
+  const handleAnalyze = async () => {
+    if (!selectedPlaylist) return;
+    setAnalyzing(true);
+    setAnalysisResult(null);
+    try {
+      const result = await api.analyzePlaylist(selectedPlaylist.id);
+      setAnalysisResult(result);
+      addToast(
+        `✅ ${result.summary.accessible_tracks}/${result.summary.total_tracks} tracks accessible`,
+        'success', 5000
+      );
+    } catch (err) {
+      addToast(`❌ Analysis failed: ${err.message}`, 'error');
+    }
+    setAnalyzing(false);
+  };
+
   const handleLogout = async () => {
     if (pollRef.current) clearTimeout(pollRef.current);
     if (waitedRef.current) clearTimeout(waitedRef.current);
@@ -365,9 +415,99 @@ export default function Dashboard() {
             gap: 14
           }}>
             {playlists.map(pl => (
-              <PlaylistCard key={pl.id} pl={pl} />
+              <PlaylistCard
+                key={pl.id}
+                pl={pl}
+                selected={selectedPlaylist?.id === pl.id}
+                onSelect={handleSelectPlaylist}
+              />
             ))}
           </div>
+
+          {/* ── Selected playlist detail panel ─────────────────── */}
+          {selectedPlaylist && (
+            <div className="card" style={{ marginTop: 20, padding: 20, animation: 'fadeIn 0.2s' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
+                {selectedPlaylist.image_url && (
+                  <img src={selectedPlaylist.image_url} alt={selectedPlaylist.name}
+                    style={{ width: 56, height: 56, borderRadius: 8, objectFit: 'cover' }} />
+                )}
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 600 }}>{selectedPlaylist.name}</h3>
+                  <p style={{ fontSize: 13, color: '#888' }}>
+                    {selectedPlaylist.track_count || 0} tracks
+                  </p>
+                </div>
+                <button
+                  onClick={handleAnalyze}
+                  disabled={analyzing}
+                  style={{ background: analyzing ? '#333' : '#a78bfa', color: '#fff', padding: '8px 20px', fontSize: 14 }}
+                >
+                  {analyzing ? 'Analyzing...' : '🎵 Analyze'}
+                </button>
+              </div>
+
+              {/* Analysis results */}
+              {analysisResult && (
+                <div style={{
+                  marginBottom: 16, padding: 12, borderRadius: 8,
+                  background: '#1a1a1a', fontSize: 13, lineHeight: 1.6
+                }}>
+                  <div style={{ color: '#a78bfa', fontWeight: 600, marginBottom: 8 }}>Analysis Results</div>
+                  <div>Status: <span style={{ color: '#4ade80' }}>{analysisResult.status}</span></div>
+                  <div>Tracks: {analysisResult.summary.total_tracks} total,
+                    <span style={{ color: analysisResult.summary.accessible_tracks > 0 ? '#4ade80' : '#f87171' }}>
+                      {' '}{analysisResult.summary.accessible_tracks} accessible
+                    </span>
+                  </div>
+                  {analysisResult.summary.audio_sample && (
+                    <div style={{ marginTop: 4, color: '#888' }}>
+                      Sample: {analysisResult.summary.audio_sample.name}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Track list */}
+              {tracksLoading && (
+                <div style={{ textAlign: 'center', padding: 20 }}>
+                  <div className="spinner" />
+                  <p style={{ fontSize: 13, color: '#888', marginTop: 8 }}>Loading tracks...</p>
+                </div>
+              )}
+              {selectedTracks && selectedTracks.length === 0 && !tracksLoading && (
+                <p style={{ fontSize: 13, color: '#555', textAlign: 'center', padding: 16 }}>
+                  No tracks found for this playlist. Try importing playlists first.
+                </p>
+              )}
+              {selectedTracks && selectedTracks.length > 0 && (
+                <>
+                  <h4 style={{ fontSize: 13, fontWeight: 600, color: '#888', marginBottom: 8 }}>
+                    Tracks ({selectedTracks.length})
+                  </h4>
+                  <div style={{ maxHeight: 320, overflowY: 'auto' }}>
+                    {selectedTracks.map((t, i) => (
+                      <div key={t.id} style={{
+                        display: 'flex', alignItems: 'center', gap: 10,
+                        padding: '6px 0', borderBottom: '1px solid #1a1a1a', fontSize: 13
+                      }}>
+                        <span style={{ color: '#555', width: 24, textAlign: 'right', flexShrink: 0 }}>{i + 1}</span>
+                        {t.image_url ? (
+                          <img src={t.image_url} alt="" style={{ width: 32, height: 32, borderRadius: 4, objectFit: 'cover' }} />
+                        ) : (
+                          <div style={{ width: 32, height: 32, borderRadius: 4, background: '#1a1a1a' }} />
+                        )}
+                        <div style={{ flex: 1, overflow: 'hidden' }}>
+                          <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 500 }}>{t.name}</div>
+                          <div style={{ color: '#666', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.artist}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </>
       )}
 
