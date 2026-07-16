@@ -4,6 +4,8 @@
 **Architecture by:** Claude Opus 4.8 (Principal Software Architect)
 **Date:** 2026-07-16
 
+**Status:** V1 skeleton implemented. QR login working. Playlist import has a frontend rendering bug — see Known Issues below.
+
 You are building the V1 skeleton of Music-Self. **Do not redesign anything.** Implement exactly what's specified. If something is ambiguous or broken, flag it — don't improvise.
 
 ---
@@ -443,16 +445,30 @@ a:hover { color: #fff; }
 
 ---
 
+## Known Issues (2026-07-16)
+
+### 1. Playlist import returns data but grid stays empty
+
+**Symptom:** User clicks "Import Playlists", gets success response with `"imported": N`, but the playlist grid on the Dashboard doesn't update. Refreshing the page shows an empty state.
+
+**Likely cause:** The `POST /api/playlists/import` response format doesn't match what `Dashboard.jsx` expects. The frontend does `setPlaylists(result.playlists)` but the API might return the data under a different key, or the data itself has a different shape.
+
+**To debug:** Open browser DevTools (F12) → Network tab → check the `/api/playlists/import` response.
+
+### 2. Old SQLite database causes schema errors
+
+**Symptom:** After code changes to the database schema, Flask throws `OperationalError: table X has no column named Y`.
+
+**Fix:** Delete `backend/database.db` and restart Flask — it auto-creates a fresh one.
+
+---
+
 ## Before You Start
 
 - Python venv is at `D:/music thera/project/venv/` (Python 3.11)
 - Activate it before pip installs or running Flask
-- You need Spotify API credentials. Either ask the user for them, or build so that Spotify-requiring routes fail gracefully with a clear error until credentials are set.
-- npm/node must be available. Check with `node --version`. If not installed, tell the user.
-
-Here's the wrap-up of where V1 stands:
-
----
+- Netease API server must be running on `localhost:3000` (clone `api-enhanced`, run `node app.js`)
+- npm/node must be available. Check with `node --version`. If not installed, install it.
 
 
 

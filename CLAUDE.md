@@ -293,11 +293,25 @@ This re-frames everything:
 
 ---
 
-#### Post-implementation bugfix (2026-07-16)
+#### Phase 11 — QR Login Working, Playlist Import Broken (2026-07-16)
 
-**Problem:** Frontend called `GET /api/me` but it was registered as `/api/auth/me` inside the auth blueprint. Dashboard stuck on loading after signup/login.
+**DeepSeek** continued debugging after the V1 skeleton handoff.
 
-**Fix:** Moved the `/api/me` route out of the blueprint into `app.py` as a standalone route. Signup → dashboard and login → dashboard flows now work end-to-end.
+**Bugfixes applied:**
+1. **SQLite schema mismatch.** Old `database.db` still had Spotify-era columns (`spotify_playlist_id` instead of `netease_playlist_id`). Fix: deleted `database.db`, Flask auto-recreated on restart.
+2. **QR polling race condition.** `setInterval` with async callbacks caused overlapping polls. Fix: switched to recursive `setTimeout`, added cleanup guards, added `console.log` tracing.
+3. **Polling cleanup.** `clearInterval` → `clearTimeout` to match new pattern. Stale polls cleared on retry.
+
+**Verified working:**
+- Signup / login → dashboard redirect
+- `/api/me` returns authenticated user
+- Netease QR key → create → check → connect flow
+- QR scan → cookie saved → "Connected as [nickname]" shown
+
+**Still broken:**
+- **Playlist import returns count but playlists don't appear on dashboard.** The `POST /api/playlists/import` call returns data, but the playlist grid stays empty. Likely a frontend state update issue or the API response format doesn't match what the frontend expects.
+
+**Status:** Session ended at 100% context. Needs fresh session to debug playlist import.
 
 ---
 
@@ -316,3 +330,5 @@ This re-frames everything:
 | 2026-07-16 | **Pivoted from Spotify to Netease Cloud Music API.** Spotify requires Premium for Web API. Replaced spotipy OAuth with Netease QR login flow. `api-enhanced` (Node.js) runs on :3000 as data provider. Audio features unavailable — removed energy/valence from UI. |
 | 2026-07-16 | **Bugfix: /api/me route.** Signup/login → dashboard flow was broken. Moved /api/me out of auth blueprint into app.py. Now working end-to-end. |
 | 2026-07-16 | **V1 skeleton verified.** 3-server stack (Netease API :3000 → Flask :5000 → Vite :5173) tested working. User can sign up, login, scan Netease QR, and import playlists. |
+| 2026-07-16 | **SQLite + QR login fixed.** Old database with Spotify schema deleted, auto-recreated with Netease columns. QR polling changed to recursive setTimeout. Netease connection verified working. |
+| 2026-07-16 | **Bug: playlist import not displaying.** Import API returns data but playlists don't render on dashboard. Frontend state update issue — deferred to next session. |

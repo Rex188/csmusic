@@ -56,53 +56,65 @@ export default function Dashboard() {
       setLoading(false);
     })();
     return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
+      if (pollRef.current) clearTimeout(pollRef.current);
     };
   }, []);
 
   const handleShowQr = async () => {
+    // Clear any existing poll
+    if (pollRef.current) clearTimeout(pollRef.current);
     setQrStatus('waiting');
     setConnecting(true);
     try {
       const keyResp = await api.neteaseQrKey();
+      console.log('[QR] key response:', keyResp);
       const key = keyResp?.data?.unikey;
       if (!key) throw new Error('Failed to get QR key');
       setQrKey(key);
 
       const qrResp = await api.neteaseQrCreate(key);
-      setQrImg(qrResp?.data?.qrimg);
+      console.log('[QR] create response:', qrResp);
+      const imgData = qrResp?.data?.qrimg;
+      if (!imgData) throw new Error('Failed to create QR image');
+      setQrImg(imgData);
 
-      // Start polling
-      pollRef.current = setInterval(async () => {
+      // Use recursive setTimeout instead of setInterval (better with async)
+      const poll = async () => {
         try {
           const check = await api.neteaseQrCheck(key);
-          if (check.code === 803) {
-            // Scanned and confirmed
-            clearInterval(pollRef.current);
-            pollRef.current = null;
-            setQrStatus('done');
+          console.log('[QR] check response:', check);
 
-            // Save cookie
+          if (check.code === 803) {
+            // Scanned and confirmed — save cookie
             const connectResp = await api.neteaseConnect(check.cookie);
+            console.log('[QR] connected:', connectResp);
             setNetease(connectResp);
             setConnecting(false);
             setQrImg(null);
             setQrKey(null);
-          } else if (check.code === 802) {
+            setQrStatus('done');
+            return;
+          }
+
+          if (check.code === 802) {
             setQrStatus('scanning');
           } else if (check.code === 800) {
-            clearInterval(pollRef.current);
-            pollRef.current = null;
             setQrStatus('expired');
             setConnecting(false);
+            return;
           }
           // 801 = still waiting, keep polling
-        } catch {
-          // poll silently
+          pollRef.current = setTimeout(poll, 2000);
+        } catch (err) {
+          console.error('[QR] poll error:', err);
+          pollRef.current = setTimeout(poll, 2000);
         }
-      }, 2000);
+      };
+
+      poll();
     } catch (err) {
-      alert(err.message);
+      console.error('[QR] setup error:', err);
+      alert(err.message || 'Failed to setup QR login');
       setConnecting(false);
     }
   };
@@ -126,7 +138,7 @@ export default function Dashboard() {
   };
 
   const handleLogout = async () => {
-    if (pollRef.current) clearInterval(pollRef.current);
+    if (pollRef.current) clearTimeout(pollRef.current);
     await api.logout();
     navigate('/login');
   };

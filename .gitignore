@@ -18,6 +18,9 @@ project/.claude/
 
 # Backend
 backend/database.db
+backend/database.db-shm
+backend/database.db-wal
+backend/database.db-journal
 backend/.env
 
 # Frontend

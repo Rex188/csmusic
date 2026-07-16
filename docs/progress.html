@@ -405,12 +405,30 @@
         <div class="title">Bugfix: /api/me route</div>
         <div class="desc">Separate /api/me added outside auth blueprint. Signup/login → dashboard flow now working end-to-end.</div>
       </div>
+      <div class="timeline-item">
+        <div class="date">2026-07-16</div>
+        <div class="title">SQLite + QR login fixed</div>
+        <div class="desc">Old database with Spotify schema deleted. QR polling changed from setInterval to recursive setTimeout. Netease connection verified working.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">2026-07-16</div>
+        <div class="title">Bug: playlist import not displaying</div>
+        <div class="desc">Import API returns data but playlist grid stays empty on dashboard. Frontend state update issue — deferred to next session.</div>
+      </div>
     </div>
   </section>
 
   <!-- Activity -->
   <section>
     <div class="section-title">📝 Activity Log</div>
+    <div class="log-entry">
+      <span class="log-date">2026-07-16</span>
+      <div class="log-msg">Bug: playlist import returns data but grid stays empty. Need to debug frontend state update.</div>
+    </div>
+    <div class="log-entry">
+      <span class="log-date">2026-07-16</span>
+      <div class="log-msg">SQLite schema fixed (deleted old db, recreated with Netease columns). QR polling rewritten to recursive setTimeout. Netease connection verified working.</div>
+    </div>
     <div class="log-entry">
       <span class="log-date">2026-07-16</span>
       <div class="log-msg">Bugfix: added standalone /api/me route. Signup/login flow now works end-to-end.</div>
