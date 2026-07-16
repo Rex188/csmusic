@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify, session, send_from_directory
+from flask import Flask, jsonify, request, session, send_from_directory
 from flask_cors import CORS
 import config
 from models import init_db
@@ -34,6 +34,31 @@ def me():
 
 # --- Serve built React frontend in production ---
 FRONTEND_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend", "dist")
+
+# --- Admin panel (production only — protected by ADMIN_KEY env var) ---
+@app.route("/api/admin")
+def admin_panel():
+    key = request.args.get("key")
+    expected = os.getenv("ADMIN_KEY")
+    if not expected or key != expected:
+        return jsonify({"error": "Unauthorized. Set ADMIN_KEY env var and pass ?key=..."}), 403
+
+    import models
+    conn = models.get_db()
+
+    users = [dict(r) for r in conn.execute("SELECT id, email, created_at FROM users ORDER BY id").fetchall()]
+    netease = [dict(r) for r in conn.execute("""
+        SELECT u.email, nt.netease_nickname, nt.netease_user_id, nt.updated_at
+        FROM netease_tokens nt JOIN users u ON u.id = nt.user_id
+    """).fetchall()]
+    playlists = [dict(r) for r in conn.execute("""
+        SELECT p.id, u.email, p.name, p.track_count, p.imported_at
+        FROM playlists p JOIN users u ON u.id = p.user_id ORDER BY p.imported_at DESC
+    """).fetchall()]
+    track_count = conn.execute("SELECT COUNT(*) as c FROM tracks").fetchone()["c"]
+    conn.close()
+
+    return jsonify({"users": users, "netease": netease, "playlists": playlists, "tracks": track_count})
 
 
 @app.route("/", defaults={"path": ""})
