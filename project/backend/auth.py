@@ -1,5 +1,6 @@
 from flask import Blueprint, request, session, jsonify
 import bcrypt
+import config
 import models
 from email_service import generate_token, send_verification_email, get_verification_expiry
 from datetime import datetime
@@ -35,28 +36,40 @@ def signup():
     # Fetch the user_id (works for both SQLite and PG)
     user_row = conn.execute("SELECT id FROM users WHERE email = ?", (email,)).fetchone()
     user_id = user_row["id"]
-
-    # Generate verification token
-    token = generate_token()
-    expires = get_verification_expiry(24)
-    conn.execute(
-        "INSERT INTO email_verifications (user_id, token, expires_at) VALUES (?, ?, ?)",
-        (user_id, token, expires.isoformat())
-    )
-    conn.commit()
-    conn.close()
-
-    # Send verification email (best-effort)
-    sent, err = send_verification_email(email, token)
-
-    # DON'T auto-login — user must verify first
-    # But set session so they can see "verify your email" state
     session["user_id"] = user_id
+
+    # ── Verification setup (best-effort — user is created regardless) ──
+    verification_sent = False
+    verification_url = None
+
+    try:
+        token = generate_token()
+        expires = get_verification_expiry(24)
+        conn.execute(
+            "INSERT INTO email_verifications (user_id, token, expires_at) VALUES (?, ?, ?)",
+            (user_id, token, expires.isoformat())
+        )
+        conn.commit()
+        conn.close()
+
+        sent, _ = send_verification_email(email, token)
+        verification_sent = sent
+        # In dev mode, include the URL so the frontend can show it
+        if not config.SMTP_HOST:
+            app_url = config.APP_URL
+            verification_url = f"{app_url.rstrip('/')}/verify?token={token}"
+    except Exception as e:
+        print(f"[auth] signup verification setup failed (non-fatal): {e}")
+        try:
+            conn.close()
+        except Exception:
+            pass
 
     return jsonify({
         "user": {"id": user_id, "email": email, "email_verified": False},
-        "verification_sent": sent,
-        "message": "Account created. Check your email to verify."
+        "verification_sent": verification_sent,
+        "verification_url": verification_url,
+        "message": "Account created! You can now explore the app."
     }), 201
 
 

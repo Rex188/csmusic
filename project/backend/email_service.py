@@ -50,7 +50,7 @@ This link expires in 24 hours.
         print(f"  [DEV] Verification URL for {to_email}:")
         print(f"  {verify_url}")
         print(f"{'='*60}\n")
-        return True, None
+        return False, None  # No SMTP configured — email was not actually sent
 
 
 def get_verification_expiry(hours=24):
