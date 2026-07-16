@@ -3,6 +3,16 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 .DS_Store
+
+# Backend
+backend/database.db
+backend/.env
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Stale (local only)
 setup.md
 gpt role.md
 deep-research-report (1).md

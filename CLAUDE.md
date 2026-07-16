@@ -16,6 +16,22 @@ Project workspace at `D:/music thera`.
 ```
 D:/music thera/
 ├── project/                  # Python project directory
+│   ├── backend/              # Flask REST API
+│   │   ├── app.py            # Main entry point
+│   │   ├── config.py         # Env config
+│   │   ├── models.py         # SQLite schema
+│   │   ├── auth.py           # Auth routes (signup/login/logout)
+│   │   ├── spotify_routes.py # Spotify OAuth routes
+│   │   ├── playlist_routes.py# Playlist import & list
+│   │   ├── requirements.txt  # Flask deps
+│   │   └── .env.example      # Config template
+│   ├── frontend/             # React + Vite
+│   │   ├── src/
+│   │   │   ├── api.js        # API client
+│   │   │   ├── pages/        # Login, Signup, Dashboard
+│   │   │   ├── App.jsx       # Router
+│   │   │   └── index.css     # Global dark theme
+│   │   └── vite.config.js    # Proxy to Flask
 │   ├── requirements.txt      # Core deps (librosa, numpy, scipy, sklearn, etc.)
 │   ├── venv/                 # Python 3.11 virtual environment (activated)
 │   ├── .gitignore
@@ -24,10 +40,12 @@ D:/music thera/
 │   ├── gpt.sh                # Script: launches GPT with gpt role.md
 │   ├── ds role.md            # Implementation Engineer system prompt
 │   ├── claude role.md        # Architect system prompt
-│   └── gpt role.md           # Research Advisor system prompt
-├── *.pdf / *.epub            # Reference books (music therapy, music processing, affective computing) (not in git)
+│   ├── design-questions.md   # Full Music-Self design doc
+│   └── tasks.md              # V1 implementation tasks
+├── *.pdf / *.epub            # Reference books (not in git)
 ├── docs/                     # GitHub Pages (public)
 │   ├── index.html            # Landing page — Music-Self concept
+│   ├── story.html            # Origin story (8 phases)
 │   └── progress.html         # Progress tracker
 ├── README.md                 # GitHub repo front page
 ├── .gitignore
@@ -222,16 +240,66 @@ This re-frames everything:
 
 ---
 
+#### Phase 9 — Blueprint & Task Handoff (2026-07-16)
+
+**Architect** designed the V1 skeleton architecture: **Flask REST API + React/Vite + SQLite**.
+
+**Architecture decisions:**
+- Flask with blueprints (auth, spotify, playlists) — modular, testable
+- Flask sessions with bcrypt — simple auth, no JWT complexity for V1
+- spotipy + raw requests for Spotify OAuth/token management
+- SQLite — zero setup, perfect for single-user V1
+- React with Vite — modern, fast dev, proxy to Flask avoids CORS pain
+- Plain CSS, dark mode, Apple-minimal
+
+**Routes:** `/api/auth/*` (signup/login/logout/me), `/api/spotify/*` (connect/callback/status), `/api/playlists/*` (list/import)
+
+**Task breakdown written to `project/tasks.md`** — ready for DeepSeek to implement. Two tasks: (1) Flask backend skeleton, (2) React frontend skeleton. Each file described in detail with exact code patterns, URL structures, and design specs.
+
+**User needs** Spotify Developer credentials before coding starts.
+
+**Status:** Plan approved. Tasks handed to DeepSeek via `tasks.md`. Implementation begins.
+
+---
+
+#### Phase 10 — Implementation (2026-07-16)
+
+**DeepSeek** implemented the full V1 skeleton as specified in `tasks.md`:
+
+**Task 1 — Flask Backend** ✅
+- `backend/requirements.txt` — flask, flask-cors, bcrypt, spotipy, python-dotenv
+- `backend/config.py` — env var loading via python-dotenv
+- `backend/models.py` — SQLite with 5 tables (users, spotify_tokens, playlists, tracks, playlist_tracks)
+- `backend/auth.py` — signup (bcrypt), login, logout, session-based auth
+- `backend/spotify_routes.py` — OAuth connect/callback/status with manual token management
+- `backend/playlist_routes.py` — list + import with token refresh, batch audio features
+- `backend/app.py` — Flask app with CORS, blueprint registration
+- `backend/.env.example` — template for local config
+
+**Task 2 — React Frontend** ✅
+- Vite + React project scaffolded at `frontend/`
+- `src/api.js` — typed API client with `credentials: 'include'`
+- `src/pages/Login.jsx` — email/password form, error handling
+- `src/pages/Signup.jsx` — email/password/confirm, client-side matching
+- `src/pages/Dashboard.jsx` — Spotify connect, playlist import, playlist grid with energy/valence indicators
+- `src/App.jsx` — BrowserRouter with 3 routes
+- `src/index.css` — dark Apple-minimal global styles
+
+**Verification:** Flask starts on port 5000, Vite builds in ~135ms.
+
+**Status:** V1 skeleton complete. Ready for Spotify API credentials and initial testing.
+
+---
+
 ## Timeline
 
 | Date | Event |
 |---|---|
 | 2026-07-15 | **Project initialized.** Folder `D:/music thera` set up as CS + music therapy workspace. |
-| 2026-07-15 | **Python environment created.** Virtual environment at `project/venv/`. `requirements.txt` with all core libs installed (librosa, numpy, scipy, sklearn, matplotlib, seaborn, streamlit, jupyter). PyMuPDF added later for PDF text extraction. |
-| 2026-07-15 | **Three-model workflow defined.** DeepSeek (implementation), Claude/Opus (architecture), GPT (research). Each has a `.sh` launcher script and a `role.md` system prompt. |
-| 2026-07-15 | **Role prompts created.** `ds role.md`, `claude role.md`, `gpt role.md` written and moved into `project/`. |
-| 2026-07-15 | **Shell scripts verified.** All three `.sh` files pass syntax check; venv activation and role file reading confirmed working. |
-| 2026-07-15 | **Architect session documented.** Claude Opus 4.8 confirmed as Principal Software Architect; the project remains setup-only, with no selected direction or implemented CS + music therapy code. |
-| 2026-07-15 | **GPT removed.** Three-model workflow reduced to two-model (Claude + DeepSeek). GPT was too expensive; research advising folded into Claude's architect role. `gpt.sh` and `gpt role.md` kept on disk but deprecated. |
-| 2026-07-15 | **Music-Self direction decided.** Design questions answered in `project/design-questions.md`. Concept locked. |
-| 2026-07-15 | **GitHub Pages published.** Landing page + progress page live at `rex188.github.io/csmusic/`. |
+| 2026-07-15 | **Python environment created.** Virtual environment at `project/venv/`. `requirements.txt` with all core libs installed. |
+| 2026-07-15 | **Three-model workflow defined.** DeepSeek (implementation), Claude/Opus (architecture), GPT (research). |
+| 2026-07-15 | **GPT removed.** Three-model → two-model. GPT too expensive. |
+| 2026-07-15 | **Deep research report reviewed and rejected.** Emotional reflection framing doesn't work — patronizing. |
+| 2026-07-15 | **Music-Self direction landed.** 8-phase exploration from blank workspace to final pitch: *A visual space that grows from your music — showing not what you listen to, but how you perceive the world.* |
+| 2026-07-16 | **V1 architecture designed.** Flask + React + SQLite skeleton. Task breakdown written to `tasks.md` for DeepSeek. Two tasks: backend skeleton + frontend skeleton. Plan approved, ready to code. |
+| 2026-07-16 | **V1 skeleton implemented.** DeepSeek built Flask backend (auth, Spotify OAuth, playlist import) + React frontend (login/signup/dashboard) per spec. Verified: Flask starts on :5000, Vite builds in ~135ms. |

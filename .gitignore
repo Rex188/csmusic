@@ -15,3 +15,11 @@ project/*.sh
 # Local Claude config
 .claude/
 project/.claude/
+
+# Backend
+backend/database.db
+backend/.env
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
