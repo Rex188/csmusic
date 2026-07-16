@@ -4,6 +4,8 @@ from flask_cors import CORS
 import config
 from models import init_db
 
+init_db()  # Ensure tables exist (runs at import time for gunicorn)
+
 app = Flask(__name__, static_folder=None)
 app.secret_key = config.SECRET_KEY
 CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
