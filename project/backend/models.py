@@ -165,6 +165,11 @@ class _PostgresCursor:
 
     def __init__(self, cur):
         self._cur = cur
+        self._lastrowid = None
+
+    @property
+    def lastrowid(self):
+        return self._lastrowid
 
     def __iter__(self):
         for row in self._cur:
@@ -179,13 +184,7 @@ class _PostgresCursor:
 
 
 class _PostgresConnection:
-    """Wraps psycopg2 connection to match sqlite3 connection API.
-
-    - conn.execute(sql, params) → cursor with .fetchone()/.fetchall()
-    - conn.commit()
-    - conn.close()
-    - Auto-converts ? → %s and INSERT OR IGNORE → ON CONFLICT DO NOTHING
-    """
+    """Wraps psycopg2 connection to match sqlite3 connection API."""
 
     def __init__(self, conn):
         self._conn = conn
@@ -194,11 +193,20 @@ class _PostgresConnection:
         pg_sql = self._convert(sql)
         if params is None:
             params = []
-        # Convert any tuple values to plain values (sqlite3 accepts tuples, psycopg2 doesn't always)
         pg_params = [p if not isinstance(p, tuple) else p[0] for p in params]
         cur = self._conn.cursor()
         cur.execute(pg_sql, pg_params)
-        return _PostgresCursor(cur)
+        wrapped = _PostgresCursor(cur)
+
+        # For INSERT statements, capture the returned id for .lastrowid
+        if pg_sql.strip().upper().startswith('INSERT') and 'RETURNING' not in pg_sql:
+            try:
+                cur.execute("SELECT LASTVAL()")
+                wrapped._lastrowid = cur.fetchone()[0]
+            except Exception:
+                wrapped._lastrowid = None
+
+        return wrapped
 
     def executescript(self, sql):
         """Split multiple statements and execute each."""
@@ -219,7 +227,6 @@ class _PostgresConnection:
         sql = sql.replace('INSERT OR IGNORE', 'INSERT')
         sql = sql.replace('?', '%s')
         if has_ignore:
-            # Add ON CONFLICT DO NOTHING before trailing semicolon (if any)
             sql = sql.rstrip()
             if sql.endswith(';'):
                 sql = sql[:-1]
