@@ -107,6 +107,51 @@ Return this exact JSON structure:
 
 # ── Routes ──────────────────────────────────────────────────────────
 
+@analysis_bp.route("/_diag", methods=["GET"])
+def diag_llm():
+    """Diagnostic: check LLM config and test the connection."""
+    uid, err = _require_auth()
+    if err:
+        return err
+
+    key_masked = (LLM_API_KEY[:8] + "****") if len(LLM_API_KEY) > 8 else "(empty)"
+    result = {
+        "config": {
+            "LLM_API_URL": LLM_API_URL,
+            "LLM_MODEL": LLM_MODEL,
+            "LLM_API_KEY": key_masked,
+            "key_length": len(LLM_API_KEY),
+        }
+    }
+
+    if not LLM_API_KEY:
+        result["error"] = "LLM_API_KEY is empty. Set it in Render Environment Variables."
+        return jsonify(result)
+
+    # Try a minimal call to DeepSeek API
+    try:
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {LLM_API_KEY}"
+        }
+        payload = {
+            "model": LLM_MODEL,
+            "messages": [{"role": "user", "content": "Say hi in 3 words."}],
+            "max_tokens": 10
+        }
+        resp = requests.post(
+            f"{LLM_API_URL.rstrip('/')}/chat/completions",
+            headers=headers,
+            json=payload,
+            timeout=15
+        )
+        result["api_status"] = resp.status_code
+        result["api_response"] = resp.text[:500]
+    except Exception as e:
+        result["api_error"] = str(e)
+
+    return jsonify(result)
+
 @analysis_bp.route("/tracks/<int:playlist_id>", methods=["GET"])
 def get_tracks(playlist_id):
     """Return all tracks for a given playlist (only if it belongs to the user)."""
