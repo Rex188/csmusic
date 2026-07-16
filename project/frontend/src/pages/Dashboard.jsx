@@ -38,6 +38,7 @@ export default function Dashboard() {
   const [qrKey, setQrKey] = useState(null);
   const [countdown, setCountdown] = useState(180);
   const [pollError, setPollError] = useState('');
+  const [waitingHint, setWaitingHint] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -90,6 +91,7 @@ export default function Dashboard() {
     if (pollRef.current) clearTimeout(pollRef.current);
     stopCountdown();
     setPollError('');
+    setWaitingHint(false);
     setQrImg(null);
     setQrKey(null);
     setQrStatus('generating');
@@ -109,6 +111,7 @@ export default function Dashboard() {
 
       // Poll loop — recursive setTimeout
       let pollFailCount = 0;
+      let pollCount = 0;
       const poll = async () => {
         try {
           const check = await api.neteaseQrCheck(key);
@@ -135,6 +138,8 @@ export default function Dashboard() {
             return;
           }
           // 801 = still waiting, keep polling
+          pollCount++;
+          if (pollCount >= 8) setWaitingHint(true);
           pollRef.current = setTimeout(poll, 2000);
         } catch (err) {
           pollFailCount++;
@@ -247,6 +252,11 @@ export default function Dashboard() {
                       ? '✅ Scanned! Confirm on your phone...'
                       : '📱 Scan with Netease Cloud Music app'}
                   </p>
+                  {qrStatus === 'waiting' && waitingHint && (
+                    <p style={{ fontSize: 12, color: '#666', marginTop: 4, maxWidth: 200 }}>
+                      Waiting for server... This can take 1–3 minutes. Stay on this page.
+                    </p>
+                  )}
                   {qrStatus === 'waiting' && countdown > 0 && (
                     <p style={{ fontSize: 12, color: '#555', marginTop: 4 }}>
                       Expires in {Math.floor(countdown / 60)}:{String(countdown % 60).padStart(2, '0')}
