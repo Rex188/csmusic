@@ -79,6 +79,7 @@ def delete_user(user_id):
 
     for pl in playlist_ids:
         conn.execute("DELETE FROM playlist_tracks WHERE playlist_id = ?", (pl["id"],))
+        conn.execute("DELETE FROM track_features WHERE analysis_job_id IN (SELECT id FROM analysis_jobs WHERE playlist_id = ?)", (pl["id"],))
         conn.execute("DELETE FROM analysis_jobs WHERE playlist_id = ?", (pl["id"],))
 
     # Delete orphan tracks (tracks not referenced by any playlist)
@@ -87,6 +88,8 @@ def delete_user(user_id):
     """)
 
     conn.execute("DELETE FROM playlists WHERE user_id = ?", (user_id,))
+    conn.execute("DELETE FROM email_verifications WHERE user_id = ?", (user_id,))
+    conn.execute("DELETE FROM track_features WHERE analysis_job_id IN (SELECT id FROM analysis_jobs WHERE user_id = ?)", (user_id,))
     conn.execute("DELETE FROM analysis_jobs WHERE user_id = ?", (user_id,))
     conn.execute("DELETE FROM netease_tokens WHERE user_id = ?", (user_id,))
     conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
@@ -113,6 +116,7 @@ def delete_playlist(playlist_id):
 
     name = pl["name"]
     conn.execute("DELETE FROM playlist_tracks WHERE playlist_id = ?", (playlist_id,))
+    conn.execute("DELETE FROM track_features WHERE analysis_job_id IN (SELECT id FROM analysis_jobs WHERE playlist_id = ?)", (playlist_id,))
     conn.execute("DELETE FROM analysis_jobs WHERE playlist_id = ?", (playlist_id,))
     conn.execute("DELETE FROM playlists WHERE id = ?", (playlist_id,))
 
