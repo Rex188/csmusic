@@ -1,0 +1,16 @@
+services:
+  # --- Music-Self Flask app ---
+  - type: web
+    name: music-self
+    runtime: python
+    repo: https://github.com/Rex188/csmusic
+    rootDir: project/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: NCM_API
+        sync: false
+      - key: PYTHON_VERSION
+        value: 3.11.9

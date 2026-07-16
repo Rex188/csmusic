@@ -1,9 +1,10 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 from flask import Blueprint, session, jsonify
+import config
 import models
 
-NCM_API = "http://localhost:3000"
+NCM_API = config.NCM_API
 playlist_bp = Blueprint("playlists", __name__)
 
 

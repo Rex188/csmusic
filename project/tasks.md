@@ -10,6 +10,31 @@ You are building the V1 skeleton of Music-Self. **Do not redesign anything.** Im
 
 ---
 
+## 📁 File Locations
+
+**Project root:** `D:/music thera/`
+
+**Our code:** `D:/music thera/project/`
+
+| Layer | Location | Key file |
+|---|---|---|
+| Netease API server | `D:/music thera/api-enhanced/` | `app.js` (run from that dir: `node app.js`) |
+| Flask backend | `D:/music thera/project/backend/` | `app.py` (entry point, all blueprint registration) |
+| React frontend | `D:/music thera/project/frontend/` | `src/main.jsx` (entry), `src/App.jsx` (routes) |
+| Python venv | `D:/music thera/project/venv/` | Activate: `source venv/Scripts/activate` |
+| Frontend pages | `D:/music thera/project/frontend/src/pages/` | Dashboard.jsx, Login.jsx, Signup.jsx |
+| Frontend API calls | `D:/music thera/project/frontend/src/api.js` | All backend endpoints defined here |
+| Backend routes | `D:/music thera/project/backend/` | auth.py, netease_routes.py, playlist_routes.py |
+| Database schema | `D:/music thera/project/backend/models.py` | `init_db()` creates all 5 tables |
+| Config | `D:/music thera/project/backend/config.py` | Loads env vars; `.env` file lives next to it |
+| Design docs | `D:/music thera/project/design-questions.md` | Full design decisions |
+| This file | `D:/music thera/project/tasks.md` | Task specs + bugfix specs + history |
+| Architect record | `D:/music thera/CLAUDE.md` | Discussions, timeline, cheatsheet |
+
+**IMPORTANT:** All paths are relative to `D:/music thera/`. Python imports use the `backend/` package (e.g., `import config`, `import models` — run from inside `backend/`).
+
+---
+
 ## What We're Building
 
 A web app where users sign up, connect their Netease Cloud Music account via QR code, import playlists, and see them on a clean dark-mode dashboard. Flask REST API backend + React frontend + SQLite. Music data comes from a separate Netease Cloud Music API Enhanced server running on port 3000.

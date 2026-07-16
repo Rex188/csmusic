@@ -1,9 +1,10 @@
-from flask import Flask, jsonify, session
+import os
+from flask import Flask, jsonify, session, send_from_directory
 from flask_cors import CORS
 import config
 from models import init_db
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=None)
 app.secret_key = config.SECRET_KEY
 CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
 
@@ -31,6 +32,22 @@ def me():
     return jsonify({"user": {"id": row["id"], "email": row["email"]}})
 
 
+# --- Serve built React frontend in production ---
+FRONTEND_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend", "dist")
+
+
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def serve_frontend(path):
+    if not os.path.isdir(FRONTEND_DIR):
+        return jsonify({"error": "Frontend not built. Run `cd frontend && npm run build` first."}), 500
+    file_path = os.path.join(FRONTEND_DIR, path)
+    if path and os.path.isfile(file_path):
+        return send_from_directory(FRONTEND_DIR, path)
+    return send_from_directory(FRONTEND_DIR, "index.html")
+
+
 if __name__ == "__main__":
     init_db()
-    app.run(debug=True, port=5000)
+    is_dev = os.getenv("RENDER") is None
+    app.run(debug=is_dev, port=5000)

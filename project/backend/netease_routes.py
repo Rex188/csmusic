@@ -1,8 +1,9 @@
 import requests
 from flask import Blueprint, request, session, jsonify
+import config
 import models
 
-NCM_API = "http://localhost:3000"
+NCM_API = config.NCM_API
 netease_bp = Blueprint("netease", __name__)
 
 

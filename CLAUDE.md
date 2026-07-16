@@ -14,43 +14,89 @@ Project workspace at `D:/music thera`.
 ## Structure
 
 ```
-D:/music thera/
-├── project/                  # Python project directory
-│   ├── backend/              # Flask REST API
-│   │   ├── app.py            # Main entry point
-│   │   ├── config.py         # Env config
-│   │   ├── models.py         # SQLite schema
-│   │   ├── auth.py           # Auth routes (signup/login/logout)
-│   │   ├── netease_routes.py   # Netease QR login & status
-│   │   ├── playlist_routes.py  # Playlist import from Netease
-│   │   ├── requirements.txt  # Flask deps
-│   │   └── .env.example      # Config template
-│   ├── frontend/             # React + Vite
-│   │   ├── src/
-│   │   │   ├── api.js        # API client
-│   │   │   ├── pages/        # Login, Signup, Dashboard
-│   │   │   ├── App.jsx       # Router
-│   │   │   └── index.css     # Global dark theme
-│   │   └── vite.config.js    # Proxy to Flask
-│   ├── requirements.txt      # Core deps (librosa, numpy, scipy, sklearn, etc.)
-│   ├── venv/                 # Python 3.11 virtual environment (activated)
-│   ├── .gitignore
-│   ├── deepseek.sh           # Script: launches DeepSeek with ds role.md
-│   ├── claude.sh             # Script: launches Claude with claude role.md
-│   ├── gpt.sh                # Script: launches GPT with gpt role.md
-│   ├── ds role.md            # Implementation Engineer system prompt
-│   ├── claude role.md        # Architect system prompt
-│   ├── design-questions.md   # Full Music-Self design doc
-│   └── tasks.md              # V1 implementation tasks
-├── *.pdf / *.epub            # Reference books (not in git)
-├── docs/                     # GitHub Pages (public)
-│   ├── index.html            # Landing page — Music-Self concept
-│   ├── story.html            # Origin story (8 phases)
-│   └── progress.html         # Progress tracker
-├── README.md                 # GitHub repo front page
+D:/music thera/                        # ← Project root
+│
+├── CLAUDE.md                          # Architect docs, discussions, timeline
+├── README.md                          # GitHub repo front page
 ├── .gitignore
-└── CLAUDE.md
+│
+├── *.pdf / *.epub                     # Reference books (not in git)
+│
+├── api-enhanced/                      # ★ Netease Cloud Music API server (Node.js)
+│   ├── app.js                         #     Entry point — run: node app.js
+│   ├── server.js                      #     Server config (port 3000)
+│   ├── module/                        #     API modules (login_qr_key.js, user_playlist.js, …)
+│   ├── package.json                   #     Dependencies (pnpm install)
+│   └── …
+│
+├── docs/                              # GitHub Pages (public)
+│   ├── index.html                     #     Landing page
+│   ├── story.html                     #     Origin story (8 phases)
+│   └── progress.html                  #     Progress tracker
+│
+└── project/                           # ★ Our application
+    │
+    ├── backend/                       # Flask REST API (port 5000)
+    │   ├── app.py                     #     Flask entry point — import this to find all routes
+    │   ├── config.py                  #     Env var loading (SECRET_KEY, DATABASE_PATH)
+    │   ├── models.py                  #     SQLite init_db() + get_db() — 5 tables
+    │   ├── auth.py                    #     Blueprint: signup, login, logout
+    │   ├── netease_routes.py          #     Blueprint: QR key/create/check, connect, status, disconnect
+    │   ├── playlist_routes.py         #     Blueprint: GET /playlists, POST /playlists/import
+    │   ├── requirements.txt           #     flask, flask-cors, bcrypt, python-dotenv, requests
+    │   ├── .env.example               #     Config template → copy to .env and edit
+    │   ├── .env                       #     Actual config (SECRET_KEY) — git-ignored
+    │   └── database.db                #     SQLite database — auto-created on first run
+    │
+    ├── frontend/                      # React + Vite (port 5173)
+    │   ├── package.json               #     react, react-dom, react-router-dom, vite
+    │   ├── vite.config.js             #     Proxy /api → Flask :5000
+    │   ├── index.html                 #     HTML shell
+    │   ├── src/
+    │   │   ├── main.jsx               #     ReactDOM entry point
+    │   │   ├── App.jsx                #     BrowserRouter: /login, /signup, /dashboard
+    │   │   ├── api.js                 #     All backend API calls — find endpoints here
+    │   │   ├── index.css              #     Global dark theme + .spinner + .card styles
+    │   │   ├── assets/                #     Static images (React logo, etc.)
+    │   │   └── pages/
+    │   │       ├── Login.jsx          #     Email + password form → /dashboard
+    │   │       ├── Signup.jsx         #     Email + password + confirm → /dashboard
+    │   │       └── Dashboard.jsx      #     ★ Main page: QR login, playlist import, grid
+    │   ├── public/
+    │   │   ├── favicon.svg
+    │   │   └── icons.svg
+    │   └── dist/                      #     Production build (npm run build)
+    │
+    ├── venv/                          # Python 3.11 virtual environment
+    │
+    ├── design-questions.md            # Music-Self design decisions (8 sections)
+    ├── setup.md                       # Quickstart — read first to catch up
+    ├── tasks.md                       # Implementation tasks + bugfix specs
+    ├── requirements.txt               # Core ML deps (librosa, numpy, scipy, sklearn, …)
+    │
+    ├── deepseek.sh                    # Shell script: launch DeepSeek with ds role.md
+    ├── claude.sh                      # Shell script: launch Claude with claude role.md
+    ├── gpt.sh                         # DEPRECATED (GPT removed 2026-07-15)
+    ├── ds role.md                     # DeepSeek system prompt (Implementation Engineer)
+    ├── claude role.md                 # Claude system prompt (Principal Architect)
+    └── gpt role.md                    # DEPRECATED
 ```
+
+### File lookup cheatsheet for DeepSeek
+
+| When you need to… | Go to this file |
+|---|---|
+| Find a backend route | `project/backend/app.py` — lists all blueprints |
+| Find an API endpoint definition | `project/backend/auth.py` / `netease_routes.py` / `playlist_routes.py` |
+| Find an API call from the frontend | `project/frontend/src/api.js` — all endpoints listed |
+| Change the UI | `project/frontend/src/pages/Dashboard.jsx` (main) or `Login.jsx` / `Signup.jsx` |
+| Change CSS/styling | `project/frontend/src/index.css` |
+| Change the database schema | `project/backend/models.py` — `init_db()` |
+| See what a route expects/returns | `project/tasks.md` — original spec with request/response formats |
+| See design decisions | `project/design-questions.md` |
+| Start the Netease API | `D:/music thera/api-enhanced/app.js` — `node app.js` from that directory |
+| Flask entry point | `D:/music thera/project/backend/app.py` |
+| React entry point | `D:/music thera/project/frontend/src/main.jsx` |
 
 ## Python Environment
 
