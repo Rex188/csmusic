@@ -29,7 +29,7 @@ def admin_dashboard():
     ).fetchall()]
 
     netease = [dict(r) for r in conn.execute("""
-        SELECT u.email, nt.netease_nickname, nt.netease_user_id, nt.updated_at
+        SELECT u.email, nt.user_id, nt.netease_nickname, nt.netease_user_id, nt.updated_at
         FROM netease_tokens nt JOIN users u ON u.id = nt.user_id
     """).fetchall()]
 
