@@ -289,10 +289,9 @@ export default function Dashboard() {
     try {
       const result = await api.analyzePlaylist(selectedPlaylist.id);
       setAnalysisResult(result);
-      addToast(
-        `✅ ${result.summary.accessible_tracks}/${result.summary.total_tracks} tracks accessible`,
-        'success', 5000
-      );
+      const a = result.analysis;
+      const summary = a.vibe || `${a.total_tracks} tracks analyzed`;
+      addToast(`✅ ${summary}`, 'success', 5000);
     } catch (err) {
       addToast(`❌ Analysis failed: ${err.message}`, 'error');
     }
@@ -448,25 +447,86 @@ export default function Dashboard() {
               </div>
 
               {/* Analysis results */}
-              {analysisResult && (
+              {analysisResult && (() => {
+                const a = analysisResult.analysis || {};
+                return (
                 <div style={{
-                  marginBottom: 16, padding: 12, borderRadius: 8,
-                  background: '#1a1a1a', fontSize: 13, lineHeight: 1.6
+                  marginBottom: 16, padding: 16, borderRadius: 8,
+                  background: '#1a1a1a', fontSize: 13, lineHeight: 1.7
                 }}>
-                  <div style={{ color: '#a78bfa', fontWeight: 600, marginBottom: 8 }}>Analysis Results</div>
-                  <div>Status: <span style={{ color: '#4ade80' }}>{analysisResult.status}</span></div>
-                  <div>Tracks: {analysisResult.summary.total_tracks} total,
-                    <span style={{ color: analysisResult.summary.accessible_tracks > 0 ? '#4ade80' : '#f87171' }}>
-                      {' '}{analysisResult.summary.accessible_tracks} accessible
-                    </span>
-                  </div>
-                  {analysisResult.summary.audio_sample && (
-                    <div style={{ marginTop: 4, color: '#888' }}>
-                      Sample: {analysisResult.summary.audio_sample.name}
+                  {/* Vibe / insight */}
+                  {a.vibe && (
+                    <div style={{ marginBottom: 12 }}>
+                      <div style={{ fontSize: 18, fontWeight: 700, color: '#a78bfa' }}>{a.vibe}</div>
+                      {a.insight && (
+                        <div style={{ color: '#888', fontSize: 13, marginTop: 4, fontStyle: 'italic' }}>
+                          "{a.insight}"
+                        </div>
+                      )}
                     </div>
                   )}
+
+                  {/* Mood tags */}
+                  {a.mood_tags?.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+                      {a.mood_tags.map((tag, i) => (
+                        <span key={i} style={{
+                          padding: '2px 10px', borderRadius: 12, fontSize: 12,
+                          background: '#2a1a4a', color: '#c4a8ff'
+                        }}>{tag}</span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Metrics row */}
+                  {(a.energy || a.valence || a.tempo_pace) && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 12 }}>
+                      {a.energy && (
+                        <div style={{ textAlign: 'center', padding: '6px 0', borderRadius: 6, background: '#111' }}>
+                          <div style={{ fontSize: 10, color: '#666', textTransform: 'uppercase', letterSpacing: 1 }}>Energy</div>
+                          <div style={{ fontWeight: 600, marginTop: 2 }}>{a.energy}</div>
+                        </div>
+                      )}
+                      {a.valence && (
+                        <div style={{ textAlign: 'center', padding: '6px 0', borderRadius: 6, background: '#111' }}>
+                          <div style={{ fontSize: 10, color: '#666', textTransform: 'uppercase', letterSpacing: 1 }}>Mood</div>
+                          <div style={{ fontWeight: 600, marginTop: 2 }}>{a.valence}</div>
+                        </div>
+                      )}
+                      {a.tempo_pace && (
+                        <div style={{ textAlign: 'center', padding: '6px 0', borderRadius: 6, background: '#111' }}>
+                          <div style={{ fontSize: 10, color: '#666', textTransform: 'uppercase', letterSpacing: 1 }}>Tempo</div>
+                          <div style={{ fontWeight: 600, marginTop: 2 }}>{a.tempo_pace}</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Genres */}
+                  {a.primary_genres?.length > 0 && (
+                    <div style={{ marginBottom: 8 }}>
+                      <span style={{ color: '#666', fontSize: 12 }}>Genres: </span>
+                      <span style={{ color: '#ccc' }}>{a.primary_genres.join(', ')}</span>
+                    </div>
+                  )}
+
+                  {/* Standout artists */}
+                  {a.standout_artists?.length > 0 && (
+                    <div style={{ marginBottom: 8 }}>
+                      <span style={{ color: '#666', fontSize: 12 }}>Key artists: </span>
+                      <span style={{ color: '#ccc' }}>{a.standout_artists.join(', ')}</span>
+                    </div>
+                  )}
+
+                  {/* Diversity & sample info */}
+                  <div style={{ display: 'flex', gap: 12, color: '#555', fontSize: 11, marginTop: 8 }}>
+                    {a.diversity && <span>Diversity: {a.diversity}</span>}
+                    {a.total_tracks && <span>Total: {a.total_tracks} tracks</span>}
+                    {a.sample_size && <span>Analyzed: {a.sample_size} tracks</span>}
+                  </div>
                 </div>
-              )}
+                );
+              })()}
 
               {/* Track list */}
               {tracksLoading && (

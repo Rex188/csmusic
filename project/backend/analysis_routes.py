@@ -1,10 +1,15 @@
 import json
+import random
 import requests
 from flask import Blueprint, session, jsonify
 import config
 import models
 
 NCM_API = config.NCM_API
+LLM_API_KEY = config.LLM_API_KEY
+LLM_API_URL = config.LLM_API_URL
+LLM_MODEL = config.LLM_MODEL
+
 analysis_bp = Blueprint("analysis", __name__)
 
 
@@ -15,41 +20,11 @@ def _require_auth():
     return uid, None
 
 
-def _get_cookie(user_id):
-    conn = models.get_db()
-    row = conn.execute(
-        "SELECT cookie FROM netease_tokens WHERE user_id = ?",
-        (user_id,)
-    ).fetchone()
-    conn.close()
-    return row["cookie"] if row else None
-
-
-def _call_ncm(path, params=None, timeout=60):
-    """Call the Netease API server."""
-    url = f"{NCM_API}{path}"
-    try:
-        resp = requests.get(url, params=params, timeout=timeout)
-        return resp.json()
-    except requests.exceptions.ConnectionError:
-        return {"code": -1, "error": "Netease API server not running"}
-    except Exception as e:
-        return {"code": -1, "error": str(e)}
-
-
-def _unwrap(raw):
-    """api-enhanced wraps in 'body' or 'data' — recursively unwrap."""
-    inner = raw.get("body") or raw.get("data") or raw
-    if isinstance(inner, dict) and (inner.get("body") or inner.get("data")):
-        inner = inner.get("body") or inner.get("data")
-    return inner
-
-
 def _get_tracks_for_playlist(playlist_db_id):
     """Get all tracks for a playlist from the local DB."""
     conn = models.get_db()
     rows = conn.execute("""
-        SELECT t.id, t.netease_track_id, t.name, t.artist, t.album, t.image_url, t.duration
+        SELECT t.id, t.netease_track_id, t.name, t.artist, t.album
         FROM tracks t
         JOIN playlist_tracks pt ON pt.track_id = t.id
         WHERE pt.playlist_id = ?
@@ -59,7 +34,78 @@ def _get_tracks_for_playlist(playlist_db_id):
     return [dict(r) for r in rows]
 
 
-# ── Routes ───────────────────────────────────────────────────────────
+def _call_llm(system_prompt, user_prompt):
+    """Call an OpenAI-compatible LLM API and return the response text."""
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {LLM_API_KEY}"
+    }
+    payload = {
+        "model": LLM_MODEL,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ],
+        "temperature": 0.7,
+        "max_tokens": 2000
+    }
+
+    resp = requests.post(
+        f"{LLM_API_URL.rstrip('/')}/chat/completions",
+        headers=headers,
+        json=payload,
+        timeout=60
+    )
+
+    if resp.status_code != 200:
+        raise Exception(f"LLM API returned {resp.status_code}: {resp.text[:300]}")
+
+    data = resp.json()
+    return data["choices"][0]["message"]["content"]
+
+
+def _build_analysis_prompt(playlist_name, tracks, total_count, sampled_count):
+    """Build the LLM prompt for playlist analysis."""
+    track_lines = []
+    for i, t in enumerate(tracks, 1):
+        track_lines.append(f"{i}. \"{t['name']}\" — {t['artist']}" +
+                           (f" ({t['album']})" if t.get('album') else ""))
+
+    track_block = "\n".join(track_lines)
+
+    return f"""Playlist: "{playlist_name}"
+Total tracks: {total_count}
+Sampled tracks for analysis: {sampled_count}
+
+Tracks:
+{track_block}"""
+
+
+SYSTEM_PROMPT = """You are a music analysis AI. Analyze the given playlist and return ONLY valid JSON (no markdown, no explanation).
+
+Extract deep musical and emotional patterns from the track list. Consider:
+- Artist/genre signatures: recurring artists or stylistic groups
+- Mood trajectory: the emotional arc across tracks
+- Energy & tempo patterns: whether the playlist is consistent or varied
+- Cultural/texture clues: languages, eras, production styles implied by artist/album names
+
+Return this exact JSON structure:
+{
+  "vibe": "one-line description of the overall atmosphere",
+  "mood_tags": ["3-5 mood keywords like energetic, melancholic, contemplative, upbeat, dark"],
+  "energy": "low | medium-low | medium | medium-high | high",
+  "valence": "sad | melancholic | neutral | happy | euphoric",
+  "tempo_pace": "slow | moderate | upbeat | fast | varied",
+  "primary_genres": ["2-4 most likely genres"],
+  "standout_artists": ["artists that define this playlist's character"],
+  "diversity": "very consistent | somewhat varied | highly diverse",
+  "insight": "one short sentence about what this playlist reveals about the listener's taste",
+  "sample_size": <number of tracks analyzed>,
+  "total_tracks": <total tracks in playlist>
+}"""
+
+
+# ── Routes ──────────────────────────────────────────────────────────
 
 @analysis_bp.route("/tracks/<int:playlist_id>", methods=["GET"])
 def get_tracks(playlist_id):
@@ -90,19 +136,13 @@ def get_tracks(playlist_id):
 @analysis_bp.route("/analyze/<int:playlist_id>", methods=["POST"])
 def analyze_playlist(playlist_id):
     """
-    Start (or retrieve) analysis for a playlist.
-    For now, this is a stub that:
-      1. Verifies auth + playlist ownership
-      2. Gets all tracks from the local DB
-      3. Checks audio availability via Netease API
-      4. Creates an analysis_job record
-      5. Returns a summary
+    Analyze a playlist via LLM.
+    Samples up to N tracks, sends to LLM, returns structured analysis.
     """
     uid, err = _require_auth()
     if err:
         return err
 
-    # Verify playlist belongs to user
     conn = models.get_db()
     pl = conn.execute(
         "SELECT id, name, track_count FROM playlists WHERE id = ? AND user_id = ?",
@@ -112,27 +152,27 @@ def analyze_playlist(playlist_id):
         conn.close()
         return jsonify({"error": "Playlist not found"}), 404
 
-    # Check if there's an existing analysis job (don't re-run)
+    # Check if there's an existing completed analysis
     existing = conn.execute(
-        "SELECT id, status, summary, created_at, completed_at FROM analysis_jobs "
+        "SELECT id, status, summary FROM analysis_jobs "
         "WHERE playlist_id = ? AND user_id = ? ORDER BY created_at DESC LIMIT 1",
         (playlist_id, uid)
     ).fetchone()
-    if existing and existing["status"] == "completed":
+
+    if existing and existing["status"] == "completed" and existing["summary"]:
         conn.close()
         return jsonify({
             "job_id": existing["id"],
             "status": "completed",
-            "message": "Already analyzed. Use GET /api/analysis/status/<job_id> for details.",
-            "summary": json.loads(existing["summary"]) if existing["summary"] else None
+            "analysis": json.loads(existing["summary"])
         })
 
-    # Get tracks from local DB
     tracks = _get_tracks_for_playlist(playlist_id)
-
     if not tracks:
         conn.close()
-        return jsonify({"error": "No tracks found for this playlist. Import playlists first."}), 400
+        return jsonify({"error": "No tracks found. Import playlists first."}), 400
+
+    total = len(tracks)
 
     # Create analysis job
     conn.execute(
@@ -140,7 +180,6 @@ def analyze_playlist(playlist_id):
         (uid, playlist_id)
     )
     conn.commit()
-    # Fetch the job we just created
     job_row = conn.execute(
         "SELECT id FROM analysis_jobs WHERE user_id = ? AND playlist_id = ? AND status = 'analyzing' "
         "ORDER BY created_at DESC LIMIT 1",
@@ -148,34 +187,61 @@ def analyze_playlist(playlist_id):
     ).fetchone()
     job_id = job_row["id"]
 
-    # Try to check audio availability via Netease API (batched — single request)
-    cookie = _get_cookie(uid)
-    total = len(tracks)
-    accessible = 0
-    audio_sample = None
+    # Sample tracks for LLM (max 40 to keep prompt fast, shuffle for randomness)
+    SAMPLE_MAX = 40
+    if total <= SAMPLE_MAX:
+        sampled = list(tracks)
+    else:
+        sampled = random.sample(tracks, SAMPLE_MAX)
 
-    if cookie:
-        try:
-            # Batch ALL track IDs into a single /song/url request (API supports comma-separated)
-            all_ids = ",".join(t["netease_track_id"] for t in tracks)
-            url_data = _call_ncm("/song/url", {"id": all_ids, "cookie": cookie}, timeout=30)
-            inner = _unwrap(url_data)
-            songs = inner.get("data", []) if isinstance(inner, dict) else []
-            for song in songs:
-                if song and song.get("url"):
-                    accessible += 1
-                    if not audio_sample:
-                        audio_sample = {"track_id": song.get("id"), "name": song.get("name", "?"), "url": song["url"]}
-        except Exception as e:
-            print(f"[analysis] audio check failed (non-fatal): {e}")
-
+    # Default summary (fallback if LLM is not configured or fails)
     summary = {
         "total_tracks": total,
-        "accessible_tracks": accessible,
-        "playlist_name": pl["name"],
-        "track_count_estimate": pl["track_count"],
-        "audio_sample": audio_sample
+        "sample_size": len(sampled),
+        "vibe": "",
+        "mood_tags": [],
+        "energy": "",
+        "valence": "",
+        "tempo_pace": "",
+        "primary_genres": [],
+        "standout_artists": [],
+        "diversity": "",
+        "insight": ""
     }
+
+    if not LLM_API_KEY:
+        # LLM not configured — save basic info
+        summary["vibe"] = "LLM not configured. Set LLM_API_KEY in .env to enable analysis."
+    else:
+        try:
+            user_prompt = _build_analysis_prompt(
+                pl["name"], sampled, total, len(sampled)
+            )
+            llm_text = _call_llm(SYSTEM_PROMPT, user_prompt)
+
+            # Parse JSON from LLM response (handle possible markdown fences)
+            llm_text = llm_text.strip()
+            if llm_text.startswith("```"):
+                llm_text = llm_text.split("\n", 1)[-1]
+                if "```" in llm_text:
+                    llm_text = llm_text.rsplit("```", 1)[0]
+            llm_text = llm_text.strip()
+
+            llm_result = json.loads(llm_text)
+            summary.update({
+                "vibe": llm_result.get("vibe", ""),
+                "mood_tags": llm_result.get("mood_tags", []),
+                "energy": llm_result.get("energy", ""),
+                "valence": llm_result.get("valence", ""),
+                "tempo_pace": llm_result.get("tempo_pace", ""),
+                "primary_genres": llm_result.get("primary_genres", []),
+                "standout_artists": llm_result.get("standout_artists", []),
+                "diversity": llm_result.get("diversity", ""),
+                "insight": llm_result.get("insight", ""),
+            })
+        except Exception as e:
+            print(f"[analysis] LLM call failed: {e}")
+            summary["vibe"] = f"Analysis failed: {str(e)[:100]}"
 
     conn.execute(
         "UPDATE analysis_jobs SET status = 'completed', summary = ? WHERE id = ?",
@@ -187,11 +253,7 @@ def analyze_playlist(playlist_id):
     return jsonify({
         "job_id": job_id,
         "status": "completed",
-        "summary": summary,
-        "message": (
-            f"Pre-analysis complete. {accessible}/{total} tracks have accessible audio. "
-            "Full librosa analysis coming soon."
-        )
+        "analysis": summary
     })
 
 
@@ -217,7 +279,7 @@ def get_analysis_status(job_id):
         "job_id": job["id"],
         "playlist_id": job["playlist_id"],
         "status": job["status"],
-        "summary": json.loads(job["summary"]) if job["summary"] else None,
+        "analysis": json.loads(job["summary"]) if job["summary"] else None,
         "created_at": job["created_at"],
         "completed_at": job["completed_at"]
     })
