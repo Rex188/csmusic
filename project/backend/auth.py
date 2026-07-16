@@ -195,6 +195,51 @@ def logout():
     return jsonify({"ok": True})
 
 
+@auth_bp.route("/_smtp-test", methods=["GET"])
+def smtp_test():
+    """Diagnostic: test SMTP connection with current config."""
+    uid = session.get("user_id")
+    if not uid:
+        return jsonify({"error": "Not authenticated"}), 401
+
+    result = {
+        "SMTP_HOST": config.SMTP_HOST or "(not set)",
+        "SMTP_PORT": config.SMTP_PORT,
+        "SMTP_USER": config.SMTP_USER or "(not set)",
+        "SMTP_PASS_set": bool(config.SMTP_PASS),
+        "SMTP_FROM": config.SMTP_FROM,
+        "APP_URL": config.APP_URL,
+    }
+
+    if not config.SMTP_HOST or not config.SMTP_USER or not config.SMTP_PASS:
+        result["error"] = "SMTP not fully configured. Set SMTP_HOST, SMTP_USER, SMTP_PASS in Render Environment."
+        return jsonify(result)
+
+    # Try connecting to SMTP
+    import smtplib
+    from email.mime.text import MIMEText
+    try:
+        server = smtplib.SMTP(config.SMTP_HOST, config.SMTP_PORT, timeout=15)
+        result["connection"] = "connected"
+        code, msg = server.starttls()
+        result["starttls"] = f"{code} {msg.decode() if isinstance(msg, bytes) else msg}"
+        server.login(config.SMTP_USER, config.SMTP_PASS)
+        result["login"] = "ok"
+        server.quit()
+        result["status"] = "SMTP working ✅"
+    except smtplib.SMTPAuthenticationError as e:
+        result["status"] = "SMTP login failed ❌"
+        result["error_detail"] = f"Authentication error: check SMTP_USER (should be your Brevo email) and SMTP_PASS (should be the SMTP key, not password)"
+    except smtplib.SMTPException as e:
+        result["status"] = "SMTP error ❌"
+        result["error_detail"] = str(e)[:300]
+    except Exception as e:
+        result["status"] = "Connection failed ❌"
+        result["error_detail"] = str(e)[:300]
+
+    return jsonify(result)
+
+
 @auth_bp.route("/me", methods=["GET"])
 def me():
     uid = session.get("user_id")
