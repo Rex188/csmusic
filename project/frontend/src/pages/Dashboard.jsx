@@ -24,17 +24,20 @@ function PlaylistCard({ pl }) {
 export default function Dashboard() {
   const navigate = useNavigate();
   const pollRef = useRef(null);
+  const countdownRef = useRef(null);
   const [user, setUser] = useState(null);
   const [netease, setNetease] = useState({ connected: false });
   const [playlists, setPlaylists] = useState([]);
   const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // QR login state
-  const [qrKey, setQrKey] = useState(null);
+  const [qrStatus, setQrStatus] = useState('');         // '' | 'generating' | 'waiting' | 'scanning' | 'connecting' | 'expired'
   const [qrImg, setQrImg] = useState(null);
-  const [qrStatus, setQrStatus] = useState(''); // '', 'waiting', 'scanning', 'done', 'expired'
-  const [connecting, setConnecting] = useState(false);
+  const [qrKey, setQrKey] = useState(null);
+  const [countdown, setCountdown] = useState(180);
+  const [pollError, setPollError] = useState('');
 
   useEffect(() => {
     (async () => {
@@ -57,42 +60,70 @@ export default function Dashboard() {
     })();
     return () => {
       if (pollRef.current) clearTimeout(pollRef.current);
+      if (countdownRef.current) clearInterval(countdownRef.current);
     };
   }, []);
 
+  const startCountdown = () => {
+    setCountdown(300);
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    countdownRef.current = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(countdownRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const stopCountdown = () => {
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current);
+      countdownRef.current = null;
+    }
+  };
+
   const handleShowQr = async () => {
-    // Clear any existing poll
+    // Clear any existing poll / countdown
     if (pollRef.current) clearTimeout(pollRef.current);
-    setQrStatus('waiting');
-    setConnecting(true);
+    stopCountdown();
+    setPollError('');
+    setQrImg(null);
+    setQrKey(null);
+    setQrStatus('generating');
+
     try {
       const keyResp = await api.neteaseQrKey();
-      console.log('[QR] key response:', keyResp);
       const key = keyResp?.data?.unikey;
       if (!key) throw new Error('Failed to get QR key');
       setQrKey(key);
 
       const qrResp = await api.neteaseQrCreate(key);
-      console.log('[QR] create response:', qrResp);
       const imgData = qrResp?.data?.qrimg;
       if (!imgData) throw new Error('Failed to create QR image');
       setQrImg(imgData);
+      setQrStatus('waiting');
+      startCountdown();
 
-      // Use recursive setTimeout instead of setInterval (better with async)
+      // Poll loop — recursive setTimeout
+      let pollFailCount = 0;
       const poll = async () => {
         try {
           const check = await api.neteaseQrCheck(key);
-          console.log('[QR] check response:', check);
+          pollFailCount = 0;
+          setPollError('');
 
           if (check.code === 803) {
             // Scanned and confirmed — save cookie
+            stopCountdown();
+            setQrStatus('connecting');
             const connectResp = await api.neteaseConnect(check.cookie);
-            console.log('[QR] connected:', connectResp);
             setNetease(connectResp);
-            setConnecting(false);
+            setQrStatus('');
             setQrImg(null);
             setQrKey(null);
-            setQrStatus('done');
             return;
           }
 
@@ -100,13 +131,20 @@ export default function Dashboard() {
             setQrStatus('scanning');
           } else if (check.code === 800) {
             setQrStatus('expired');
-            setConnecting(false);
+            stopCountdown();
             return;
           }
           // 801 = still waiting, keep polling
           pollRef.current = setTimeout(poll, 2000);
         } catch (err) {
+          pollFailCount++;
           console.error('[QR] poll error:', err);
+          if (pollFailCount >= 15) {
+            setPollError('Connection lost — please retry');
+            setQrStatus('expired');
+            stopCountdown();
+            return;
+          }
           pollRef.current = setTimeout(poll, 2000);
         }
       };
@@ -114,23 +152,22 @@ export default function Dashboard() {
       poll();
     } catch (err) {
       console.error('[QR] setup error:', err);
-      alert(err.message || 'Failed to setup QR login');
-      setConnecting(false);
+      setQrStatus('expired');
     }
   };
 
   const handleRetryQr = () => {
-    setQrImg(null);
-    setQrKey(null);
-    setQrStatus('');
     handleShowQr();
   };
 
   const handleImport = async () => {
     setImporting(true);
+    setImportResult(null);
     try {
       const result = await api.importPlaylists();
       setPlaylists(result.playlists);
+      const count = result.playlists.length;
+      setImportResult({ tracks: result.imported, playlists: count });
     } catch (err) {
       alert(err.message);
     }
@@ -139,6 +176,7 @@ export default function Dashboard() {
 
   const handleLogout = async () => {
     if (pollRef.current) clearTimeout(pollRef.current);
+    stopCountdown();
     await api.logout();
     navigate('/login');
   };
@@ -166,28 +204,93 @@ export default function Dashboard() {
         </p>
 
         <div style={{ display: 'flex', gap: 10, flexDirection: 'column', alignItems: 'start' }}>
-          {!netease.connected && !connecting && (
+          {!netease.connected && qrStatus === '' && (
             <button onClick={handleShowQr}>Connect Netease Cloud Music</button>
           )}
 
-          {connecting && qrImg && (
+          {/* QR flow — 5 states */}
+          {!netease.connected && qrStatus !== '' && (
             <div style={{ textAlign: 'center' }}>
-              <img src={qrImg} alt="QR code" style={{ width: 180, height: 180, borderRadius: 8, background: '#fff', padding: 8 }} />
-              <p style={{ fontSize: 13, color: '#888', marginTop: 8 }}>
-                {qrStatus === 'scanning' ? '✅ Scanned! Confirm on your phone...' : '📱 Scan with Netease Cloud Music app'}
-              </p>
+              {/* State 1: generating */}
+              {qrStatus === 'generating' && (
+                <div>
+                  <div className="spinner" />
+                  <p style={{ fontSize: 13, color: '#888', marginTop: 8 }}>Generating QR code...</p>
+                </div>
+              )}
+
+              {/* States 2-3: waiting / scanning */}
+              {qrImg && (qrStatus === 'waiting' || qrStatus === 'scanning') && (
+                <div>
+                  <div style={{ position: 'relative', display: 'inline-block' }}>
+                    <img src={qrImg} alt="QR code"
+                      style={{
+                        width: 180, height: 180, borderRadius: 8, background: '#fff', padding: 8,
+                        opacity: qrStatus === 'scanning' ? 0.5 : 1,
+                        transition: 'opacity 0.3s'
+                      }} />
+                    {qrStatus === 'waiting' && (
+                      <div style={{
+                        position: 'absolute', inset: -4, borderRadius: 12,
+                        border: '2px solid #a78bfa', animation: 'pulse 2s infinite'
+                      }} />
+                    )}
+                    {qrStatus === 'scanning' && (
+                      <div style={{
+                        position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                        fontSize: 48
+                      }}>✅</div>
+                    )}
+                  </div>
+                  <p style={{ fontSize: 13, color: '#888', marginTop: 8 }}>
+                    {qrStatus === 'scanning'
+                      ? '✅ Scanned! Confirm on your phone...'
+                      : '📱 Scan with Netease Cloud Music app'}
+                  </p>
+                  {qrStatus === 'waiting' && countdown > 0 && (
+                    <p style={{ fontSize: 12, color: '#555', marginTop: 4 }}>
+                      Expires in {Math.floor(countdown / 60)}:{String(countdown % 60).padStart(2, '0')}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* State 4: connecting */}
+              {qrStatus === 'connecting' && (
+                <div>
+                  <div className="spinner" />
+                  <p style={{ fontSize: 13, color: '#888', marginTop: 8 }}>Connecting to Netease...</p>
+                </div>
+              )}
+
+              {/* State 5: expired / error */}
               {qrStatus === 'expired' && (
-                <p style={{ fontSize: 13, color: '#f87171', marginTop: 4 }}>
-                  QR code expired. <button onClick={handleRetryQr} style={{ background: 'none', color: '#a78bfa', padding: 0, fontSize: 13, textDecoration: 'underline' }}>Retry</button>
-                </p>
+                <div>
+                  <p style={{ fontSize: 14, color: '#f87171', marginBottom: 12 }}>{pollError || 'QR code expired'}</p>
+                  <button onClick={handleRetryQr} style={{ background: '#1a1a1a', color: '#a78bfa' }}>
+                    Generate new QR code
+                  </button>
+                </div>
               )}
             </div>
           )}
 
-          {netease.connected && (
-            <button onClick={handleImport} disabled={importing}>
-              {importing ? 'Importing...' : 'Import Playlists'}
-            </button>
+          {/* Import section */}
+          {netease.connected && !importing && (
+            <button onClick={handleImport}>Import Playlists</button>
+          )}
+
+          {importing && (
+            <div className="import-progress">
+              <div className="spinner" />
+              <span>Importing your playlists…</span>
+            </div>
+          )}
+
+          {importResult && (
+            <div className="import-success">
+              ✅ Imported {importResult.tracks} tracks across {importResult.playlists} playlists
+            </div>
           )}
         </div>
       </div>
@@ -208,9 +311,15 @@ export default function Dashboard() {
         </>
       )}
 
-      {playlists.length === 0 && netease.connected && !importing && (
+      {playlists.length === 0 && netease.connected && !importing && !importResult && (
         <p style={{ textAlign: 'center', color: '#555', marginTop: 40 }}>
           No playlists yet. Click "Import Playlists" to get started.
+        </p>
+      )}
+
+      {playlists.length === 0 && importResult && importResult.playlists === 0 && (
+        <p style={{ textAlign: 'center', color: '#555', marginTop: 40 }}>
+          No playlists found on your Netease account.
         </p>
       )}
     </div>

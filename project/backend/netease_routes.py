@@ -14,7 +14,7 @@ def _require_auth():
 
 
 def _proxy(path, params=None, method="GET"):
-    """Call the Netease API server and return JSON response."""
+    """Call the Netease API server and return raw JSON response."""
     url = f"{NCM_API}{path}"
     try:
         if method == "GET":
@@ -28,11 +28,20 @@ def _proxy(path, params=None, method="GET"):
         return {"code": -1, "error": str(e)}
 
 
+def _unwrap(raw):
+    """api-enhanced wraps in 'body' or 'data' — recursively unwrap to the inner payload."""
+    inner = raw.get("body") or raw.get("data") or raw
+    # Some endpoints double-wrap, e.g. {code: 200, body: {code: 200, data: {...}}}
+    if isinstance(inner, dict) and (inner.get("body") or inner.get("data")):
+        inner = inner.get("body") or inner.get("data")
+    return inner
+
+
 @netease_bp.route("/qr/key", methods=["GET"])
 def qr_key():
     """Step 1: Get a key for QR login."""
-    data = _proxy("/login/qr/key")
-    return jsonify(data.get("body", data))
+    raw = _proxy("/login/qr/key")
+    return jsonify(raw.get("body", raw))
 
 
 @netease_bp.route("/qr/create", methods=["GET"])
@@ -41,8 +50,8 @@ def qr_create():
     key = request.args.get("key")
     if not key:
         return jsonify({"error": "key required"}), 400
-    data = _proxy("/login/qr/create", {"key": key, "qrimg": "1"})
-    return jsonify(data.get("body", data))
+    raw = _proxy("/login/qr/create", {"key": key, "qrimg": "1"})
+    return jsonify(raw.get("body", raw))
 
 
 @netease_bp.route("/qr/check", methods=["GET"])
@@ -51,16 +60,15 @@ def qr_check():
     key = request.args.get("key")
     if not key:
         return jsonify({"error": "key required"}), 400
-    data = _proxy("/login/qr/check", {"key": key})
-    body = data.get("body", data)
-    # If login successful, body contains the cookie
-    if body.get("code") == 803:
+    raw = _proxy("/login/qr/check", {"key": key})
+    body = _unwrap(raw)
+    code = body.get("code")
+    if code == 803:
         return jsonify({"code": 803, "cookie": body.get("cookie", "")})
-    if body.get("code") == 800:
+    if code == 800:
         return jsonify({"code": 800, "message": "QR code expired"})
-    if body.get("code") == 802:
+    if code == 802:
         return jsonify({"code": 802, "message": "Scanning, confirm on phone"})
-    # 801 = waiting
     return jsonify({"code": 801, "message": "Waiting for scan"})
 
 

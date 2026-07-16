@@ -13,7 +13,10 @@ You're not sharing a playlist. You're showing someone how you process reality.
 | ✅ | **V1 skeleton working** — Flask backend + React frontend live |
 | ✅ | Sign up / login with bcrypt auth |
 | ✅ | Netease Cloud Music QR login |
-| ✅ | Playlist import from Netease |
+| ✅ | Playlist import from Netease (parallel fetching) |
+| ✅ | QR login UX — generating/waiting/scanning/connecting states + countdown |
+| ✅ | Error handling — JSON-safe API client, informative error messages |
+| ✅ | Playlist import fixed — artist NoneType crash, DB lock recovery |
 | ✅ | 3-server stack: Netease API (:3000) → Flask (:5000) → Vite (:5173) |
 | 🧪 | Next: visual landscape, audio analysis, social features |
 | 📖 | [Full progress page →](https://rex188.github.io/csmusic/progress.html) |

@@ -68,3 +68,51 @@ a:hover { color: #fff; }
   border-radius: 8px;
   font-size: 14px;
 }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #2a2a2a;
+  border-top-color: #a78bfa;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.import-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+}
+.import-progress .spinner {
+  margin: 0;
+}
+.import-progress span {
+  color: #888;
+  font-size: 14px;
+}
+
+.import-success {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: #0a2d0a;
+  border: 1px solid #1a5c1a;
+  color: #a5fca5;
+  border-radius: 8px;
+  font-size: 14px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

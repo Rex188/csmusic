@@ -235,8 +235,8 @@
       <div class="label">Inspirations</div>
     </div>
     <div class="stat-card">
-      <div class="number" style="color:var(--blue)">3</div>
-      <div class="label">Servers Running</div>
+      <div class="number" style="color:var(--green)">6</div>
+      <div class="label">Bugs Fixed</div>
     </div>
   </div>
 
@@ -337,6 +337,18 @@
       <div class="task-col">
         <h3>Decided ✓</h3>
         <div class="task-card">
+          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Playlist import &amp; rendering</div>
+          <div class="task-meta">Import uses parallel ThreadPoolExecutor. Tracks saved with artist/album/duration. Dashboard shows cover + track count.</div>
+        </div>
+        <div class="task-card">
+          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>QR login UX overhaul</div>
+          <div class="task-meta">5 states (generating/waiting/scanning/connecting/expired) + pulsing border + countdown timer. Backend unwrapping fixed.</div>
+        </div>
+        <div class="task-card">
+          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Error handling improvements</div>
+          <div class="task-meta">JSON-safe API client (content-type check), artist None crash fix, DB lock recovery.</div>
+        </div>
+        <div class="task-card">
           <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>V1 skeleton implemented</div>
           <div class="task-meta">Flask backend (auth, Netease QR login, playlist import) + React frontend (login/signup/dashboard). All verified working.</div>
         </div>
@@ -415,12 +427,43 @@
         <div class="title">Bug: playlist import not displaying</div>
         <div class="desc">Import API returns data but playlist grid stays empty on dashboard. Frontend state update issue — deferred to next session.</div>
       </div>
+      <div class="timeline-item">
+        <div class="date">2026-07-16</div>
+        <div class="title">QR unwrapping fix + loading UX</div>
+        <div class="desc">Fixed _proxy() response unwrapping for api-enhanced double-wrapped responses. Added generating/waiting/scanning/connecting/expired states with animated spinner, pulsing QR border, and countdown timer.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">2026-07-16</div>
+        <div class="title">Playlist import fixes</div>
+        <div class="desc">Added parallel ThreadPoolExecutor (5 workers) for fetching tracks across playlists. Fixed artist NoneType crash. Raised all timeouts to 120s. DB lock recovery.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">2026-07-16</div>
+        <div class="title">JSON-safe API client + error resilience</div>
+        <div class="desc">Fixed "body stream already read" error in api.js by checking content-type before .json(). Added _unwrap() helper to both netease_routes.py and playlist_routes.py for consistent response handling.</div>
+      </div>
     </div>
   </section>
 
   <!-- Activity -->
   <section>
     <div class="section-title">📝 Activity Log</div>
+    <div class="log-entry">
+      <span class="log-date">2026-07-16</span>
+      <div class="log-msg">JSON-safe api.js: content-type check before .json() to prevent "body stream already read". <em>_unwrap()</em> helper added to both netease_routes.py and playlist_routes.py for consistent api-enhanced response handling.</div>
+    </div>
+    <div class="log-entry">
+      <span class="log-date">2026-07-16</span>
+      <div class="log-msg">Playlist import: parallel ThreadPoolExecutor (5 workers). Artist None crash fixed. Timeouts 15s→120s. DB lock recovery.</div>
+    </div>
+    <div class="log-entry">
+      <span class="log-date">2026-07-16</span>
+      <div class="log-msg">QR login UX overhaul: 5 visual states (generating/waiting/scanning/connecting/expired) with spinner, pulsing border, countdown timer. Backend _unwrap() handles double-wrapped api-enhanced responses.</div>
+    </div>
+    <div class="log-entry">
+      <span class="log-date">2026-07-16</span>
+      <div class="log-msg">Import loading UX: spinner during import, green success banner ("Imported X tracks across Y playlists"), empty states differentiated.</div>
+    </div>
     <div class="log-entry">
       <span class="log-date">2026-07-16</span>
       <div class="log-msg">Bug: playlist import returns data but grid stays empty. Need to debug frontend state update.</div>
@@ -469,7 +512,7 @@
   <hr>
 
   <footer>
-    Music-Self &nbsp;·&nbsp; Last updated 2026-07-15
+    Music-Self &nbsp;·&nbsp; Last updated 2026-07-16
   </footer>
 
 </div>

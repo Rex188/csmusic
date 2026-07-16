@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 from flask import Blueprint, session, jsonify
 import models
@@ -23,16 +24,63 @@ def _get_cookie(user_id):
     return row["cookie"] if row else None
 
 
-def _call_ncm(path, params=None):
-    """Call the Netease API server with cookie injection."""
+def _call_ncm(path, params=None, timeout=60):
+    """Call the Netease API server."""
     url = f"{NCM_API}{path}"
     try:
-        resp = requests.get(url, params=params, timeout=15)
+        resp = requests.get(url, params=params, timeout=timeout)
         return resp.json()
     except requests.exceptions.ConnectionError:
         return {"code": -1, "error": "Netease API server not running"}
     except Exception as e:
         return {"code": -1, "error": str(e)}
+
+
+def _unwrap(raw):
+    """api-enhanced wraps in 'body' or 'data' — recursively unwrap to the inner payload."""
+    inner = raw.get("body") or raw.get("data") or raw
+    if isinstance(inner, dict) and (inner.get("body") or inner.get("data")):
+        inner = inner.get("body") or inner.get("data")
+    return inner
+
+
+def _fetch_tracks(pl_id, cookie):
+    """Fetch tracks for one playlist (runs in parallel)."""
+    data = _call_ncm("/playlist/track/all", {"id": pl_id, "limit": 100, "cookie": cookie}, timeout=120)
+    inner = _unwrap(data)
+    return pl_id, inner.get("songs", [])
+
+
+def _insert_tracks(conn, playlist_db_id, songs):
+    """Insert songs into DB for a single playlist. Returns count."""
+    count = 0
+    for song in songs:
+        song_id = str(song.get("id"))
+        if not song_id:
+            continue
+        song_name = song.get("name", "")
+        raw_artists = song.get("ar", song.get("artists", []))
+        artists = ", ".join(a.get("name") or "" for a in raw_artists)
+        album_info = song.get("al") or song.get("album", {})
+        album_name = album_info.get("name", "") if album_info else ""
+        album_img = album_info.get("picUrl") or None if album_info else None
+        duration = song.get("dt", song.get("duration", 0))
+
+        conn.execute("""
+            INSERT OR IGNORE INTO tracks (netease_track_id, name, artist, album, image_url, duration)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (song_id, song_name, artists, album_name, album_img, duration))
+
+        track_row = conn.execute(
+            "SELECT id FROM tracks WHERE netease_track_id = ?", (song_id,)
+        ).fetchone()
+        if track_row:
+            conn.execute("""
+                INSERT OR IGNORE INTO playlist_tracks (playlist_id, track_id)
+                VALUES (?, ?)
+            """, (playlist_db_id, track_row["id"]))
+            count += 1
+    return count
 
 
 @playlist_bp.route("", methods=["GET"])
@@ -65,12 +113,11 @@ def import_playlists():
 
     # Step 1: Get user info to find Netease UID
     info_resp = _call_ncm("/login/status", {"cookie": cookie})
-    info = info_resp.get("body") or info_resp
+    info = _unwrap(info_resp)
     profile = info.get("data", {}).get("profile", {})
     netease_uid = profile.get("userId")
 
     if not netease_uid:
-        # Try getting from tokens table
         conn = models.get_db()
         row = conn.execute(
             "SELECT netease_user_id FROM netease_tokens WHERE user_id = ?", (uid,)
@@ -81,14 +128,16 @@ def import_playlists():
             return jsonify({"error": "Could not find Netease user ID. Try reconnecting."}), 400
 
     # Step 2: Fetch user's playlists from Netease
-    pl_data = _call_ncm("/user/playlist", {"uid": netease_uid, "limit": 50, "cookie": cookie})
-    playlist_list = pl_data.get("playlist") if "playlist" in pl_data else pl_data.get("body", {}).get("playlist", [])
+    pl_data = _call_ncm("/user/playlist", {"uid": netease_uid, "limit": 50, "cookie": cookie}, timeout=120)
+    pl_inner = _unwrap(pl_data)
+    playlist_list = pl_inner.get("playlist", [])
 
     if not playlist_list:
         return jsonify({"error": "No playlists found or API error", "raw": pl_data}), 500
 
     conn = models.get_db()
     imported_count = 0
+    playlist_meta = []  # (playlist_db_id, pl_id) pairs for parallel fetching
 
     for pl in playlist_list:
         pl_id = str(pl["id"])
@@ -97,7 +146,6 @@ def import_playlists():
         img_url = pl.get("coverImgUrl") or (pl.get("picUrl") or None)
         track_count = pl.get("trackCount", 0)
 
-        # Insert playlist
         conn.execute("""
             INSERT OR IGNORE INTO playlists (user_id, netease_playlist_id, name, description, image_url, track_count)
             VALUES (?, ?, ?, ?, ?, ?)
@@ -107,51 +155,33 @@ def import_playlists():
             "SELECT id FROM playlists WHERE user_id = ? AND netease_playlist_id = ?",
             (uid, pl_id)
         ).fetchone()
-        if not playlist_row:
-            continue
-        playlist_db_id = playlist_row["id"]
+        if playlist_row:
+            playlist_meta.append((playlist_row["id"], pl_id))
 
-        # Step 3: Fetch tracks for this playlist
-        track_data = _call_ncm("/playlist/track/all", {
-            "id": pl_id, "limit": 100, "cookie": cookie
-        })
+    conn.commit()
 
-        songs = track_data.get("songs") if "songs" in track_data else track_data.get("body", {}).get("songs", [])
-        if not songs:
-            songs = track_data.get("body", {}).get("songs", [])
+    # Step 3: Fetch ALL playlists' tracks in parallel
+    # Use a dedicated session for thread safety
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        future_map = {
+            executor.submit(_fetch_tracks, pl_id, cookie): db_id
+            for db_id, pl_id in playlist_meta
+        }
 
-        for song in songs:
-            song_id = str(song.get("id"))
-            if not song_id:
-                continue
-            song_name = song.get("name", "")
-            artists = ", ".join(a.get("name", "") for a in song.get("ar", song.get("artists", [])))
-            album_name = ""
-            album_img = None
-            album_info = song.get("al") or song.get("album", {})
-            if album_info:
-                album_name = album_info.get("name", "")
-                album_img = album_info.get("picUrl") or None
-            duration = song.get("dt", song.get("duration", 0))
+        for future in as_completed(future_map):
+            playlist_db_id = future_map[future]
+            try:
+                _, songs = future.result()
+                # Insert tracks into DB (sequential per playlist, but concurrent across playlists)
+                imported_count += _insert_tracks(conn, playlist_db_id, songs)
+                conn.commit()
+            except Exception as e:
+                print(f"[import] error for playlist {playlist_db_id}: {e}")
 
-            conn.execute("""
-                INSERT OR IGNORE INTO tracks (netease_track_id, name, artist, album, image_url, duration)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (song_id, song_name, artists, album_name, album_img, duration))
-
-            track_row = conn.execute(
-                "SELECT id FROM tracks WHERE netease_track_id = ?", (song_id,)
-            ).fetchone()
-            if track_row:
-                conn.execute("""
-                    INSERT OR IGNORE INTO playlist_tracks (playlist_id, track_id)
-                    VALUES (?, ?)
-                """, (playlist_db_id, track_row["id"]))
-                imported_count += 1
-
-        conn.commit()
+    conn.close()
 
     # Fetch updated list
+    conn = models.get_db()
     rows = conn.execute(
         "SELECT id, name, description, image_url, track_count, imported_at FROM playlists WHERE user_id = ? ORDER BY imported_at DESC",
         (uid,)

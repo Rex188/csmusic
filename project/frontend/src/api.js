@@ -6,6 +6,12 @@ async function request(path, options = {}) {
     headers: { 'Content-Type': 'application/json', ...options.headers },
     ...options,
   });
+  // Check content-type before trying .json() to avoid "body stream already read"
+  const ct = res.headers.get('content-type') || '';
+  if (!ct.includes('application/json') && !ct.includes('text/json')) {
+    const text = await res.text();
+    throw new Error(`Server returned ${res.status} (not JSON — is the backend running?)\n${text.slice(0, 200)}`);
+  }
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Request failed');
   return data;

@@ -4,7 +4,7 @@
 **Architecture by:** Claude Opus 4.8 (Principal Software Architect)
 **Date:** 2026-07-16
 
-**Status:** V1 skeleton implemented. QR login working. Playlist import has a frontend rendering bug — see Known Issues below.
+**Status:** V1 fully functional. QR login (5 states, countdown, polling) + playlist import (parallel, error-resilient) + dashboard rendering all verified working. Bugfixes applied session 2026-07-16.
 
 You are building the V1 skeleton of Music-Self. **Do not redesign anything.** Implement exactly what's specified. If something is ambiguous or broken, flag it — don't improvise.
 
@@ -445,21 +445,246 @@ a:hover { color: #fff; }
 
 ---
 
-## Known Issues (2026-07-16)
+## 🐛 Bugfix — QR Login UX (2026-07-16)
 
-### 1. Playlist import returns data but grid stays empty
+Two bugs reported by the user after scanning the QR code:
 
-**Symptom:** User clicks "Import Playlists", gets success response with `"imported": N`, but the playlist grid on the Dashboard doesn't update. Refreshing the page shows an empty state.
+### Bug 1: No visual feedback after scanning
 
-**Likely cause:** The `POST /api/playlists/import` response format doesn't match what `Dashboard.jsx` expects. The frontend does `setPlaylists(result.playlists)` but the API might return the data under a different key, or the data itself has a different shape.
+**Root cause analysis:**
 
-**To debug:** Open browser DevTools (F12) → Network tab → check the `/api/playlists/import` response.
+There are three problems in the QR flow:
 
-### 2. Old SQLite database causes schema errors
+**Problem A — No loading state while generating QR.** `handleShowQr()` does two async calls (`qr/key` then `qr/create`) before `qrImg` is set. During this gap the button is gone (`connecting=true`) but no QR image shows yet (`qrImg=null`). The user sees nothing happening — no spinner, no "Generating..." text.
 
-**Symptom:** After code changes to the database schema, Flask throws `OperationalError: table X has no column named Y`.
+**Fix:** After `setConnecting(true)`, show a "Generating QR code..." message before `qrImg` is available.
 
-**Fix:** Delete `backend/database.db` and restart Flask — it auto-creates a fresh one.
+**Problem B — Response unwrapping might be wrong.** The `api-enhanced` server wraps all responses as `{code: 200, data: {...}}` or `{code: 200, body: {...}}`. Our backend inconsistently uses `data.get("body", data)` which breaks if the server uses `data` instead of `body`.
+
+Specifically in `qr/check`:
+```python
+data = _proxy("/login/qr/check", {"key": key})
+body = data.get("body", data)
+if body.get("code") == 803:  # ← code might be 200 (outer wrapper), never matches
+```
+
+If `data = {code: 200, data: {code: 802}}` and we do `data.get("body", data)`, we get `{code: 200, data: {code: 802}}` whose `.code` is 200, not 802. The polling returns 801 forever. User scans, status never changes.
+
+**Fix:** In all `_proxy` calls in `netease_routes.py`, unwrap both `body` and `data`:
+```python
+def _proxy(path, params=None, method="GET"):
+    ...
+    result = resp.json()
+    return result.get("body") or result.get("data") or result
+```
+
+Then use that unwrapped result directly in route handlers.
+
+**Problem C — No distinct visual states.** Currently only two text states: "Scan with app" or "Scanned!". Missing: "Generating QR...", "Connecting..." (after 803 before connect API returns), and a visible pulsing animation on the QR while waiting.
+
+**Fix:** Add more granular status states with CSS animation.
+
+### Bug 2: QR code expires too quickly
+
+**Root cause:** Netease QR codes expire in ~2-5 minutes server-side. No countdown shown, expired message is tiny red text, retry is a small underlined link.
+
+**Fix:** Add a countdown timer and prominent retry button.
+
+---
+
+### What to fix
+
+#### Backend: `backend/netease_routes.py`
+
+1. **Fix `_proxy()` response unwrapping** — unwrap both `body` and `data`:
+```python
+def _proxy(path, params=None, method="GET"):
+    url = f"{NCM_API}{path}"
+    try:
+        if method == "GET":
+            resp = requests.get(url, params=params, timeout=15)
+        else:
+            resp = requests.post(url, data=params, timeout=15)
+        result = resp.json()
+        # api-enhanced wraps in either "body" or "data" — unwrap both
+        return result.get("body") or result.get("data") or result
+    except requests.exceptions.ConnectionError:
+        return {"code": -1, "error": "Netease API server not running on port 3000"}
+    except Exception as e:
+        return {"code": -1, "error": str(e)}
+```
+
+2. **Simplify QR route handlers** — since `_proxy` now returns the unwrapped inner object, remove the redundant `.get("body", ...)` calls:
+
+`qr/key`: `data = _proxy("/login/qr/key")` → `return jsonify(data)` (data is already unwrapped, frontend expects `{data: {unikey: ...}}` — actually, check: the api-enhanced body for qr/key looks like `{code: 200, data: {unikey: "..."}}`. After unwrapping we get `{code: 200, data: {unikey: "..."}}`. Frontend does `keyResp?.data?.unikey`. This still works because the unwrapped inner object IS `{code: 200, data: {unikey: "..."}}`.
+
+Wait — let me be more precise. The api-enhanced server response structure:
+- Outer: `{code: 200, data: {code: 200, data: {unikey: "..."}}}` — sometimes double-wrapped
+- OR: `{code: 200, body: {code: 200, data: {unikey: "..."}}}` — sometimes uses `body`
+
+The inner object (whether keyed by `data` or `body`) has `{code: 200, data: {unikey: "..."}}`
+
+After `_proxy` returns `result.get("body") or result.get("data") or result`, we get `{code: 200, data: {unikey: "..."}}`.
+
+Then frontend does `keyResp?.data?.unikey` → gets the unikey. ✓
+
+For `qr/create`: same pattern. ✓
+
+For `qr/check`: after unwrap we get `{code: 801, ...}` or `{code: 802, ...}` or `{code: 803, cookie: "..."}`. Frontend accesses `check.code` directly. ✓
+
+So the fix is: make `_proxy` unwrap, then in route handlers use the unwrapped data directly without `.get("body", ...)`.
+
+3. **Update each route handler** to match:
+
+```python
+@netease_bp.route("/qr/key", methods=["GET"])
+def qr_key():
+    data = _proxy("/login/qr/key")
+    return jsonify(data)  # already unwrapped by _proxy
+
+@netease_bp.route("/qr/create", methods=["GET"])
+def qr_create():
+    key = request.args.get("key")
+    if not key:
+        return jsonify({"error": "key required"}), 400
+    data = _proxy("/login/qr/create", {"key": key, "qrimg": "1"})
+    return jsonify(data)
+
+@netease_bp.route("/qr/check", methods=["GET"])
+def qr_check():
+    key = request.args.get("key")
+    if not key:
+        return jsonify({"error": "key required"}), 400
+    body = _proxy("/login/qr/check", {"key": key})
+    # body is now the inner response: {code: 801/802/803, cookie?: "..."}
+    code = body.get("code")
+    if code == 803:
+        return jsonify({"code": 803, "cookie": body.get("cookie", "")})
+    if code == 800:
+        return jsonify({"code": 800, "message": "QR code expired"})
+    if code == 802:
+        return jsonify({"code": 802, "message": "Scanning, confirm on phone"})
+    return jsonify({"code": 801, "message": "Waiting for scan"})
+```
+
+#### Frontend: `frontend/src/pages/Dashboard.jsx`
+
+New QR state machine with 5 visible states:
+
+| State | What user sees |
+|---|---|
+| `generating` | "Generating QR code..." spinner — while key/create APIs load |
+| `waiting` | QR image + pulsing ring + "📱 Scan with Netease Cloud Music app" + countdown |
+| `scanning` | QR image dimmed + green checkmark + "✅ Scanned! Confirm on your phone..." |
+| `connecting` | "Connecting to Netease..." spinner — after 803 before connect API returns |
+| `expired` | "QR code expired" + prominent retry button (not tiny link) |
+
+Add a `pollFailCount` ref — if 15 consecutive polls fail (30 seconds), stop polling and show "Connection lost — please retry".
+
+Add a countdown: start at 180 seconds (3 min), decrement every second via a separate `setInterval`. Show "Expires in 2:45" below the QR. When it hits 0, treat as expired.
+
+The QR image section should always show some status, even during initial loading:
+
+```jsx
+{connecting && (
+  <div style={{ textAlign: 'center' }}>
+    {qrStatus === 'generating' && (
+      <div>
+        <div className="spinner" />
+        <p style={{ fontSize: 13, color: '#888', marginTop: 8 }}>Generating QR code...</p>
+      </div>
+    )}
+    {qrImg && (qrStatus === 'waiting' || qrStatus === 'scanning') && (
+      <div>
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <img src={qrImg} alt="QR code"
+            style={{
+              width: 180, height: 180, borderRadius: 8, background: '#fff', padding: 8,
+              opacity: qrStatus === 'scanning' ? 0.5 : 1,
+              transition: 'opacity 0.3s'
+            }} />
+          {qrStatus === 'waiting' && (
+            <div style={{
+              position: 'absolute', inset: -4, borderRadius: 12,
+              border: '2px solid #a78bfa', animation: 'pulse 2s infinite'
+            }} />
+          )}
+          {qrStatus === 'scanning' && (
+            <div style={{
+              position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+              fontSize: 48
+            }}>✅</div>
+          )}
+        </div>
+        <p style={{ fontSize: 13, color: '#888', marginTop: 8 }}>
+          {qrStatus === 'scanning'
+            ? '✅ Scanned! Confirm on your phone...'
+            : '📱 Scan with Netease Cloud Music app'}
+        </p>
+        {qrStatus === 'waiting' && countdown > 0 && (
+          <p style={{ fontSize: 12, color: '#555', marginTop: 4 }}>
+            Expires in {Math.floor(countdown / 60)}:{String(countdown % 60).padStart(2, '0')}
+          </p>
+        )}
+      </div>
+    )}
+    {!qrImg && qrStatus === 'connecting' && (
+      <div>
+        <div className="spinner" />
+        <p style={{ fontSize: 13, color: '#888', marginTop: 8 }}>Connecting to Netease...</p>
+      </div>
+    )}
+    {qrStatus === 'expired' && (
+      <div>
+        <p style={{ fontSize: 14, color: '#f87171', marginBottom: 12 }}>QR code expired</p>
+        <button onClick={handleRetryQr} style={{ background: '#1a1a1a', color: '#a78bfa' }}>
+          Generate new QR code
+        </button>
+      </div>
+    )}
+  </div>
+)}
+```
+
+#### Frontend: `frontend/src/index.css`
+
+Add the pulse animation:
+```css
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #2a2a2a;
+  border-top-color: #a78bfa;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+```
+
+---
+
+### How to verify
+
+1. Start all three servers (Netease API :3000, Flask :5000, Vite :5173)
+2. Login → Dashboard → Click "Connect Netease Cloud Music"
+3. **Verify:** "Generating QR code..." spinner appears briefly
+4. **Verify:** QR code appears with pulsing border and countdown timer
+5. Scan with Netease app
+6. **Verify:** QR dims, green checkmark appears, text changes to "Scanned! Confirm on your phone..."
+7. Confirm on phone
+8. **Verify:** "Connecting to Netease..." spinner appears briefly
+9. **Verify:** Dashboard shows "Connected as [nickname]"
+10. **Verify:** If wait > 3 min without scanning, QR shows "expired" with prominent retry button
+11. **Verify:** If Netease API server is stopped mid-poll, after ~30 seconds shows error instead of silently hanging
 
 ---
 
@@ -530,6 +755,5 @@ a:hover { color: #fff; }
 | `backend/playlist_routes.py` | Rewrote to proxy Netease API instead of Spotify              |
 | `frontend/api.js`            | Updated with Netease endpoints                               |
 | `backend/spotify_routes.py`  | Deleted                                                      |
-| **NOW**                      | Working on `Dashboard.jsx` to replace Spotify UI with Netease QR login UI |
-
-The Dashboard frontend still needs its connect/import flow and QR code rendering updated from Spotify → Netease.
+| **NOW**                     | V1 complete. QR login (5-state UX, countdown, _unwrap fix) + playlist import (parallel 5-thread, NoneType fix, 120s timeout) + dashboard rendering all verified working. |
+|                             | Next: Visual landscape / garden UI, librosa audio analysis, social masks.
