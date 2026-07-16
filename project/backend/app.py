@@ -42,8 +42,12 @@ def me():
 FRONTEND_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend", "dist")
 
 @app.route("/", defaults={"path": ""})
-@app.route("/<path:path>")
+@app.route("/<path:path>", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"])
 def serve_frontend(path):
+    # Catch-all that serves the React SPA.
+    # Any API request that reaches here is a 404 (blueprint routes take priority).
+    if request.method != "GET":
+        return jsonify({"error": "Not found"}), 404
     if not os.path.isdir(FRONTEND_DIR):
         return jsonify({"error": "Frontend not built. Run `cd frontend && npm run build` first."}), 500
     file_path = os.path.join(FRONTEND_DIR, path)
