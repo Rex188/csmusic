@@ -41,18 +41,40 @@ def me():
 # --- Serve built React frontend in production ---
 FRONTEND_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend", "dist")
 
-@app.route("/", defaults={"path": ""})
-@app.route("/<path:path>", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"])
-def serve_frontend(path):
-    # Catch-all that serves the React SPA.
-    # Any API request that reaches here is a 404 (blueprint routes take priority).
-    if request.method != "GET":
-        return jsonify({"error": "Not found"}), 404
+
+@app.route("/")
+def serve_index():
     if not os.path.isdir(FRONTEND_DIR):
         return jsonify({"error": "Frontend not built. Run `cd frontend && npm run build` first."}), 500
-    file_path = os.path.join(FRONTEND_DIR, path)
-    if path and os.path.isfile(file_path):
-        return send_from_directory(FRONTEND_DIR, path)
+    return send_from_directory(FRONTEND_DIR, "index.html")
+
+
+@app.route("/assets/<path:filename>")
+def serve_assets(filename):
+    if not os.path.isdir(FRONTEND_DIR):
+        return jsonify({"error": "Frontend not built"}), 500
+    return send_from_directory(os.path.join(FRONTEND_DIR, "assets"), filename)
+
+
+@app.route("/favicon.svg")
+def serve_favicon():
+    return send_from_directory(FRONTEND_DIR, "favicon.svg")
+
+
+@app.route("/icons.svg")
+def serve_icons():
+    return send_from_directory(FRONTEND_DIR, "icons.svg")
+
+
+# ── 404 handler: SPA fallback for frontend routes ──
+@app.errorhandler(404)
+def not_found(e):
+    """Non-API paths that don't match any route → serve index.html (SPA fallback).
+    API paths → real JSON 404."""
+    if request.path.startswith("/api/"):
+        return jsonify({"error": "Not found"}), 404
+    if not os.path.isdir(FRONTEND_DIR):
+        return jsonify({"error": "Frontend not built"}), 500
     return send_from_directory(FRONTEND_DIR, "index.html")
 
 
