@@ -26,14 +26,18 @@ function PlaylistCard({ pl }) {
 
 const QR_KEY = 'music-self-qr';
 
-function saveQrState(state) {
-  try { sessionStorage.setItem(QR_KEY, JSON.stringify(state)); } catch {}
+function saveQrState(state, userId) {
+  try { sessionStorage.setItem(QR_KEY, JSON.stringify({ ...state, userId })); } catch {}
 }
 
-function loadQrState() {
+function loadQrState(userId) {
   try {
     const raw = sessionStorage.getItem(QR_KEY);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    // Only restore if it belongs to the same user (different users on same machine)
+    if (parsed.userId && parsed.userId === userId) return parsed;
+    return null;
   } catch { return null; }
 }
 
@@ -55,24 +59,21 @@ export default function Dashboard() {
   const [importing, setImporting] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // QR login state — restore from sessionStorage if available
-  const saved = loadQrState();
-  const [qrStatus, setQrStatus] = useState(saved?.status || '');
-  const [qrImg, setQrImg] = useState(saved?.img || null);
-  const [qrKey, setQrKey] = useState(saved?.key || null);
+  // QR login state
+  const [qrStatus, setQrStatus] = useState('');
+  const [qrImg, setQrImg] = useState(null);
+  const [qrKey, setQrKey] = useState(null);
   const [countdown, setCountdown] = useState(180);
 
-  // Keep sessionStorage in sync with QR state
-  const syncRef = useRef({ qrStatus, qrImg, qrKey });
-
+  // Keep sessionStorage in sync with QR state (binds to current user)
   useEffect(() => {
-    syncRef.current = { status: qrStatus, img: qrImg, key: qrKey };
-    if (qrStatus && qrStatus !== '' && qrStatus !== 'connecting' && qrImg) {
-      saveQrState({ status: qrStatus, img: qrImg, key: qrKey });
+    if (!user) return;
+    if (qrStatus && qrStatus !== '' && qrStatus !== 'connecting' && qrImg && qrKey) {
+      saveQrState({ status: qrStatus, img: qrImg, key: qrKey }, user.id);
     } else if (!qrStatus || qrStatus === '' || qrStatus === 'connecting') {
       clearQrState();
     }
-  }, [qrStatus, qrImg, qrKey]);
+  }, [qrStatus, qrImg, qrKey, user]);
 
   /* ── Polling logic ─────────────────────────────────────────────── */
 
@@ -181,8 +182,8 @@ export default function Dashboard() {
       } catch {}
       setLoading(false);
 
-      // Resume QR polling if there's an active session
-      const saved = loadQrState();
+      // Resume QR polling if there's an active session (same user only)
+      const saved = loadQrState(me.user?.id);
       if (saved && saved.key && saved.status === 'waiting') {
         setQrKey(saved.key);
         setQrImg(saved.img);
