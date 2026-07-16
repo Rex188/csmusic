@@ -14,14 +14,14 @@ def _require_auth():
     return uid, None
 
 
-def _proxy(path, params=None, method="GET"):
+def _proxy(path, params=None, method="GET", timeout=45):
     """Call the Netease API server and return raw JSON response."""
     url = f"{NCM_API}{path}"
     try:
         if method == "GET":
-            resp = requests.get(url, params=params, timeout=15)
+            resp = requests.get(url, params=params, timeout=timeout)
         else:
-            resp = requests.post(url, data=params, timeout=15)
+            resp = requests.post(url, data=params, timeout=timeout)
         return resp.json()
     except requests.exceptions.ConnectionError:
         return {"code": -1, "error": "Netease API server not running on port 3000"}
@@ -88,7 +88,7 @@ def connect():
 
     # Fetch user info from Netease
     try:
-        info_resp = requests.get(f"{NCM_API}/login/status", params={"cookie": cookie}, timeout=10)
+        info_resp = requests.get(f"{NCM_API}/login/status", params={"cookie": cookie}, timeout=45)
         info = info_resp.json().get("body") or info_resp.json()
         profile = info.get("data", {}).get("profile", {})
         netease_user_id = str(profile.get("userId", ""))

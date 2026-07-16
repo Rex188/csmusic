@@ -39,4 +39,10 @@ export const api = {
   getPlaylistTracks: (playlistId) => request(`/analysis/tracks/${playlistId}`),
   analyzePlaylist: (playlistId) => request(`/analysis/analyze/${playlistId}`, { method: 'POST' }),
   getAnalysisStatus: (jobId) => request(`/analysis/status/${jobId}`),
+
+  // Admin (protected by ADMIN_KEY env var)
+  adminDashboard: (key) => request(`/admin?key=${key}`),
+  adminDeleteUser: (key, userId) => request(`/admin/user/${userId}`, { method: 'DELETE', body: JSON.stringify({ key }) }),
+  adminDeletePlaylist: (key, playlistId) => request(`/admin/playlist/${playlistId}`, { method: 'DELETE', body: JSON.stringify({ key }) }),
+  adminDisconnectNetease: (key, userId) => request(`/admin/disconnect/${userId}`, { method: 'POST', body: JSON.stringify({ key }) }),
 };

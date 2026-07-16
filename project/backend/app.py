@@ -14,11 +14,13 @@ from auth import auth_bp
 from netease_routes import netease_bp
 from playlist_routes import playlist_bp
 from analysis_routes import analysis_bp
+from admin_routes import admin_bp
 
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
 app.register_blueprint(netease_bp, url_prefix="/api/netease")
 app.register_blueprint(playlist_bp, url_prefix="/api/playlists")
 app.register_blueprint(analysis_bp, url_prefix="/api/analysis")
+app.register_blueprint(admin_bp, url_prefix="/api/admin")
 
 
 @app.route("/api/me")
@@ -38,32 +40,6 @@ def me():
 
 # --- Serve built React frontend in production ---
 FRONTEND_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend", "dist")
-
-# --- Admin panel (production only — protected by ADMIN_KEY env var) ---
-@app.route("/api/admin")
-def admin_panel():
-    key = request.args.get("key")
-    expected = os.getenv("ADMIN_KEY")
-    if not expected or key != expected:
-        return jsonify({"error": "Unauthorized. Set ADMIN_KEY env var and pass ?key=..."}), 403
-
-    import models
-    conn = models.get_db()
-
-    users = [dict(r) for r in conn.execute("SELECT id, email, created_at FROM users ORDER BY id").fetchall()]
-    netease = [dict(r) for r in conn.execute("""
-        SELECT u.email, nt.netease_nickname, nt.netease_user_id, nt.updated_at
-        FROM netease_tokens nt JOIN users u ON u.id = nt.user_id
-    """).fetchall()]
-    playlists = [dict(r) for r in conn.execute("""
-        SELECT p.id, u.email, p.name, p.track_count, p.imported_at
-        FROM playlists p JOIN users u ON u.id = p.user_id ORDER BY p.imported_at DESC
-    """).fetchall()]
-    track_count = conn.execute("SELECT COUNT(*) as c FROM tracks").fetchone()["c"]
-    conn.close()
-
-    return jsonify({"users": users, "netease": netease, "playlists": playlists, "tracks": track_count})
-
 
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
