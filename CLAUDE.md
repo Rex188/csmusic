@@ -289,7 +289,15 @@ This re-frames everything:
 
 **Note:** Spotify was replaced with Netease Cloud Music API because Spotify requires Premium for Web API access. The Netease API server ([`api-enhanced`](https://github.com/NeteaseCloudMusicApiEnhanced/api-enhanced)) runs as a separate Node.js process on port 3000. Audio features (energy/valence) are not available from Netease — removed from V1.
 
-**Status:** V1 skeleton complete. User needs to install & run the Netease API server before importing playlists.
+**Status:** V1 skeleton complete. 3-server stack verified working (Netease API :3000 → Flask :5000 → Vite :5173).
+
+---
+
+#### Post-implementation bugfix (2026-07-16)
+
+**Problem:** Frontend called `GET /api/me` but it was registered as `/api/auth/me` inside the auth blueprint. Dashboard stuck on loading after signup/login.
+
+**Fix:** Moved the `/api/me` route out of the blueprint into `app.py` as a standalone route. Signup → dashboard and login → dashboard flows now work end-to-end.
 
 ---
 
@@ -306,3 +314,5 @@ This re-frames everything:
 | 2026-07-16 | **V1 architecture designed.** Flask + React + SQLite skeleton. Task breakdown written to `tasks.md` for DeepSeek. Two tasks: backend skeleton + frontend skeleton. Plan approved, ready to code. |
 | 2026-07-16 | **V1 skeleton implemented.** DeepSeek built Flask backend + React frontend per spec. Verified: Flask starts on :5000, Vite builds in ~131ms. |
 | 2026-07-16 | **Pivoted from Spotify to Netease Cloud Music API.** Spotify requires Premium for Web API. Replaced spotipy OAuth with Netease QR login flow. `api-enhanced` (Node.js) runs on :3000 as data provider. Audio features unavailable — removed energy/valence from UI. |
+| 2026-07-16 | **Bugfix: /api/me route.** Signup/login → dashboard flow was broken. Moved /api/me out of auth blueprint into app.py. Now working end-to-end. |
+| 2026-07-16 | **V1 skeleton verified.** 3-server stack (Netease API :3000 → Flask :5000 → Vite :5173) tested working. User can sign up, login, scan Netease QR, and import playlists. |

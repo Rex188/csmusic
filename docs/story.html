@@ -244,7 +244,7 @@
 
   <header>
     <h1>🌱 The Origin Story</h1>
-    <p class="sub">How Music-Self went from zero to a locked concept — in one day.</p>
+    <p class="sub">How Music-Self went from zero to a working V1 — in two days.</p>
   </header>
 
   <!-- Phase 1 -->
@@ -471,7 +471,7 @@
       <p><strong>Architecture direction:</strong></p>
       <ul style="padding-left:18px;margin-bottom:12px;">
         <li style="margin-bottom:4px;">Frontend-first. The visual experience IS the product. Apple-style minimalism, dark, interactive.</li>
-        <li style="margin-bottom:4px;">Music from streaming APIs (Spotify). Offline supported but secondary.</li>
+        <li style="margin-bottom:4px;">Music from streaming APIs (Netease Cloud Music via QR login). Offline supported but secondary.</li>
         <li style="margin-bottom:4px;">Deep analysis under the hood — users never see charts unless they choose to.</li>
         <li style="margin-bottom:4px;">Social masks. Share a facet, not the whole self.</li>
         <li style="margin-bottom:4px;">Web-first, then iOS. Simple email/password accounts.</li>
@@ -483,7 +483,27 @@
         <li style="margin-bottom:4px;">No AI explaining emotions to the user</li>
         <li style="margin-bottom:4px;">No gamification · No feed / algorithm · No p5.js</li>
       </ul>
-      <p><strong>V1 priority:</strong> Frontend/visual experience first. Spotify API for music data (energy, valence, tempo). Custom ML pipeline later.</p>
+      <p><strong>V1 priority:</strong> Frontend/visual experience first. Netease Cloud Music API for playlist data. Custom ML pipeline later.</p>
+    </div>
+  </div>
+
+  <!-- Phase 9 -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-number">Phase 9</span>
+      <h2 class="phase-title">⚡ V1 Implementation &amp; Pivot</h2>
+    </div>
+    <div class="phase-body">
+      <p><strong>DeepSeek</strong> implemented the V1 skeleton as specified: Flask backend (auth, music source integration, playlist import) + React frontend (login, signup, dashboard).</p>
+      <p><strong>Pivot:</strong> Spotify was dropped because it requires Premium for Web API access. Replaced with <strong>Netease Cloud Music API Enhanced</strong> (open-source Node.js server running on port 3000) — QR login flow instead of OAuth redirect.</p>
+      <p><strong>Bugfix:</strong> <code>/api/me</code> route was inside the auth blueprint. Moved to <code>app.py</code> as a standalone route. Signup/login → dashboard now works end-to-end.</p>
+      <p><strong>Current stack:</strong></p>
+      <ul style="padding-left:18px;margin-bottom:12px;">
+        <li style="margin-bottom:4px;"><strong>Netease API server</strong> (:3000) — data provider for playlists and tracks</li>
+        <li style="margin-bottom:4px;"><strong>Flask backend</strong> (:5000) — auth, Netease proxy, playlist import, SQLite</li>
+        <li style="margin-bottom:4px;"><strong>React + Vite frontend</strong> (:5173) — dark Apple-minimal UI</li>
+      </ul>
+      <p>Audio features (energy, valence, tempo) are not available from Netease — removed from V1. Will add librosa analysis pipeline later for local files.</p>
     </div>
   </div>
 
@@ -532,6 +552,16 @@
         <div class="date">2026-07-15</div>
         <div class="title">GitHub Pages published</div>
         <div class="desc">Landing page + progress page + story page live at rex188.github.io/csmusic/.</div>
+      </div>
+      <div class="tl-item">
+        <div class="date">2026-07-16</div>
+        <div class="title">V1 skeleton implemented</div>
+        <div class="desc">Flask backend + React frontend built per spec. Pivoted from Spotify to Netease Cloud Music API (Spotify requires Premium). Netease API server runs on :3000.</div>
+      </div>
+      <div class="tl-item">
+        <div class="date">2026-07-16</div>
+        <div class="title">Bugfix: /api/me route</div>
+        <div class="desc">Fixed signup/login → dashboard flow. Standalone /api/me route added outside auth blueprint. All three servers verified working end-to-end.</div>
       </div>
     </div>
   </section>

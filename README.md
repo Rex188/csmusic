@@ -1,4 +1,4 @@
-# 👁️ Music-Self
+# 🌱 Music-Self
 
 **Music is how you perceive the world. Your lens, made visible.**
 
@@ -10,12 +10,13 @@ You're not sharing a playlist. You're showing someone how you process reality.
 
 | | |
 |---|---|
-| 🧪 | **Concept locked** — no code written yet |
-| ✅ | Python 3.11 + librosa + scikit-learn + Streamlit ready |
-| ✅ | DeepSeek (implementation) + Claude Opus (architecture) ready |
-| ✅ | Design decisions fully documented |
-
-[👉 See full progress page →](https://rex188.github.io/csmusic/progress.html)
+| ✅ | **V1 skeleton working** — Flask backend + React frontend live |
+| ✅ | Sign up / login with bcrypt auth |
+| ✅ | Netease Cloud Music QR login |
+| ✅ | Playlist import from Netease |
+| ✅ | 3-server stack: Netease API (:3000) → Flask (:5000) → Vite (:5173) |
+| 🧪 | Next: visual landscape, audio analysis, social features |
+| 📖 | [Full progress page →](https://rex188.github.io/csmusic/progress.html) |
 
 ---
 
@@ -55,14 +56,13 @@ A private space where your music becomes a **living landscape** — one that ref
 
 ## 🛠️ Tech Stack
 
-| Tool | Purpose |
+| Layer | Tech |
 |---|---|
-| Python 3.11 | Core language (ML pipeline) |
-| librosa | Audio feature extraction |
-| scikit-learn | ML / clustering models |
-| Streamlit | Rapid prototyping |
-| DeepSeek (API) | Implementation engineer |
-| Claude Opus 4.8 | Software architect |
+| Backend | Flask (Python 3.11), SQLite, bcrypt sessions |
+| Frontend | React + Vite, dark Apple-minimal CSS |
+| Music source | Netease Cloud Music API Enhanced (Node.js :3000) |
+| ML stack (ready) | librosa, numpy, scipy, scikit-learn, Streamlit |
+| AI workflow | DeepSeek (implementation) + Claude Opus (architecture) |
 
 ---
 

@@ -227,16 +227,16 @@
       <div class="label">Direction Chosen</div>
     </div>
     <div class="stat-card">
-      <div class="number" style="color:var(--yellow)">0</div>
-      <div class="label">Code Written</div>
+      <div class="number" style="color:var(--green)">1</div>
+      <div class="label">V1 Skeleton Done</div>
     </div>
     <div class="stat-card">
       <div class="number" style="color:var(--accent)">4</div>
       <div class="label">Inspirations</div>
     </div>
     <div class="stat-card">
-      <div class="number" style="color:var(--blue)">2</div>
-      <div class="label">AI Models</div>
+      <div class="number" style="color:var(--blue)">3</div>
+      <div class="label">Servers Running</div>
     </div>
   </div>
 
@@ -272,7 +272,7 @@
     <div class="section-title">⚙️ Design Decisions</div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;">
       <ul style="font-size:0.84rem; color:var(--text-dim); padding-left:18px; display:flex; flex-direction:column; gap:6px;">
-        <li><strong>Music source:</strong> Streaming APIs (Spotify primary), offline files supported</li>
+        <li><strong>Music source:</strong> Netease Cloud Music (QR login via api-enhanced), local files supported</li>
         <li><strong>Identity model:</strong> One evolving self — "like bringing up a kid"</li>
         <li><strong>Deep analysis:</strong> Heavy ML under the hood so the landscape feels accurate — users never see charts unless they dig</li>
         <li><strong>Reflection:</strong> User recognizes themselves in the visual. Optional notes encouraged, not required.</li>
@@ -318,24 +318,28 @@
       <div class="task-col">
         <h3>Pending</h3>
         <div class="task-card">
-          <div class="task-title">Choose frontend framework</div>
-          <div class="task-meta">Visual-first, interactive, dark mode. React / Next.js likely.</div>
+          <div class="task-title">Visual landscape / garden UI</div>
+          <div class="task-meta">The core visual metaphor — how features map to visual elements. Garden? Geometry?</div>
         </div>
         <div class="task-card">
-          <div class="task-title">Music API integration</div>
-          <div class="task-meta">Spotify API for metadata &amp; audio features (energy, valence, tempo).</div>
+          <div class="task-title">Librosa audio analysis pipeline</div>
+          <div class="task-meta">Extract tempo, key, energy, timbre from local/original files. Custom ML.</div>
         </div>
         <div class="task-card">
-          <div class="task-title">Design visual metaphor</div>
-          <div class="task-meta">How do features → visual elements? Garden? Geometry? Something new?</div>
+          <div class="task-title">Social masks &amp; sharing</div>
+          <div class="task-meta">Share a facet of your music-self. Different masks for different people.</div>
         </div>
         <div class="task-card">
-          <div class="task-title">First prototype</div>
-          <div class="task-meta">Minimal version: import music → see your landscape. Nothing else.</div>
+          <div class="task-title">iOS app (post-V1)</div>
+          <div class="task-meta">Native mobile experience planned.</div>
         </div>
       </div>
       <div class="task-col">
         <h3>Decided ✓</h3>
+        <div class="task-card">
+          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>V1 skeleton implemented</div>
+          <div class="task-meta">Flask backend (auth, Netease QR login, playlist import) + React frontend (login/signup/dashboard). All verified working.</div>
+        </div>
         <div class="task-card">
           <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">LOCKED</span>Music-Self direction</div>
           <div class="task-meta">"Music as perception" — private visual space that grows with you.</div>
@@ -346,11 +350,7 @@
         </div>
         <div class="task-card">
           <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Infrastructure ready</div>
-          <div class="task-meta">Python venv, librosa, sklearn, gitignore, shell scripts all set.</div>
-        </div>
-        <div class="task-card">
-          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>GitHub Pages live</div>
-          <div class="task-meta">Landing page + progress page at rex188.github.io/csmusic/</div>
+          <div class="task-meta">Python venv, Flask, React, Vite, SQLite, Netease API server all set.</div>
         </div>
       </div>
     </div>
@@ -395,12 +395,30 @@
         <div class="title">GitHub Pages published</div>
         <div class="desc">Landing page + progress page live.</div>
       </div>
+      <div class="timeline-item">
+        <div class="date">2026-07-16</div>
+        <div class="title">V1 skeleton implemented</div>
+        <div class="desc">Flask backend (auth, Netease QR login, playlist import) + React frontend (login/signup/dashboard). Pivoted from Spotify to Netease Cloud Music API. 3-server stack verified working.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">2026-07-16</div>
+        <div class="title">Bugfix: /api/me route</div>
+        <div class="desc">Separate /api/me added outside auth blueprint. Signup/login → dashboard flow now working end-to-end.</div>
+      </div>
     </div>
   </section>
 
   <!-- Activity -->
   <section>
     <div class="section-title">📝 Activity Log</div>
+    <div class="log-entry">
+      <span class="log-date">2026-07-16</span>
+      <div class="log-msg">Bugfix: added standalone /api/me route. Signup/login flow now works end-to-end.</div>
+    </div>
+    <div class="log-entry">
+      <span class="log-date">2026-07-16</span>
+      <div class="log-msg">V1 skeleton implemented &amp; verified: Flask backend (auth, Netease QR login, playlist import) + React frontend (login/signup/dashboard with playlist grid). Pivoted from Spotify to Netease Cloud Music API.</div>
+    </div>
     <div class="log-entry">
       <span class="log-date">2026-07-15</span>
       <div class="log-msg">Pitch reframed: "Music as perception." Landing page, progress page, README updated.</div>
