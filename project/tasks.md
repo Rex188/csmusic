@@ -101,6 +101,11 @@ No audio features table yet. Netease API doesn't expose energy/valence/tempo —
 - `_unwrap()` helper handles double-wrapped api-enhanced responses
 - Frontend "body stream already read" fix (content-type check before `.json()`)
 - Deployed to Render: `https://music-self.onrender.com`
+- PostgreSQL dual-backend (SQLite local / PG production via DATABASE_URL env var)
+- Toast notification system: all alerts are animated popup toasts, replace inline errors
+- QR state persisted per-user in sessionStorage (survives page refresh, no cross-user leak)
+- Admin endpoint `/api/admin?key=xxx` + local CLI `python admin.py all`
+- Render deployment config: `render.yaml` + Flask serves built React statically
 
 ### ❌ Not Yet Built
 1. **Audio feature analysis** — librosa pipeline to get energy/valence/tempo from audio files
