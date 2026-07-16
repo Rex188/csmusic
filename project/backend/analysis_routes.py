@@ -24,7 +24,7 @@ def _get_tracks_for_playlist(playlist_db_id):
     """Get all tracks for a playlist from the local DB."""
     conn = models.get_db()
     rows = conn.execute("""
-        SELECT t.id, t.netease_track_id, t.name, t.artist, t.album
+        SELECT t.id, t.netease_track_id, t.name, t.artist, t.album, t.image_url
         FROM tracks t
         JOIN playlist_tracks pt ON pt.track_id = t.id
         WHERE pt.playlist_id = ?
