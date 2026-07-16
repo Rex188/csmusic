@@ -1,28 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
 
-function EnergyBar({ value, label, color }) {
-  const pct = Math.round((value || 0) * 100);
-  return (
-    <div style={{ marginTop: 4 }}>
-      <div style={{ fontSize: 11, color: '#666', marginBottom: 2 }}>{label}</div>
-      <div style={{ height: 4, background: '#222', borderRadius: 2, overflow: 'hidden' }}>
-        <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: 2 }} />
-      </div>
-    </div>
-  );
-}
-
 function PlaylistCard({ pl }) {
-  const energies = pl.tracks?.length ? pl.tracks.map(t => t.energy || 0) : [];
-  const valences = pl.tracks?.length ? pl.tracks.map(t => t.valence || 0) : [];
-  const avgEnergy = energies.length ? energies.reduce((a, b) => a + b, 0) / energies.length : 0;
-  const avgValence = valences.length ? valences.reduce((a, b) => a + b, 0) / valences.length : 0.5;
-
-  const hue = avgValence * 120 + 200; // 200 (blue/cool) → 320 (warm/orange)
-  const sat = avgEnergy * 80 + 20;
-
   return (
     <div className="card" style={{ padding: 14 }}>
       {pl.image_url ? (
@@ -30,14 +10,12 @@ function PlaylistCard({ pl }) {
       ) : (
         <div style={{
           width: '100%', aspectRatio: '1/1', borderRadius: 8,
-          background: `radial-gradient(circle at 30% 30%, hsl(${hue}, ${sat}%, 40%), hsl(${hue}, ${sat}%, 20%))`
+          background: 'radial-gradient(circle at 30% 30%, #2a2a3a, #1a1a2a)'
         }} />
       )}
       <div style={{ marginTop: 8 }}>
         <div style={{ fontWeight: 600, fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{pl.name}</div>
         <div style={{ fontSize: 12, color: '#666' }}>{pl.track_count || 0} tracks</div>
-        <EnergyBar value={avgEnergy} label="Energy" color="#a78bfa" />
-        <EnergyBar value={avgValence} label="Valence" color="#f59e0b" />
       </div>
     </div>
   );
@@ -45,11 +23,18 @@ function PlaylistCard({ pl }) {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const pollRef = useRef(null);
   const [user, setUser] = useState(null);
-  const [spotify, setSpotify] = useState({ connected: false });
+  const [netease, setNetease] = useState({ connected: false });
   const [playlists, setPlaylists] = useState([]);
   const [importing, setImporting] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // QR login state
+  const [qrKey, setQrKey] = useState(null);
+  const [qrImg, setQrImg] = useState(null);
+  const [qrStatus, setQrStatus] = useState(''); // '', 'waiting', 'scanning', 'done', 'expired'
+  const [connecting, setConnecting] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -61,8 +46,8 @@ export default function Dashboard() {
         return;
       }
       try {
-        const st = await api.spotifyStatus();
-        setSpotify(st);
+        const st = await api.neteaseStatus();
+        setNetease(st);
       } catch {}
       try {
         const pl = await api.getPlaylists();
@@ -70,15 +55,63 @@ export default function Dashboard() {
       } catch {}
       setLoading(false);
     })();
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
   }, []);
 
-  const handleConnect = async () => {
+  const handleShowQr = async () => {
+    setQrStatus('waiting');
+    setConnecting(true);
     try {
-      const { url } = await api.spotifyConnect();
-      window.location.href = url;
+      const keyResp = await api.neteaseQrKey();
+      const key = keyResp?.data?.unikey;
+      if (!key) throw new Error('Failed to get QR key');
+      setQrKey(key);
+
+      const qrResp = await api.neteaseQrCreate(key);
+      setQrImg(qrResp?.data?.qrimg);
+
+      // Start polling
+      pollRef.current = setInterval(async () => {
+        try {
+          const check = await api.neteaseQrCheck(key);
+          if (check.code === 803) {
+            // Scanned and confirmed
+            clearInterval(pollRef.current);
+            pollRef.current = null;
+            setQrStatus('done');
+
+            // Save cookie
+            const connectResp = await api.neteaseConnect(check.cookie);
+            setNetease(connectResp);
+            setConnecting(false);
+            setQrImg(null);
+            setQrKey(null);
+          } else if (check.code === 802) {
+            setQrStatus('scanning');
+          } else if (check.code === 800) {
+            clearInterval(pollRef.current);
+            pollRef.current = null;
+            setQrStatus('expired');
+            setConnecting(false);
+          }
+          // 801 = still waiting, keep polling
+        } catch {
+          // poll silently
+        }
+      }, 2000);
     } catch (err) {
       alert(err.message);
+      setConnecting(false);
     }
+  };
+
+  const handleRetryQr = () => {
+    setQrImg(null);
+    setQrKey(null);
+    setQrStatus('');
+    handleShowQr();
   };
 
   const handleImport = async () => {
@@ -93,6 +126,7 @@ export default function Dashboard() {
   };
 
   const handleLogout = async () => {
+    if (pollRef.current) clearInterval(pollRef.current);
     await api.logout();
     navigate('/login');
   };
@@ -110,16 +144,35 @@ export default function Dashboard() {
 
       {/* Welcome card */}
       <div className="card" style={{ marginBottom: 24 }}>
-        <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 4 }}>Welcome back{spotify.display_name ? `, ${spotify.display_name}` : ''}</h2>
+        <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 4 }}>
+          Welcome{netease.nickname ? `, ${netease.nickname}` : ''}
+        </h2>
         <p style={{ color: '#888', fontSize: 14, marginBottom: 16 }}>
-          {spotify.connected
-            ? 'Your Spotify is connected. Import your playlists to see your music-self.'
-            : 'Connect Spotify to start building your music-self.'}
+          {netease.connected
+            ? 'Your Netease Cloud Music is connected. Import your playlists to see your music-self.'
+            : 'Connect Netease Cloud Music to start building your music-self.'}
         </p>
-        <div style={{ display: 'flex', gap: 10 }}>
-          {!spotify.connected ? (
-            <button onClick={handleConnect}>Connect Spotify</button>
-          ) : (
+
+        <div style={{ display: 'flex', gap: 10, flexDirection: 'column', alignItems: 'start' }}>
+          {!netease.connected && !connecting && (
+            <button onClick={handleShowQr}>Connect Netease Cloud Music</button>
+          )}
+
+          {connecting && qrImg && (
+            <div style={{ textAlign: 'center' }}>
+              <img src={qrImg} alt="QR code" style={{ width: 180, height: 180, borderRadius: 8, background: '#fff', padding: 8 }} />
+              <p style={{ fontSize: 13, color: '#888', marginTop: 8 }}>
+                {qrStatus === 'scanning' ? '✅ Scanned! Confirm on your phone...' : '📱 Scan with Netease Cloud Music app'}
+              </p>
+              {qrStatus === 'expired' && (
+                <p style={{ fontSize: 13, color: '#f87171', marginTop: 4 }}>
+                  QR code expired. <button onClick={handleRetryQr} style={{ background: 'none', color: '#a78bfa', padding: 0, fontSize: 13, textDecoration: 'underline' }}>Retry</button>
+                </p>
+              )}
+            </div>
+          )}
+
+          {netease.connected && (
             <button onClick={handleImport} disabled={importing}>
               {importing ? 'Importing...' : 'Import Playlists'}
             </button>
@@ -143,7 +196,7 @@ export default function Dashboard() {
         </>
       )}
 
-      {playlists.length === 0 && spotify.connected && !importing && (
+      {playlists.length === 0 && netease.connected && !importing && (
         <p style={{ textAlign: 'center', color: '#555', marginTop: 40 }}>
           No playlists yet. Click "Import Playlists" to get started.
         </p>

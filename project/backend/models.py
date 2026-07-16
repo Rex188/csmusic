@@ -18,44 +18,38 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
-        CREATE TABLE IF NOT EXISTS spotify_tokens (
+        CREATE TABLE IF NOT EXISTS netease_tokens (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER UNIQUE NOT NULL REFERENCES users(id),
-            access_token TEXT NOT NULL,
-            refresh_token TEXT NOT NULL,
-            expires_at TIMESTAMP NOT NULL,
-            spotify_user_id TEXT,
-            spotify_display_name TEXT
+            cookie TEXT NOT NULL,
+            netease_user_id TEXT,
+            netease_nickname TEXT,
+            netease_avatar TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
         CREATE TABLE IF NOT EXISTS playlists (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL REFERENCES users(id),
-            spotify_playlist_id TEXT NOT NULL,
+            netease_playlist_id TEXT NOT NULL,
             name TEXT NOT NULL,
             description TEXT,
             image_url TEXT,
             track_count INTEGER,
             imported_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE(user_id, spotify_playlist_id)
+            UNIQUE(user_id, netease_playlist_id)
         );
 
         CREATE TABLE IF NOT EXISTS tracks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            spotify_track_id TEXT UNIQUE NOT NULL,
+            netease_track_id TEXT UNIQUE NOT NULL,
             name TEXT NOT NULL,
             artist TEXT NOT NULL,
             album TEXT,
             image_url TEXT,
-            energy REAL,
-            valence REAL,
-            tempo REAL,
-            danceability REAL,
-            acousticness REAL,
-            instrumentalness REAL,
-            key INTEGER,
-            mode INTEGER,
-            fetched_at TIMESTAMP
+            duration INTEGER,
+            fetched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
         CREATE TABLE IF NOT EXISTS playlist_tracks (

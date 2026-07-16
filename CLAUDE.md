@@ -21,8 +21,8 @@ D:/music thera/
 │   │   ├── config.py         # Env config
 │   │   ├── models.py         # SQLite schema
 │   │   ├── auth.py           # Auth routes (signup/login/logout)
-│   │   ├── spotify_routes.py # Spotify OAuth routes
-│   │   ├── playlist_routes.py# Playlist import & list
+│   │   ├── netease_routes.py   # Netease QR login & status
+│   │   ├── playlist_routes.py  # Playlist import from Netease
 │   │   ├── requirements.txt  # Flask deps
 │   │   └── .env.example      # Config template
 │   ├── frontend/             # React + Vite
@@ -267,27 +267,29 @@ This re-frames everything:
 **DeepSeek** implemented the full V1 skeleton as specified in `tasks.md`:
 
 **Task 1 — Flask Backend** ✅
-- `backend/requirements.txt` — flask, flask-cors, bcrypt, spotipy, python-dotenv
+- `backend/requirements.txt` — flask, flask-cors, bcrypt, python-dotenv, requests
 - `backend/config.py` — env var loading via python-dotenv
-- `backend/models.py` — SQLite with 5 tables (users, spotify_tokens, playlists, tracks, playlist_tracks)
+- `backend/models.py` — SQLite with 5 tables (users, netease_tokens, playlists, tracks, playlist_tracks)
 - `backend/auth.py` — signup (bcrypt), login, logout, session-based auth
-- `backend/spotify_routes.py` — OAuth connect/callback/status with manual token management
-- `backend/playlist_routes.py` — list + import with token refresh, batch audio features
+- `backend/netease_routes.py` — QR key/create/check flow, connect/disconnect, login status
+- `backend/playlist_routes.py` — list + import from Netease Cloud Music API (runs as separate Node.js server on :3000)
 - `backend/app.py` — Flask app with CORS, blueprint registration
 - `backend/.env.example` — template for local config
 
 **Task 2 — React Frontend** ✅
 - Vite + React project scaffolded at `frontend/`
-- `src/api.js` — typed API client with `credentials: 'include'`
+- `src/api.js` — typed API client with Netease endpoints (qr key/create/check, connect, import)
 - `src/pages/Login.jsx` — email/password form, error handling
 - `src/pages/Signup.jsx` — email/password/confirm, client-side matching
-- `src/pages/Dashboard.jsx` — Spotify connect, playlist import, playlist grid with energy/valence indicators
+- `src/pages/Dashboard.jsx` — Netease QR login flow, playlist import, playlist grid with covers
 - `src/App.jsx` — BrowserRouter with 3 routes
 - `src/index.css` — dark Apple-minimal global styles
 
-**Verification:** Flask starts on port 5000, Vite builds in ~135ms.
+**Verification:** Flask starts on port 5000, Vite builds in ~131ms.
 
-**Status:** V1 skeleton complete. Ready for Spotify API credentials and initial testing.
+**Note:** Spotify was replaced with Netease Cloud Music API because Spotify requires Premium for Web API access. The Netease API server ([`api-enhanced`](https://github.com/NeteaseCloudMusicApiEnhanced/api-enhanced)) runs as a separate Node.js process on port 3000. Audio features (energy/valence) are not available from Netease — removed from V1.
+
+**Status:** V1 skeleton complete. User needs to install & run the Netease API server before importing playlists.
 
 ---
 
@@ -302,4 +304,5 @@ This re-frames everything:
 | 2026-07-15 | **Deep research report reviewed and rejected.** Emotional reflection framing doesn't work — patronizing. |
 | 2026-07-15 | **Music-Self direction landed.** 8-phase exploration from blank workspace to final pitch: *A visual space that grows from your music — showing not what you listen to, but how you perceive the world.* |
 | 2026-07-16 | **V1 architecture designed.** Flask + React + SQLite skeleton. Task breakdown written to `tasks.md` for DeepSeek. Two tasks: backend skeleton + frontend skeleton. Plan approved, ready to code. |
-| 2026-07-16 | **V1 skeleton implemented.** DeepSeek built Flask backend (auth, Spotify OAuth, playlist import) + React frontend (login/signup/dashboard) per spec. Verified: Flask starts on :5000, Vite builds in ~135ms. |
+| 2026-07-16 | **V1 skeleton implemented.** DeepSeek built Flask backend + React frontend per spec. Verified: Flask starts on :5000, Vite builds in ~131ms. |
+| 2026-07-16 | **Pivoted from Spotify to Netease Cloud Music API.** Spotify requires Premium for Web API. Replaced spotipy OAuth with Netease QR login flow. `api-enhanced` (Node.js) runs on :3000 as data provider. Audio features unavailable — removed energy/valence from UI. |

@@ -10,7 +10,7 @@ You are building the V1 skeleton of Music-Self. **Do not redesign anything.** Im
 
 ## What We're Building
 
-A web app where users sign up, connect their Spotify account, import playlists, and see them on a clean dark-mode dashboard. Flask REST API backend + React frontend + SQLite.
+A web app where users sign up, connect their Netease Cloud Music account via QR code, import playlists, and see them on a clean dark-mode dashboard. Flask REST API backend + React frontend + SQLite. Music data comes from a separate Netease Cloud Music API Enhanced server running on port 3000.
 
 ## Task Order
 
@@ -429,16 +429,17 @@ a:hover { color: #fff; }
 
 ## Acceptance Criteria
 
-1. **Flask starts** on port 5000, all routes registered
-2. **Vite starts** on port 5173, proxy `/api` to Flask
-3. **Sign up** → creates user in SQLite, redirects to dashboard
-4. **Login** → authenticates, sets session
-5. **Connect Spotify** → OAuth redirect → callback saves tokens → status shows "Connected as ..."
-6. **Import Playlists** → playlists + tracks saved to DB, playlists rendered as cards
-7. **Dashboard** shows playlist grid with energy/valence indicators
-8. **Persistence** — restart Flask, data still there in SQLite
-9. **Errors don't crash** — wrong password, missing fields, Spotify not connected — all show user-friendly messages
-10. **Dark, clean, Apple-minimal** look throughout
+1. **Netease API server** (api-enhanced) runs on port 3000
+2. **Flask starts** on port 5000, all routes registered
+3. **Vite starts** on port 5173, proxy `/api` to Flask
+4. **Sign up** → creates user in SQLite, redirects to dashboard
+5. **Login** → authenticates, sets session
+6. **QR login flow** → get key → show QR → poll → scan → cookie saved → "Connected as ..."
+7. **Import Playlists** → playlists + tracks from Netease saved to DB, rendered as cards
+8. **Dashboard** shows playlist grid with cover images and track counts
+9. **Persistence** — restart Flask, data still there in SQLite
+10. **Errors don't crash** — wrong password, missing fields, Netease not connected — all show user-friendly messages
+11. **Dark, clean, Apple-minimal** look throughout
 
 ---
 
@@ -448,3 +449,71 @@ a:hover { color: #fff; }
 - Activate it before pip installs or running Flask
 - You need Spotify API credentials. Either ask the user for them, or build so that Spotify-requiring routes fail gracefully with a clear error until credentials are set.
 - npm/node must be available. Check with `node --version`. If not installed, tell the user.
+
+Here's the wrap-up of where V1 stands:
+
+---
+
+
+
+
+
+
+
+# UPDATES
+
+## ✅ Done (Implemented)
+
+### Backend (Flask)
+- `backend/app.py` — Flask app with CORS, 3 blueprints
+- `backend/config.py` — Env var loading
+- `backend/models.py` — SQLite schema (5 tables: users, netease_tokens, playlists, tracks, playlist_tracks)
+- `backend/auth.py` — signup (bcrypt), login, logout, session /me
+- `backend/netease_routes.py` — QR login flow (key → create → poll → save cookie), connect/disconnect, status
+- `backend/playlist_routes.py` — list playlists, import (fetches user playlists + tracks via Netease API proxy)
+- `backend/requirements.txt`, `backend/.env.example`
+
+### Frontend (React/Vite)
+- `frontend/vite.config.js` — proxy `/api` → Flask :5000
+- `frontend/src/api.js` — API client with all Netease + playlist methods
+- `frontend/src/pages/Login.jsx` — email/password form
+- `frontend/src/pages/Signup.jsx` — email/password/confirm
+- `frontend/src/pages/Dashboard.jsx` — Netease QR connect, import, playlist grid
+- `frontend/src/App.jsx` — Router (3 routes)
+- `frontend/src/index.css` — Dark Apple-minimal theme
+
+### Verified
+- Flask starts on :5000 ✅
+- Vite builds in ~135ms ✅
+
+---
+
+## ❌ Not Finished (Needs Doing)
+
+### Missing Infrastructure
+1. **Netease API server not set up** — Need to clone and run `api-enhanced` locally on port 3000 (Node.js required)
+2. **No `.env` file created** — `backend/.env.example` exists but `.env` hasn't been copied and configured
+3. **No actual test run** — Haven't tested the full auth → QR login → import flow end-to-end
+
+### Not Yet Built (Post-V1)
+4. **Audio feature analysis** — Netease doesn't provide energy/valence/tempo. We'll need librosa to analyze songs locally (download from Netease URL or user uploads)
+5. **"Music-self" visual landscape** — The dashboard is still a raw playlist grid, not a garden/abstract visual
+6. **Social masks** — Not started
+7. **Optional journaling / notes** — Not started
+8. **iOS app** — Postponed
+
+---
+
+## Timeline
+
+| Time                         | Event                                                        |
+| ---------------------------- | ------------------------------------------------------------ |
+| Before this session          | Spotify API chosen, then blocked (Premium required)          |
+| This session start           | Pivoted to Netease Cloud Music API-enhanced                  |
+| `backend/netease_routes.py`  | QR login flow built (key → create → poll → connect)          |
+| `backend/playlist_routes.py` | Rewrote to proxy Netease API instead of Spotify              |
+| `frontend/api.js`            | Updated with Netease endpoints                               |
+| `backend/spotify_routes.py`  | Deleted                                                      |
+| **NOW**                      | Working on `Dashboard.jsx` to replace Spotify UI with Netease QR login UI |
+
+The Dashboard frontend still needs its connect/import flow and QR code rendering updated from Spotify → Netease.

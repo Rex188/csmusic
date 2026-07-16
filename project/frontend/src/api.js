@@ -16,8 +16,16 @@ export const api = {
   login: (body) => request('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
   logout: () => request('/auth/logout', { method: 'POST' }),
   me: () => request('/me'),
-  spotifyStatus: () => request('/spotify/status'),
-  spotifyConnect: () => request('/spotify/connect'),
+
+  // Netease Cloud Music
+  neteaseQrKey: () => request('/netease/qr/key'),
+  neteaseQrCreate: (key) => request(`/netease/qr/create?key=${key}`),
+  neteaseQrCheck: (key) => request(`/netease/qr/check?key=${key}`),
+  neteaseConnect: (cookie) => request('/netease/connect', { method: 'POST', body: JSON.stringify({ cookie }) }),
+  neteaseStatus: () => request('/netease/status'),
+  neteaseDisconnect: () => request('/netease/disconnect', { method: 'POST' }),
+
+  // Playlists
   getPlaylists: () => request('/playlists'),
   importPlaylists: () => request('/playlists/import', { method: 'POST' }),
 };
