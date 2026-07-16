@@ -24,6 +24,12 @@ You're not sharing a playlist. You're showing someone how you process reality.
 
 ---
 
+## 🚀 Try It Now
+
+**→ [https://music-self.onrender.com](https://music-self.onrender.com)**
+
+Connect your Netease Cloud Music account via QR code and import your playlists. No commitment, no data stored unless you sign up. Your music-self grows with you.
+
 ## 👁️ What Is Music-Self?
 
 A private space where your music becomes a **living landscape** — one that reflects how you see the world. The way you hear music *is* the way you see everything else.

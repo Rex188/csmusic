@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Music-Self — Your Lens, Made Visible</title>
+  <meta name="description" content="A visual space that grows from your music — showing not what you listen to, but how you perceive the world.">
   <style>
     :root {
       --bg: #0b0d14;
@@ -24,7 +25,6 @@
       line-height: 1.6;
     }
 
-    /* Top nav */
     .topnav {
       display: flex;
       justify-content: center;
@@ -40,26 +40,28 @@
     .topnav a:hover { color: var(--accent); }
     .topnav a.active { color: var(--accent); font-weight: 600; }
 
+    /* ── Hero with giant CTA ── */
     .hero {
       text-align: center;
-      padding: 60px 24px 48px;
-      max-width: 600px;
+      padding: 72px 24px 48px;
+      max-width: 640px;
       margin: 0 auto;
     }
-    .hero .emoji-big { font-size: 3rem; margin-bottom: 12px; }
+    .hero .emoji-big { font-size: 3.6rem; margin-bottom: 16px; }
     .hero h1 {
-      font-size: 3rem;
+      font-size: 3.4rem;
       font-weight: 800;
       letter-spacing: -0.03em;
-      line-height: 1.1;
+      line-height: 1.05;
     }
     .hero h1 span { color: var(--accent); }
     .hero .sub {
-      font-size: 1.05rem;
+      font-size: 1.1rem;
       color: var(--text-dim);
-      margin-top: 14px;
+      margin-top: 16px;
+      line-height: 1.5;
     }
-    .hero .quote {
+    .hero .tagline {
       margin-top: 20px;
       font-size: 0.9rem;
       color: var(--text);
@@ -69,6 +71,29 @@
       border-radius: 10px;
       border-left: 3px solid var(--accent);
       text-align: left;
+    }
+
+    .hero .cta-big {
+      display: inline-block;
+      margin-top: 32px;
+      background: var(--accent);
+      color: #0b0d14;
+      font-weight: 700;
+      font-size: 1.15rem;
+      padding: 16px 44px;
+      border-radius: 48px;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 24px rgba(167, 139, 250, 0.25);
+    }
+    .hero .cta-big:hover {
+      transform: scale(1.04);
+      box-shadow: 0 6px 32px rgba(167, 139, 250, 0.35);
+    }
+    .hero .cta-sub {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: var(--text-dim);
     }
 
     .container { max-width: 680px; margin: 0 auto; padding: 0 20px; }
@@ -115,33 +140,31 @@
     .pitch-item { margin-bottom: 8px; font-size: 0.85rem; }
     .pitch-item .old-text { color: #fca5a5; }
     .pitch-item .new-text { color: var(--text); }
-    .pitch-divider {
-      text-align: center;
-      background: var(--surface);
-      padding: 6px;
-      font-size: 0.75rem;
-      color: var(--text-dim);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-    }
 
-    .btn {
-      display: inline-block;
-      background: var(--accent);
-      color: #0b0d14;
-      font-weight: 700;
-      font-size: 0.92rem;
-      padding: 12px 30px;
-      border-radius: 40px;
-      text-decoration: none;
-      transition: opacity 0.15s;
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
     }
-    .btn:hover { opacity: 0.85; }
+    @media (max-width: 600px) { .feature-grid { grid-template-columns: 1fr; } }
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 16px;
+      text-align: center;
+    }
+    .feature-card .icon { font-size: 1.8rem; margin-bottom: 6px; }
+    .feature-card h4 { font-size: 0.85rem; font-weight: 600; }
+    .feature-card p { font-size: 0.78rem; color: var(--text-dim); margin-top: 4px; }
+
     .btn-outline {
+      display: inline-block;
       background: transparent;
       color: var(--accent);
       border: 1.5px solid var(--accent);
     }
+    .btn-outline:hover { background: var(--accent-soft); }
 
     .cta-box {
       background: var(--accent-soft);
@@ -163,8 +186,8 @@
     footer a:hover { text-decoration: underline; }
 
     @media (max-width: 480px) {
-      .hero h1 { font-size: 2.2rem; }
-      .hero { padding: 48px 16px 32px; }
+      .hero h1 { font-size: 2.4rem; }
+      .hero .cta-big { font-size: 1rem; padding: 14px 32px; }
       .pitch-grid { grid-template-columns: 1fr; }
     }
   </style>
@@ -182,25 +205,14 @@
     <div class="emoji-big">🌱</div>
     <h1>Music-<span>Self</span></h1>
     <p class="sub"><strong>Music is how you perceive the world.</strong> Your lens, made visible.</p>
-    <div class="quote">
+    <div class="tagline">
       "You're not sharing a playlist. You're showing someone how you process reality."
     </div>
+    <a class="cta-big" href="https://music-self.onrender.com" target="_blank">🚀 Try the Live App →</a>
+    <p class="cta-sub">Connect your Netease Cloud Music account — no sign-up needed</p>
   </div>
 
   <div class="container">
-
-    <!-- Core -->
-    <section>
-      <div class="section-title">The idea</div>
-      <div class="card">
-        <p>A private space where your music becomes a <strong>living landscape</strong> — one that reflects how you see the world. The way you hear music <em>is</em> the way you see everything else.</p>
-      </div>
-      <div class="card" style="border-left: 3px solid var(--accent);">
-        <p style="color:var(--text);font-size:0.95rem;">
-          Share your perspective — not your feelings. If someone resonates with your lens, the connection is already deeper than small talk ever gets.
-        </p>
-      </div>
-    </section>
 
     <!-- Pitch reframe -->
     <section>
@@ -221,56 +233,47 @@
           <div class="pitch-item"><span class="new-text">You see yourself — and others see you too</span></div>
         </div>
       </div>
-      <div class="card" style="margin-top:10px;">
-        <p><strong>Why sharing matters:</strong> Consensus isn't agreeing on facts. It's recognizing a shared way of <em>perceiving</em>.</p>
-      </div>
     </section>
 
-    <!-- What it enables -->
+    <!-- Features -->
     <section>
-      <div class="section-title">What this enables</div>
-      <div class="card">
-        <h3>🔍 Self-perception</h3>
-        <p>See the shape of your own lens. What do you repeat? What do you avoid? The patterns you'd never notice in a playlist view.</p>
-      </div>
-      <div class="card">
-        <h3>🤝 Deep connection</h3>
-        <p>Show someone your music-self and you're showing them how you process reality, not what you "like." That's a different kind of intimacy.</p>
-      </div>
-      <div class="card">
-        <h3>🎭 Facets, not profiles</h3>
-        <p>You have different lenses for different contexts. Social masks let you share the right facet with the right person — like real life.</p>
-      </div>
-    </section>
-
-    <!-- State -->
-    <section>
-      <div class="section-title">Where it stands</div>
-      <div class="card" style="text-align:center; padding:20px;">
-        <p style="font-size:1.1rem; margin-bottom:4px;">✅ Live on Render — <a href="https://music-self.onrender.com" target="_blank" style="color:var(--accent);text-decoration:underline;">music-self.onrender.com</a></p>
-        <p style="font-size:0.85rem; color:var(--text-dim);">Flask backend (auth, Netease QR login, playlist import, admin endpoint) + React frontend. Stack: api-enhanced (Render Node) → Flask (Render Python).</p>
-      </div>
-      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:12px;">
-        <a class="btn" href="https://music-self.onrender.com" target="_blank">🚀 Live App</a>
-        <a class="btn btn-outline" href="progress.html">📋 Progress</a>
-        <a class="btn btn-outline" href="story.html">📖 Origin story</a>
-        <a class="btn btn-outline" href="https://github.com/Rex188/csmusic">GitHub</a>
+      <div class="section-title">What you can do</div>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="icon">🔗</div>
+          <h4>Connect</h4>
+          <p>Link your Netease Cloud Music account via QR code in seconds</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">📦</div>
+          <h4>Import</h4>
+          <p>Pull in all your playlists and discover patterns in your music</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🔮</div>
+          <h4>Explore</h4>
+          <p>Your music-self grows as you do — visualize your listening lens</p>
+        </div>
       </div>
     </section>
 
     <!-- CTA -->
     <section>
       <div class="cta-box">
-        <h2>💬 Does this resonate?</h2>
-        <p>Or does it miss? The concept is fresh — your take shapes where it goes next. Open an issue, I read everything.</p>
-        <a class="btn" href="https://github.com/Rex188/csmusic/issues/new" target="_blank">Share your perspective →</a>
+        <h2>🌱 Your perspective, made visible</h2>
+        <p>Try it now. No commitment, no data stored server-side unless you sign up.</p>
+        <a class="cta-big" href="https://music-self.onrender.com" target="_blank" style="position:static;transform:none;box-shadow:none;background:var(--accent);color:#0b0d14;font-weight:700;font-size:1.15rem;padding:16px 44px;border-radius:48px;text-decoration:none;display:inline-block;">Open Music-Self →</a>
       </div>
     </section>
 
   </div>
 
   <footer>
-    Music-Self &nbsp;·&nbsp; Built by <a href="https://github.com/Rex188">Rex188</a> &nbsp;·&nbsp; <a href="story.html">Story</a> &nbsp;·&nbsp; <a href="https://github.com/Rex188/csmusic">GitHub</a>
+    Music-Self &nbsp;·&nbsp; Built by <a href="https://github.com/Rex188">Rex188</a> &nbsp;·&nbsp;
+    <a href="story.html">Story</a> &nbsp;·&nbsp;
+    <a href="progress.html">Progress</a> &nbsp;·&nbsp;
+    <a href="https://github.com/Rex188/csmusic">GitHub</a> &nbsp;·&nbsp;
+    <a href="https://music-self.onrender.com" target="_blank">Live App</a>
   </footer>
 
 </body>
