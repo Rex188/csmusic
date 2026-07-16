@@ -148,23 +148,26 @@ def analyze_playlist(playlist_id):
     ).fetchone()
     job_id = job_row["id"]
 
-    # Try to check audio availability via Netease API (best-effort)
+    # Try to check audio availability via Netease API (batched — single request)
     cookie = _get_cookie(uid)
-    accessible = 0
     total = len(tracks)
-    audio_sample = None  # first available audio URL for preview
+    accessible = 0
+    audio_sample = None
 
-    for track in tracks:
-        if cookie:
-            url_data = _call_ncm("/song/url", {"id": track["netease_track_id"], "cookie": cookie}, timeout=30)
+    if cookie:
+        try:
+            # Batch ALL track IDs into a single /song/url request (API supports comma-separated)
+            all_ids = ",".join(t["netease_track_id"] for t in tracks)
+            url_data = _call_ncm("/song/url", {"id": all_ids, "cookie": cookie}, timeout=30)
             inner = _unwrap(url_data)
             songs = inner.get("data", []) if isinstance(inner, dict) else []
-            if songs and songs[0].get("url"):
-                accessible += 1
-                if not audio_sample:
-                    audio_sample = {"track_id": track["id"], "name": track["name"], "url": songs[0]["url"]}
-        else:
-            break
+            for song in songs:
+                if song and song.get("url"):
+                    accessible += 1
+                    if not audio_sample:
+                        audio_sample = {"track_id": song.get("id"), "name": song.get("name", "?"), "url": song["url"]}
+        except Exception as e:
+            print(f"[analysis] audio check failed (non-fatal): {e}")
 
     summary = {
         "total_tracks": total,
