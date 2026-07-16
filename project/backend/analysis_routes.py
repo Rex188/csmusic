@@ -58,7 +58,11 @@ def _call_llm(system_prompt, user_prompt):
     )
 
     if resp.status_code != 200:
-        raise Exception(f"LLM API returned {resp.status_code}: {resp.text[:300]}")
+        key_preview = LLM_API_KEY[:6] + "..." if len(LLM_API_KEY) > 6 else "(empty)"
+        raise Exception(
+            f"LLM API returned {resp.status_code} (key={key_preview}, url={LLM_API_URL}, model={LLM_MODEL}): "
+            f"{resp.text[:300]}"
+        )
 
     data = resp.json()
     return data["choices"][0]["message"]["content"]
