@@ -103,6 +103,9 @@ def _init_sqlite():
     conn.commit()
     conn.close()
 
+    # ── Migrations for databases created before schema changes ──
+    _run_migrations_sqlite()
+
 
 # ── PostgreSQL backend (Render production) ─────────────────────────
 
@@ -206,6 +209,32 @@ def _init_postgres():
         )
     """)
     db.commit()
+    db.close()
+
+    _run_migrations_postgres()
+
+
+# ── Schema migrations ──────────────────────────────────────────────
+
+def _run_migrations_sqlite():
+    """Apply schema changes to existing databases (must be idempotent)."""
+    conn = _sqlite_db()
+    try:
+        conn.execute("ALTER TABLE users ADD COLUMN email_verified INTEGER DEFAULT 0")
+        conn.commit()
+    except Exception:
+        conn.rollback()  # Column already exists — ignore
+    conn.close()
+
+
+def _run_migrations_postgres():
+    """Apply schema changes to existing PostgreSQL databases."""
+    db = _postgres_db()
+    try:
+        db.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified INTEGER DEFAULT 0")
+        db.commit()
+    except Exception:
+        db.rollback()
     db.close()
 
 
