@@ -15,11 +15,15 @@ You're not sharing a playlist. You're showing someone how you process reality.
 | ✅ | Sign up / login with bcrypt auth |
 | ✅ | Netease Cloud Music QR login (5-state UX + countdown) |
 | ✅ | Playlist import from Netease (parallel fetching, error-resilient) |
-| ✅ | Admin endpoint / API key protected (`/api/admin?key=xxx`) |
+| ✅ | **Playlist selection** — clickable cards + track detail panel |
+| ✅ | **LLM playlist analysis** — DeepSeek/OpenAI/Ollama (vibe, mood, energy, valence, tempo, genres) |
+| ✅ | **Admin panel UI** — `/admin` page with key login, user/playlist/Netease management |
+| ✅ | **Email verification** — signup verification via SMTP (Brevo/SendGrid) |
+| ✅ | Admin API (`/api/admin?key=xxx`) + local CLI (`python admin.py all`) |
 | ✅ | QR login UX — generating/waiting/scanning/connecting/expired states |
 | ✅ | Error handling — JSON-safe API client, informative error messages |
 | ✅ | 2-server production stack: api-enhanced (Render Node) → Flask (Render Python) |
-| 🧪 | Next: visual landscape, audio analysis, social features |
+| 🧪 | Next: visual landscape/garden UI, audio analysis (librosa), social features |
 | 📖 | [Full progress page →](https://rex188.github.io/csmusic/progress.html) |
 
 ---

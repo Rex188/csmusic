@@ -237,8 +237,12 @@
       <div class="label">Services Deployed</div>
     </div>
     <div class="stat-card">
-      <div class="number" style="color:var(--green)">8</div>
+      <div class="number" style="color:var(--green)">15</div>
       <div class="label">Bugs Fixed</div>
+    </div>
+    <div class="stat-card">
+      <div class="number" style="color:var(--yellow)">2</div>
+      <div class="label">Major Features Built</div>
     </div>
   </div>
 
@@ -321,7 +325,7 @@
         <h3>Pending</h3>
         <div class="task-card">
           <div class="task-title">Visual landscape / garden UI</div>
-          <div class="task-meta">The core visual metaphor — how features map to visual elements. Garden? Geometry?</div>
+          <div class="task-meta">The core visual metaphor — how features map to visual elements. The big one.</div>
         </div>
         <div class="task-card">
           <div class="task-title">Librosa audio analysis pipeline</div>
@@ -339,36 +343,36 @@
       <div class="task-col">
         <h3>Decided ✓</h3>
         <div class="task-card">
+          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Admin panel UI</div>
+          <div class="task-meta">/admin page with key login, stats cards, User/Playlist/Netease management tables with cascade delete + confirm</div>
+        </div>
+        <div class="task-card">
+          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Email verification flow</div>
+          <div class="task-meta">Signup sends verification via SMTP (Brevo/SendGrid) or console fallback. Dashboard banner. Admin shows verified status.</div>
+        </div>
+        <div class="task-card">
+          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Playlist analysis (LLM)</div>
+          <div class="task-meta">Sample up to 40 tracks, send to LLM (DeepSeek/OpenAI/Ollama), structured analysis: vibe, mood, energy, valence, tempo, genres, insight.</div>
+        </div>
+        <div class="task-card">
+          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Playlist selection + detail panel</div>
+          <div class="task-meta">Clickable cards with purple highlight. Detail panel shows track list with covers/artists + Analyze button.</div>
+        </div>
+        <div class="task-card">
           <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Deployed to Render</div>
-          <div class="task-meta">2 services: api-enhanced (Node.js) + music-self (Flask). Live at music-self.onrender.com. Admin endpoint with API key auth.</div>
+          <div class="task-meta">2 services: api-enhanced (Node.js) + music-self (Flask). Live at music-self.onrender.com.</div>
         </div>
         <div class="task-card">
           <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Playlist import &amp; rendering</div>
-          <div class="task-meta">Import uses parallel ThreadPoolExecutor. Tracks saved with artist/album/duration. Dashboard shows cover + track count.</div>
+          <div class="task-meta">Import uses parallel ThreadPoolExecutor. Tracks saved with artist/album/duration.</div>
         </div>
         <div class="task-card">
           <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>QR login UX overhaul</div>
-          <div class="task-meta">5 states (generating/waiting/scanning/connecting/expired) + pulsing border + countdown timer. Backend unwrapping fixed.</div>
-        </div>
-        <div class="task-card">
-          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Error handling improvements</div>
-          <div class="task-meta">JSON-safe API client (content-type check), artist None crash fix, DB lock recovery.</div>
+          <div class="task-meta">5 states + pulsing border + countdown timer. Backend unwrapping fixed.</div>
         </div>
         <div class="task-card">
           <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>V1 skeleton implemented</div>
-          <div class="task-meta">Flask backend (auth, Netease QR login, playlist import) + React frontend (login/signup/dashboard). All verified working.</div>
-        </div>
-        <div class="task-card">
-          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">LOCKED</span>Music-Self direction</div>
-          <div class="task-meta">"Music as perception" — private visual space that grows with you.</div>
-        </div>
-        <div class="task-card">
-          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Pitch reframed</div>
-          <div class="task-meta">From "emotional support garden" → "your lens, made visible." Sharp, not cringe.</div>
-        </div>
-        <div class="task-card">
-          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Infrastructure ready</div>
-          <div class="task-meta">Python venv, Flask, React, Vite, SQLite, Netease API server all set.</div>
+          <div class="task-meta">Flask backend (auth, QR login, playlist import) + React frontend (login/signup/dashboard).</div>
         </div>
       </div>
     </div>
@@ -458,12 +462,51 @@
         <div class="title">Admin endpoint + CLI script</div>
         <div class="desc">Added /api/admin?key=xxx endpoint protected by ADMIN_KEY env var. Returns all users, netease connections, playlists, track count. Local admin.py CLI (python admin.py all) for database inspection.</div>
       </div>
+      <div class="timeline-item">
+        <div class="date">2026-07-16</div>
+        <div class="title">Playlist selection + LLM analysis</div>
+        <div class="desc">Clickable playlist cards with track detail panel. Analyze button samples tracks and sends to DeepSeek/OpenAI LLM for structured analysis (vibe, mood, energy, valence, tempo, genres, insight).</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">2026-07-16</div>
+        <div class="title">Admin panel UI + routing fixes</div>
+        <div class="desc">Full /admin page: key login, stats cards, User/Playlist/Netease tables with cascade delete. Fixed catch-all route conflicts with blueprint POST/DELETE routes. Added user_id to admin netease query.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">2026-07-16</div>
+        <div class="title">Email verification system</div>
+        <div class="desc">Signup triggers verification email (SMTP/Brevo). /auth/verify/&lt;token&gt; endpoint auto-login. Dashboard banner with resend. Admin shows verified/unverified status. Migration system for existing databases.</div>
+      </div>
     </div>
   </section>
 
   <!-- Activity -->
   <section>
     <div class="section-title">📝 Activity Log</div>
+    <div class="log-entry">
+      <span class="log-date">2026-07-16</span>
+      <div class="log-msg">Email verification: signup sends email (SMTP/console), /auth/verify/&lt;token&gt; endpoint, dashboard banner, admin verification status. Migration system for existing DBs.</div>
+    </div>
+    <div class="log-entry">
+      <span class="log-date">2026-07-16</span>
+      <div class="log-msg">Admin panel routing fixed: removed catch-all /&lt;path:path&gt;, explicit static routes + 404 SPA fallback. Fixed DELETE body ignored by WSGI (key now in query params). Fixed cascade delete FOREIGN KEY constraint on email_verifications.</div>
+    </div>
+    <div class="log-entry">
+      <span class="log-date">2026-07-16</span>
+      <div class="log-msg">Admin panel UI: /admin page with key auth, stats cards, User/Playlist/Netease tables with cascade delete and confirm dialog.</div>
+    </div>
+    <div class="log-entry">
+      <span class="log-date">2026-07-16</span>
+      <div class="log-msg">Playlist analysis (LLM): samples tracks, sends to DeepSeek/OpenAI/Ollama, returns structured analysis (vibe, mood, energy, valence, tempo, genres). Dropped slow audio URL checking.</div>
+    </div>
+    <div class="log-entry">
+      <span class="log-date">2026-07-16</span>
+      <div class="log-msg">Playlist selection: clickable cards with purple highlight, detail panel with track list + covers + Analyze button. New GET /api/analysis/tracks/&lt;id&gt; endpoint.</div>
+    </div>
+    <div class="log-entry">
+      <span class="log-date">2026-07-16</span>
+      <div class="log-msg">QR timeouts bumped 15s→45s for Render cold start. Config added for LLM_API_KEY/URL/MODEL + SMTP_HOST/PORT/USER/PASS/FROM + APP_URL.</div>
+    </div>
     <div class="log-entry">
       <span class="log-date">2026-07-16</span>
       <div class="log-msg">Admin endpoint + CLI: /api/admin?key=xxx (ADMIN_KEY protected) and local admin.py (python admin.py all) for inspecting users, playlists, tracks, netease connections.</div>
@@ -536,7 +579,7 @@
   <hr>
 
   <footer>
-    Music-Self &nbsp;·&nbsp; <a href="https://music-self.onrender.com" target="_blank">Try the App</a> &nbsp;·&nbsp; Last updated 2026-07-16
+    Music-Self &nbsp;·&nbsp; <a href="https://music-self.onrender.com" target="_blank">Try the App</a> &nbsp;·&nbsp; Last updated 2026-07-16 (v2)
   </footer>
 
 </div>

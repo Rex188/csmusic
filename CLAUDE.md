@@ -40,9 +40,12 @@ D:/music thera/                        # ← Project root
     │   ├── app.py                     #     Flask entry point — import this to find all routes
     │   ├── config.py                  #     Env var loading (SECRET_KEY, DATABASE_PATH, NCM_API)
     │   ├── models.py                  #     DB init — SQLite local, PostgreSQL production (DATABASE_URL)
-    │   ├── auth.py                    #     Blueprint: signup, login, logout
+    │   ├── auth.py                    #     Blueprint: signup (with email verification), login, logout, verify, resend
     │   ├── netease_routes.py          #     Blueprint: QR key/create/check, connect, status, disconnect
     │   ├── playlist_routes.py         #     Blueprint: GET /playlists, POST /playlists/import
+    │   ├── analysis_routes.py         #     Blueprint: /tracks/<id>, /analyze/<id> (LLM), /status/<id>, /_diag
+    │   ├── admin_routes.py            #     Blueprint: /admin dashboard + DELETE user/playlist + disconnect
+    │   ├── email_service.py           #     SMTP email sender for verification
     │   ├── admin.py                   #     CLI: python admin.py <users|playlists|tracks|netease|all>
     │   ├── requirements.txt           #     flask, flask-cors, bcrypt, python-dotenv, requests, psycopg2-binary
     │   ├── .env.example               #     Config template → copy to .env and edit
@@ -61,8 +64,10 @@ D:/music thera/                        # ← Project root
     │   │   ├── assets/                #     Static images (React logo, etc.)
     │   │   └── pages/
     │   │       ├── Login.jsx          #     Email + password form → /dashboard
-    │   │       ├── Signup.jsx         #     Email + password + confirm → /dashboard
-    │   │       └── Dashboard.jsx      #     ★ Main page: QR login, playlist import, grid
+    │   │       ├── Signup.jsx         #     Signup with verification prompt
+    │   │       ├── Dashboard.jsx      #     ★ Main page: QR login, playlist grid, detail panel, analysis
+    │   │       ├── Admin.jsx          #     /admin: key login, user/playlist/Netease management
+    │   │       └── Verify.jsx         #     /verify?token=xxx: email verification page
     │   ├── public/
     │   │   ├── favicon.svg
     │   │   └── icons.svg
@@ -87,10 +92,10 @@ D:/music thera/                        # ← Project root
 
 | When you need to… | Go to this file |
 |---|---|
-| Find a backend route | `project/backend/app.py` — lists all blueprints |
-| Find an API endpoint definition | `project/backend/auth.py` / `netease_routes.py` / `playlist_routes.py` |
+| Find a backend route | `project/backend/app.py` — lists all 6 blueprints |
+| Find an API endpoint definition | `auth.py` / `netease_routes.py` / `playlist_routes.py` / `analysis_routes.py` / `admin_routes.py` |
 | Find an API call from the frontend | `project/frontend/src/api.js` — all endpoints listed |
-| Change the UI | `project/frontend/src/pages/Dashboard.jsx` (main) or `Login.jsx` / `Signup.jsx` |
+| Change the UI | `project/frontend/src/pages/Dashboard.jsx` (main) or `Signup.jsx` / `Admin.jsx` / `Verify.jsx` |
 | Change CSS/styling | `project/frontend/src/index.css` |
 | Change the database schema | `project/backend/models.py` — `init_db()` |
 | See what a route expects/returns | `project/tasks.md` — original spec with request/response formats |
@@ -362,6 +367,50 @@ This re-frames everything:
 
 ---
 
+#### Phase 12 — Feature Expansion: LLM Analysis, Admin Panel, Email Verification (2026-07-16)
+
+**Context:** V1 was stable and deployed. User requested three major features in rapid succession.
+
+**Feature 1 — Playlist Selection & Analysis**
+- User wanted to analyze specific playlists (not all at once)
+- Clickable playlist cards with purple highlight + detail panel showing track list
+- LLM-based analysis: samples up to 40 tracks, sends to LLM, returns structured result
+- Supports DeepSeek (default), OpenAI, or Ollama via `LLM_API_KEY`/`LLM_API_URL`/`LLM_MODEL` env vars
+- Replaced slow per-track audio URL checking with batch LLM analysis
+
+**Feature 2 — Admin Panel UI**
+- Admin key login at `/admin`, persisted in sessionStorage
+- Stats dashboard: users, connections, playlists, tracks, analyses
+- Management tables with cascade Delete (user/playlist) and Disconnect (Netease)
+- Two-step confirm dialog to prevent accidents
+- Routing fixes: catch-all `/<path:path>` conflicted with blueprint POST/DELETE routes — removed entirely, replaced with explicit static routes + 404 SPA fallback
+
+**Feature 3 — Email Verification**
+- `email_verified` column on users table + `email_verifications` table with expiry
+- SMTP-based sending via Brevo/SendGrid (or console log in dev/dev mode)
+- `/auth/verify/<token>` endpoint auto-logs in user on success
+- Dashboard shows verification banner with Resend button
+- Login warns if email not verified
+- Admin shows verification status
+
+**Bugfixes during Phase 12:**
+1. **DELETE body ignored by WSGI** — gunicorn doesn't parse DELETE request bodies. Key moved from body to query param.
+2. **FOREIGN KEY constraint** — `email_verifications` referenced `users(id)` but cascade delete didn't clean it up. 500 on user delete.
+3. **Catch-all routing** — `@app.route("/<path:path>")` overrode blueprint POST/DELETE. Replaced with explicit static routes + 404 handler.
+4. **email_verified column missing** — existing DBs didn't have the column. Added migration functions.
+5. **Track cover not displaying** — SQL query in track listing was missing `image_url` field.
+
+**New files:**
+- `backend/analysis_routes.py` — 4 endpoints: tracks, analyze, status, diag
+- `backend/admin_routes.py` — 4 endpoints: dashboard, delete user, delete playlist, disconnect
+- `backend/email_service.py` — SMTP sender with dev fallback
+- `frontend/src/pages/Admin.jsx` — admin panel UI
+- `frontend/src/pages/Verify.jsx` — verification page
+
+**Status:** All Phase 12 features deployed and working on Render. Docs updated.
+
+---
+
 ## Timeline
 
 | Date | Event |
@@ -385,3 +434,7 @@ This re-frames everything:
 | 2026-07-16 | **All docs updated.** `docs/progress.html`, `docs/index.html`, `README.md`, `CLAUDE.md` all reflecting working V1 state with QR login, playlist import, and error resilience. |
 | 2026-07-16 | **Deployed to Render (production).** Two services: api-enhanced (Node, free tier) + music-self (Flask Python, free tier). Flask serves built React frontend statically. NCM_API configurable via env var. Live at `https://music-self.onrender.com`. |
 | 2026-07-16 | **Admin endpoint + CLI script.** Added `/api/admin?key=xxx` endpoint (protected by `ADMIN_KEY` env var) returning all users, netease connections, playlists, track count. Local `python admin.py all` CLI for database inspection. |
+| 2026-07-16 | **Playlist selection + LLM analysis.** Clickable playlist cards with detail panel. LLM analysis (DeepSeek/OpenAI) returns vibe, mood, energy, valence, tempo, genres. New `analysis_routes.py`. |
+| 2026-07-16 | **Admin panel UI.** `/admin` page with key login, stats cards, User/Playlist/Netease management. Cascade delete with confirm. Routing fixed (catch-all removed). New `admin_routes.py`, `Admin.jsx`. |
+| 2026-07-16 | **Email verification.** SMTP-based (Brevo/SendGrid). Verification table + column. Verify/resend endpoints. Dashboard banner. New `email_service.py`, `Verify.jsx`. |
+| 2026-07-16 | **All docs updated.** Phase 12 changes reflected in `tasks.md`, `progress.html`, `index.html`, `README.md`, `CLAUDE.md`. |
