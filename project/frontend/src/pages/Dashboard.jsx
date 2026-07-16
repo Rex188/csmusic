@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
+import { addToast } from '../components/Toast';
 
 function PlaylistCard({ pl }) {
   return (
@@ -29,16 +30,14 @@ export default function Dashboard() {
   const [netease, setNetease] = useState({ connected: false });
   const [playlists, setPlaylists] = useState([]);
   const [importing, setImporting] = useState(false);
-  const [importResult, setImportResult] = useState(null);
+  const [importingToast, setImportingToast] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // QR login state
-  const [qrStatus, setQrStatus] = useState('');         // '' | 'generating' | 'waiting' | 'scanning' | 'connecting' | 'expired'
+  const [qrStatus, setQrStatus] = useState('');
   const [qrImg, setQrImg] = useState(null);
   const [qrKey, setQrKey] = useState(null);
   const [countdown, setCountdown] = useState(180);
-  const [pollError, setPollError] = useState('');
-  const [waitingHint, setWaitingHint] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -87,11 +86,8 @@ export default function Dashboard() {
   };
 
   const handleShowQr = async () => {
-    // Clear any existing poll / countdown
     if (pollRef.current) clearTimeout(pollRef.current);
     stopCountdown();
-    setPollError('');
-    setWaitingHint(false);
     setQrImg(null);
     setQrKey(null);
     setQrStatus('generating');
@@ -109,17 +105,22 @@ export default function Dashboard() {
       setQrStatus('waiting');
       startCountdown();
 
-      // Poll loop — recursive setTimeout
+      // Show toast explaining the wait
+      const waited = setTimeout(() => {
+        addToast(
+          '⏳ Connecting to Netease server... This can take 1–3 minutes. Please stay on this page.',
+          'warning', 6000
+        );
+      }, 15000);
+
       let pollFailCount = 0;
-      let pollCount = 0;
       const poll = async () => {
         try {
           const check = await api.neteaseQrCheck(key);
           pollFailCount = 0;
-          setPollError('');
 
           if (check.code === 803) {
-            // Scanned and confirmed — save cookie
+            clearTimeout(waited);
             stopCountdown();
             setQrStatus('connecting');
             const connectResp = await api.neteaseConnect(check.cookie);
@@ -127,27 +128,28 @@ export default function Dashboard() {
             setQrStatus('');
             setQrImg(null);
             setQrKey(null);
+            addToast(`✅ Connected as ${connectResp.nickname}`, 'success');
             return;
           }
 
           if (check.code === 802) {
             setQrStatus('scanning');
+            addToast('📱 Scanned! Please confirm on your phone.', 'info', 3000);
           } else if (check.code === 800) {
             setQrStatus('expired');
             stopCountdown();
+            clearTimeout(waited);
+            addToast('QR code expired. Generate a new one.', 'error');
             return;
           }
-          // 801 = still waiting, keep polling
-          pollCount++;
-          if (pollCount >= 8) setWaitingHint(true);
           pollRef.current = setTimeout(poll, 2000);
         } catch (err) {
           pollFailCount++;
-          console.error('[QR] poll error:', err);
           if (pollFailCount >= 15) {
-            setPollError('Connection lost — please retry');
+            clearTimeout(waited);
             setQrStatus('expired');
             stopCountdown();
+            addToast('Connection lost — please retry.', 'error');
             return;
           }
           pollRef.current = setTimeout(poll, 2000);
@@ -158,23 +160,27 @@ export default function Dashboard() {
     } catch (err) {
       console.error('[QR] setup error:', err);
       setQrStatus('expired');
+      addToast('Failed to generate QR code. Please try again.', 'error');
     }
   };
 
   const handleRetryQr = () => {
     handleShowQr();
+    addToast('Generating new QR code...', 'info', 2000);
   };
 
   const handleImport = async () => {
     setImporting(true);
-    setImportResult(null);
+    setImportingToast(false);
     try {
       const result = await api.importPlaylists();
       setPlaylists(result.playlists);
-      const count = result.playlists.length;
-      setImportResult({ tracks: result.imported, playlists: count });
+      addToast(
+        `✅ Imported ${result.imported} tracks across ${result.playlists.length} playlists`,
+        'success', 5000
+      );
     } catch (err) {
-      alert(err.message);
+      addToast(`❌ ${err.message}`, 'error', 5000);
     }
     setImporting(false);
   };
@@ -185,6 +191,14 @@ export default function Dashboard() {
     await api.logout();
     navigate('/login');
   };
+
+  // Show a persistent toast while importing
+  useEffect(() => {
+    if (importing && !importingToast) {
+      setImportingToast(true);
+      addToast('⏳ Importing your playlists... This may take a while.', 'info', 999999);
+    }
+  }, [importing, importingToast]);
 
   if (loading) return <div className="container" style={{ textAlign: 'center', paddingTop: 80 }}>Loading...</div>;
 
@@ -213,10 +227,9 @@ export default function Dashboard() {
             <button onClick={handleShowQr}>Connect Netease Cloud Music</button>
           )}
 
-          {/* QR flow — 5 states */}
+          {/* QR flow */}
           {!netease.connected && qrStatus !== '' && (
             <div style={{ textAlign: 'center' }}>
-              {/* State 1: generating */}
               {qrStatus === 'generating' && (
                 <div>
                   <div className="spinner" />
@@ -224,7 +237,6 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* States 2-3: waiting / scanning */}
               {qrImg && (qrStatus === 'waiting' || qrStatus === 'scanning') && (
                 <div>
                   <div style={{ position: 'relative', display: 'inline-block' }}>
@@ -252,11 +264,6 @@ export default function Dashboard() {
                       ? '✅ Scanned! Confirm on your phone...'
                       : '📱 Scan with Netease Cloud Music app'}
                   </p>
-                  {qrStatus === 'waiting' && waitingHint && (
-                    <p style={{ fontSize: 12, color: '#666', marginTop: 4, maxWidth: 200 }}>
-                      Waiting for server... This can take 1–3 minutes. Stay on this page.
-                    </p>
-                  )}
                   {qrStatus === 'waiting' && countdown > 0 && (
                     <p style={{ fontSize: 12, color: '#555', marginTop: 4 }}>
                       Expires in {Math.floor(countdown / 60)}:{String(countdown % 60).padStart(2, '0')}
@@ -265,7 +272,6 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* State 4: connecting */}
               {qrStatus === 'connecting' && (
                 <div>
                   <div className="spinner" />
@@ -273,10 +279,9 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* State 5: expired / error */}
               {qrStatus === 'expired' && (
                 <div>
-                  <p style={{ fontSize: 14, color: '#f87171', marginBottom: 12 }}>{pollError || 'QR code expired'}</p>
+                  <p style={{ fontSize: 14, color: '#f87171', marginBottom: 12 }}>QR code expired</p>
                   <button onClick={handleRetryQr} style={{ background: '#1a1a1a', color: '#a78bfa' }}>
                     Generate new QR code
                   </button>
@@ -285,22 +290,9 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* Import section */}
+          {/* Import button */}
           {netease.connected && !importing && (
             <button onClick={handleImport}>Import Playlists</button>
-          )}
-
-          {importing && (
-            <div className="import-progress">
-              <div className="spinner" />
-              <span>Importing your playlists…</span>
-            </div>
-          )}
-
-          {importResult && (
-            <div className="import-success">
-              ✅ Imported {importResult.tracks} tracks across {importResult.playlists} playlists
-            </div>
           )}
         </div>
       </div>
@@ -321,15 +313,9 @@ export default function Dashboard() {
         </>
       )}
 
-      {playlists.length === 0 && netease.connected && !importing && !importResult && (
+      {playlists.length === 0 && netease.connected && !importing && (
         <p style={{ textAlign: 'center', color: '#555', marginTop: 40 }}>
           No playlists yet. Click "Import Playlists" to get started.
-        </p>
-      )}
-
-      {playlists.length === 0 && importResult && importResult.playlists === 0 && (
-        <p style={{ textAlign: 'center', color: '#555', marginTop: 40 }}>
-          No playlists found on your Netease account.
         </p>
       )}
     </div>
