@@ -22,47 +22,122 @@ function PlaylistCard({ pl }) {
   );
 }
 
+/* ── sessionStorage helpers for QR state ─────────────────────────── */
+
+const QR_KEY = 'music-self-qr';
+
+function saveQrState(state) {
+  try { sessionStorage.setItem(QR_KEY, JSON.stringify(state)); } catch {}
+}
+
+function loadQrState() {
+  try {
+    const raw = sessionStorage.getItem(QR_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+function clearQrState() {
+  try { sessionStorage.removeItem(QR_KEY); } catch {}
+}
+
+/* ── Component ───────────────────────────────────────────────────── */
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const pollRef = useRef(null);
   const countdownRef = useRef(null);
+  const waitedRef = useRef(null);
+  const startedRef = useRef(null);
   const [user, setUser] = useState(null);
   const [netease, setNetease] = useState({ connected: false });
   const [playlists, setPlaylists] = useState([]);
   const [importing, setImporting] = useState(false);
-  const [importingToast, setImportingToast] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // QR login state
-  const [qrStatus, setQrStatus] = useState('');
-  const [qrImg, setQrImg] = useState(null);
-  const [qrKey, setQrKey] = useState(null);
+  // QR login state — restore from sessionStorage if available
+  const saved = loadQrState();
+  const [qrStatus, setQrStatus] = useState(saved?.status || '');
+  const [qrImg, setQrImg] = useState(saved?.img || null);
+  const [qrKey, setQrKey] = useState(saved?.key || null);
   const [countdown, setCountdown] = useState(180);
 
+  // Keep sessionStorage in sync with QR state
+  const syncRef = useRef({ qrStatus, qrImg, qrKey });
+
   useEffect(() => {
-    (async () => {
+    syncRef.current = { status: qrStatus, img: qrImg, key: qrKey };
+    if (qrStatus && qrStatus !== '' && qrStatus !== 'connecting' && qrImg) {
+      saveQrState({ status: qrStatus, img: qrImg, key: qrKey });
+    } else if (!qrStatus || qrStatus === '' || qrStatus === 'connecting') {
+      clearQrState();
+    }
+  }, [qrStatus, qrImg, qrKey]);
+
+  /* ── Polling logic ─────────────────────────────────────────────── */
+
+  const startPolling = (key) => {
+    stopCountdown();
+    startCountdown();
+
+    const waited = setTimeout(() => {
+      addToast(
+        '⏳ Connecting to Netease server... This can take 1–3 minutes. Please stay on this page.',
+        'warning', 6000
+      );
+    }, 15000);
+    waitedRef.current = waited;
+
+    let pollFailCount = 0;
+    const poll = async () => {
       try {
-        const me = await api.me();
-        setUser(me.user);
-      } catch {
-        navigate('/login');
-        return;
+        const check = await api.neteaseQrCheck(key);
+        pollFailCount = 0;
+
+        if (check.code === 803) {
+          clearTimeout(waited);
+          stopCountdown();
+          setQrStatus('connecting');
+          const connectResp = await api.neteaseConnect(check.cookie);
+          setNetease(connectResp);
+          setQrStatus('');
+          setQrImg(null);
+          setQrKey(null);
+          addToast(`✅ Connected as ${connectResp.nickname}`, 'success');
+          clearQrState();
+          return;
+        }
+
+        if (check.code === 802) {
+          setQrStatus('scanning');
+          addToast('📱 Scanned! Please confirm on your phone.', 'info', 3000);
+        } else if (check.code === 800) {
+          setQrStatus('expired');
+          stopCountdown();
+          clearTimeout(waited);
+          addToast('QR code expired. Generate a new one.', 'error');
+          clearQrState();
+          return;
+        }
+        pollRef.current = setTimeout(poll, 2000);
+      } catch (err) {
+        pollFailCount++;
+        if (pollFailCount >= 15) {
+          clearTimeout(waited);
+          setQrStatus('expired');
+          stopCountdown();
+          addToast('Connection lost — please retry.', 'error');
+          clearQrState();
+          return;
+        }
+        pollRef.current = setTimeout(poll, 2000);
       }
-      try {
-        const st = await api.neteaseStatus();
-        setNetease(st);
-      } catch {}
-      try {
-        const pl = await api.getPlaylists();
-        setPlaylists(pl.playlists);
-      } catch {}
-      setLoading(false);
-    })();
-    return () => {
-      if (pollRef.current) clearTimeout(pollRef.current);
-      if (countdownRef.current) clearInterval(countdownRef.current);
     };
-  }, []);
+
+    poll();
+  };
+
+  /* ── Countdown ─────────────────────────────────────────────────── */
 
   const startCountdown = () => {
     setCountdown(300);
@@ -85,9 +160,50 @@ export default function Dashboard() {
     }
   };
 
+  /* ── Mount ─────────────────────────────────────────────────────── */
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const me = await api.me();
+        setUser(me.user);
+      } catch {
+        navigate('/login');
+        return;
+      }
+      try {
+        const st = await api.neteaseStatus();
+        setNetease(st);
+      } catch {}
+      try {
+        const pl = await api.getPlaylists();
+        setPlaylists(pl.playlists);
+      } catch {}
+      setLoading(false);
+
+      // Resume QR polling if there's an active session
+      const saved = loadQrState();
+      if (saved && saved.key && saved.status === 'waiting') {
+        setQrKey(saved.key);
+        setQrImg(saved.img);
+        setQrStatus('waiting');
+        startPolling(saved.key);
+      }
+    })();
+    return () => {
+      if (pollRef.current) clearTimeout(pollRef.current);
+      if (countdownRef.current) clearInterval(countdownRef.current);
+      if (waitedRef.current) clearTimeout(waitedRef.current);
+    };
+  }, []);
+
+  /* ── Handlers ──────────────────────────────────────────────────── */
+
   const handleShowQr = async () => {
     if (pollRef.current) clearTimeout(pollRef.current);
+    if (waitedRef.current) clearTimeout(waitedRef.current);
     stopCountdown();
+    clearQrState();
     setQrImg(null);
     setQrKey(null);
     setQrStatus('generating');
@@ -103,60 +219,7 @@ export default function Dashboard() {
       if (!imgData) throw new Error('Failed to create QR image');
       setQrImg(imgData);
       setQrStatus('waiting');
-      startCountdown();
-
-      // Show toast explaining the wait
-      const waited = setTimeout(() => {
-        addToast(
-          '⏳ Connecting to Netease server... This can take 1–3 minutes. Please stay on this page.',
-          'warning', 6000
-        );
-      }, 15000);
-
-      let pollFailCount = 0;
-      const poll = async () => {
-        try {
-          const check = await api.neteaseQrCheck(key);
-          pollFailCount = 0;
-
-          if (check.code === 803) {
-            clearTimeout(waited);
-            stopCountdown();
-            setQrStatus('connecting');
-            const connectResp = await api.neteaseConnect(check.cookie);
-            setNetease(connectResp);
-            setQrStatus('');
-            setQrImg(null);
-            setQrKey(null);
-            addToast(`✅ Connected as ${connectResp.nickname}`, 'success');
-            return;
-          }
-
-          if (check.code === 802) {
-            setQrStatus('scanning');
-            addToast('📱 Scanned! Please confirm on your phone.', 'info', 3000);
-          } else if (check.code === 800) {
-            setQrStatus('expired');
-            stopCountdown();
-            clearTimeout(waited);
-            addToast('QR code expired. Generate a new one.', 'error');
-            return;
-          }
-          pollRef.current = setTimeout(poll, 2000);
-        } catch (err) {
-          pollFailCount++;
-          if (pollFailCount >= 15) {
-            clearTimeout(waited);
-            setQrStatus('expired');
-            stopCountdown();
-            addToast('Connection lost — please retry.', 'error');
-            return;
-          }
-          pollRef.current = setTimeout(poll, 2000);
-        }
-      };
-
-      poll();
+      startPolling(key);
     } catch (err) {
       console.error('[QR] setup error:', err);
       setQrStatus('expired');
@@ -171,7 +234,7 @@ export default function Dashboard() {
 
   const handleImport = async () => {
     setImporting(true);
-    setImportingToast(false);
+    addToast('⏳ Importing your playlists... This may take a while.', 'info', 999999);
     try {
       const result = await api.importPlaylists();
       setPlaylists(result.playlists);
@@ -187,18 +250,12 @@ export default function Dashboard() {
 
   const handleLogout = async () => {
     if (pollRef.current) clearTimeout(pollRef.current);
+    if (waitedRef.current) clearTimeout(waitedRef.current);
     stopCountdown();
+    clearQrState();
     await api.logout();
     navigate('/login');
   };
-
-  // Show a persistent toast while importing
-  useEffect(() => {
-    if (importing && !importingToast) {
-      setImportingToast(true);
-      addToast('⏳ Importing your playlists... This may take a while.', 'info', 999999);
-    }
-  }, [importing, importingToast]);
 
   if (loading) return <div className="container" style={{ textAlign: 'center', paddingTop: 80 }}>Loading...</div>;
 
