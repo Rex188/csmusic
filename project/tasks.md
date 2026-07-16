@@ -114,4 +114,9 @@ No audio features table yet. Netease API doesn't expose energy/valence/tempo —
 4. **Optional journaling / notes** — attaching thoughts to songs
 5. **iOS app** — postponed
 
+### 🐛 Known Issues
+1. **QR state persistence across users (partial fix in place).** sessionStorage now binds QR state to user ID, but on a shared machine, switching users can still show stale UI if the previous user's QR was in 'waiting' state before logout. Full fix needs proper per-user state cleanup on logout — deferred.
+
 ---
+
+## 🚀 Try It Live
