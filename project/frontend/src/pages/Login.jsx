@@ -7,9 +7,11 @@ export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       const result = await api.login({ email, password });
       if (result.user && !result.user.email_verified) {
@@ -20,6 +22,8 @@ export default function Login() {
       setTimeout(() => navigate('/dashboard'), 300);
     } catch (err) {
       addToast(`❌ ${err.message}`, 'error');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -41,7 +45,14 @@ export default function Login() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button type="submit">Log in</button>
+        <button type="submit" disabled={submitting} style={submitting ? { opacity: 0.6, cursor: 'not-allowed' } : {}}>
+          {submitting ? (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              <span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }}></span>
+              Logging in...
+            </span>
+          ) : 'Log in'}
+        </button>
       </form>
       <p style={{ textAlign: 'center', marginTop: 16, color: '#888' }}>
         No account? <Link to="/signup">Sign up</Link>

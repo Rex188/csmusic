@@ -13,6 +13,7 @@ export default function Signup() {
   const [verificationUrl, setVerificationUrl] = useState(null);
   const [verificationSent, setVerificationSent] = useState(false);
   const [resending, setResending] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,6 +21,7 @@ export default function Signup() {
       addToast('❌ Passwords do not match', 'error');
       return;
     }
+    setSubmitting(true);
     try {
       const result = await api.signup({ email, password });
       setSignupEmail(email);
@@ -29,6 +31,8 @@ export default function Signup() {
       addToast('✅ Account created!', 'success', 3000);
     } catch (err) {
       addToast(`❌ ${err.message}`, 'error');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -123,7 +127,14 @@ export default function Signup() {
           onChange={(e) => setConfirm(e.target.value)}
           required
         />
-        <button type="submit">Sign up</button>
+        <button type="submit" disabled={submitting} style={submitting ? { opacity: 0.6, cursor: 'not-allowed' } : {}}>
+          {submitting ? (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              <span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }}></span>
+              Creating account...
+            </span>
+          ) : 'Sign up'}
+        </button>
       </form>
       <p style={{ textAlign: 'center', marginTop: 16, color: '#888' }}>
         Already have an account? <Link to="/login">Log in</Link>
