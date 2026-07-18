@@ -333,7 +333,7 @@ export default function Dashboard() {
         <div style={{ maxWidth: 'var(--max-width-page)', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h1 style={{
             fontFamily: 'var(--font-display)', fontSize: 'var(--text-lg)', fontWeight: 400,
-            background: 'var(--accent-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+            color: 'var(--text-primary)',
           }}>
             music-self
           </h1>

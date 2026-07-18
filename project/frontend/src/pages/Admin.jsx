@@ -180,7 +180,7 @@ export default function Admin() {
               <div key={s.label} className="card" style={{ textAlign: 'center', padding: 'var(--space-4) var(--space-2)' }}>
                 <div style={{
                   fontSize: 'var(--text-2xl)', fontWeight: 300,
-                  background: 'var(--accent-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                  color: 'var(--text-primary)',
                 }}>
                   {s.value}
                 </div>

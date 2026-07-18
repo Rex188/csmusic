@@ -42,9 +42,7 @@ export default function Verify() {
             fontSize: 'var(--text-2xl)',
             fontWeight: 300,
             letterSpacing: '-0.02em',
-            background: 'var(--accent-gradient)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
+            color: 'var(--text-primary)',
           }}>
             music-self
           </h1>

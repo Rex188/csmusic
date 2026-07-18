@@ -37,9 +37,7 @@ export default function Login() {
             fontSize: 'var(--text-2xl)',
             fontWeight: 300,
             letterSpacing: '-0.02em',
-            background: 'var(--accent-gradient)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
+            color: 'var(--text-primary)',
             marginBottom: 'var(--space-2)'
           }}>
             music-self
