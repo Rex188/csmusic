@@ -325,8 +325,8 @@ export default function Dashboard() {
       {/* ── Glass sticky header ─────────────────────────────────── */}
       <div style={{
         position: 'sticky', top: 0, zIndex: 10,
-        background: 'var(--bg-glass)', backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
+        background: 'var(--bg-glass)', backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
         borderBottom: '1px solid var(--border-subtle)',
         padding: 'var(--space-4) var(--space-6)'
       }}>
