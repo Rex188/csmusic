@@ -237,12 +237,16 @@
       <div class="label">Services Deployed</div>
     </div>
     <div class="stat-card">
-      <div class="number" style="color:var(--green)">15</div>
+      <div class="number" style="color:var(--yellow)">5</div>
+      <div class="label">Major Features Built</div>
+    </div>
+    <div class="stat-card">
+      <div class="number" style="color:var(--green)">20</div>
       <div class="label">Bugs Fixed</div>
     </div>
     <div class="stat-card">
-      <div class="number" style="color:var(--yellow)">2</div>
-      <div class="label">Major Features Built</div>
+      <div class="number" style="color:var(--accent)">1</div>
+      <div class="label">UI Redesign</div>
     </div>
   </div>
 
@@ -343,6 +347,14 @@
       <div class="task-col">
         <h3>Decided ✓</h3>
         <div class="task-card">
+          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Frontend UI Redesign (Apple-Style)</div>
+          <div class="task-meta">Complete design token system, glass cards, gradient accent, Inter typography, 4-button variants. All 6 pages redesigned.</div>
+        </div>
+        <div class="task-card">
+          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Email verification recovery path</div>
+          <div class="task-meta">verification_url always returned. Fallback link when SMTP fails. Loading states for cold-start UX.</div>
+        </div>
+        <div class="task-card">
           <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Admin panel UI</div>
           <div class="task-meta">/admin page with key login, stats cards, User/Playlist/Netease management tables with cascade delete + confirm</div>
         </div>
@@ -361,18 +373,6 @@
         <div class="task-card">
           <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Deployed to Render</div>
           <div class="task-meta">2 services: api-enhanced (Node.js) + music-self (Flask). Live at music-self.onrender.com.</div>
-        </div>
-        <div class="task-card">
-          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Playlist import &amp; rendering</div>
-          <div class="task-meta">Import uses parallel ThreadPoolExecutor. Tracks saved with artist/album/duration.</div>
-        </div>
-        <div class="task-card">
-          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>QR login UX overhaul</div>
-          <div class="task-meta">5 states + pulsing border + countdown timer. Backend unwrapping fixed.</div>
-        </div>
-        <div class="task-card">
-          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>V1 skeleton implemented</div>
-          <div class="task-meta">Flask backend (auth, QR login, playlist import) + React frontend (login/signup/dashboard).</div>
         </div>
       </div>
     </div>
@@ -477,12 +477,39 @@
         <div class="title">Email verification system</div>
         <div class="desc">Signup triggers verification email (SMTP/Brevo). /auth/verify/&lt;token&gt; endpoint auto-login. Dashboard banner with resend. Admin shows verified/unverified status. Migration system for existing databases.</div>
       </div>
+      <div class="timeline-item">
+        <div class="date">2026-07-18</div>
+        <div class="title">Debugger role added</div>
+        <div class="desc">Three-model pipeline: Architect → Implementer → Debugger.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">2026-07-18</div>
+        <div class="title">Email verification recovery path fixed</div>
+        <div class="desc">verification_url always returned. Frontend shows fallback link when SMTP fails. Loading states added for cold-start UX.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">2026-07-18</div>
+        <div class="title">Frontend UI Redesign (Apple-Style)</div>
+        <div class="desc">Complete design token system, glass cards, gradient accent, Inter typography, 4-button system. All 6 pages redesigned, built, and deployed.</div>
+      </div>
     </div>
   </section>
 
   <!-- Activity -->
   <section>
     <div class="section-title">📝 Activity Log</div>
+    <div class="log-entry">
+      <span class="log-date">2026-07-18</span>
+      <div class="log-msg">Frontend UI Redesign (Apple-Style): complete design token system (~200 lines CSS), glass cards, gradient accent, Inter typography, 4-button variants. All 6 pages (Login, Signup, Verify, Dashboard, Admin, Toast) redesigned, built, and deployed to Render.</div>
+    </div>
+    <div class="log-entry">
+      <span class="log-date">2026-07-18</span>
+      <div class="log-msg">Email verification recovery path fixed: verification_url always returned (signup + resend). Frontend shows clickable fallback link when SMTP fails. Signup/Login loading states added for cold-start UX.</div>
+    </div>
+    <div class="log-entry">
+      <span class="log-date">2026-07-18</span>
+      <div class="log-msg">Debugger role added: diagnostics-only Senior Debugging Engineer. Three-model pipeline: Architect → Implementer → Debugger.</div>
+    </div>
     <div class="log-entry">
       <span class="log-date">2026-07-16</span>
       <div class="log-msg">Email verification: signup sends email (SMTP/console), /auth/verify/&lt;token&gt; endpoint, dashboard banner, admin verification status. Migration system for existing DBs.</div>
@@ -501,67 +528,19 @@
     </div>
     <div class="log-entry">
       <span class="log-date">2026-07-16</span>
-      <div class="log-msg">Playlist selection: clickable cards with purple highlight, detail panel with track list + covers + Analyze button. New GET /api/analysis/tracks/&lt;id&gt; endpoint.</div>
+      <div class="log-msg">Deployed to Render: 2 services (api-enhanced Node + Flask Python). Flask serves built React frontend statically. Live at <a href="https://music-self.onrender.com" target="_blank" style="color:var(--accent);">music-self.onrender.com</a>.</div>
     </div>
     <div class="log-entry">
       <span class="log-date">2026-07-16</span>
-      <div class="log-msg">QR timeouts bumped 15s→45s for Render cold start. Config added for LLM_API_KEY/URL/MODEL + SMTP_HOST/PORT/USER/PASS/FROM + APP_URL.</div>
+      <div class="log-msg">QR login UX overhaul + playlist import fixes: 5 visual states, parallel ThreadPoolExecutor, timeouts raised, DB lock recovery.</div>
     </div>
     <div class="log-entry">
       <span class="log-date">2026-07-16</span>
-      <div class="log-msg">Admin endpoint + CLI: /api/admin?key=xxx (ADMIN_KEY protected) and local admin.py (python admin.py all) for inspecting users, playlists, tracks, netease connections.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-16</span>
-      <div class="log-msg">Deployed to Render: 2 services (api-enhanced Node + Flask Python). Flask serves built React frontend statically. NCM_API configurable via env var. Live at <a href="https://music-self.onrender.com" target="_blank" style="color:var(--accent);">music-self.onrender.com</a>.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-16</span>
-      <div class="log-msg">JSON-safe api.js: content-type check before .json() to prevent "body stream already read". <em>_unwrap()</em> helper added to both netease_routes.py and playlist_routes.py for consistent api-enhanced response handling.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-16</span>
-      <div class="log-msg">Playlist import: parallel ThreadPoolExecutor (5 workers). Artist None crash fixed. Timeouts 15s→120s. DB lock recovery.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-16</span>
-      <div class="log-msg">QR login UX overhaul: 5 visual states (generating/waiting/scanning/connecting/expired) with spinner, pulsing border, countdown timer. Backend _unwrap() handles double-wrapped api-enhanced responses.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-16</span>
-      <div class="log-msg">Import loading UX: spinner during import, green success banner ("Imported X tracks across Y playlists"), empty states differentiated.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-16</span>
-      <div class="log-msg">Bug: playlist import returns data but grid stays empty. Need to debug frontend state update.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-16</span>
-      <div class="log-msg">SQLite schema fixed (deleted old db, recreated with Netease columns). QR polling rewritten to recursive setTimeout. Netease connection verified working.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-16</span>
-      <div class="log-msg">Bugfix: added standalone /api/me route. Signup/login flow now works end-to-end.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-16</span>
-      <div class="log-msg">V1 skeleton implemented &amp; verified: Flask backend (auth, Netease QR login, playlist import) + React frontend (login/signup/dashboard with playlist grid). Pivoted from Spotify to Netease Cloud Music API.</div>
+      <div class="log-msg">V1 skeleton implemented: Flask backend (auth, Netease QR login, playlist import) + React frontend (login/signup/dashboard). Pivoted from Spotify to Netease Cloud Music API.</div>
     </div>
     <div class="log-entry">
       <span class="log-date">2026-07-15</span>
-      <div class="log-msg">Pitch reframed: "Music as perception." Landing page, progress page, README updated.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-15</span>
-      <div class="log-msg">Music-Self concept locked. Design questions fully documented in project/design-questions.md.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-15</span>
-      <div class="log-msg">Research report (emotion reflection) rejected by user as unconvincing.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-15</span>
-      <div class="log-msg">Python venv created, all dependencies installed, shell scripts verified.</div>
+      <div class="log-msg">Music-Self concept locked. Pitch reframed: "Music as perception." GitHub Pages published.</div>
     </div>
   </section>
 
@@ -579,7 +558,7 @@
   <hr>
 
   <footer>
-    Music-Self &nbsp;·&nbsp; <a href="https://music-self.onrender.com" target="_blank">Try the App</a> &nbsp;·&nbsp; Last updated 2026-07-16 (v2)
+    Music-Self &nbsp;·&nbsp; <a href="https://music-self.onrender.com" target="_blank">Try the App</a> &nbsp;·&nbsp; Last updated 2026-07-18 (v3)
   </footer>
 
 </div>

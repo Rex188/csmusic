@@ -508,6 +508,69 @@
     </div>
   </div>
 
+  <!-- Phase 10 -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-number">Phase 10</span>
+      <h2 class="phase-title">🚀 Feature Expansion &amp; Deployment</h2>
+    </div>
+    <div class="phase-body">
+      <p>V1 was stable and deployed. The user requested three major features:</p>
+      <ul style="padding-left:18px;margin-bottom:12px;">
+        <li style="margin-bottom:4px;"><strong>Playlist Selection &amp; LLM Analysis</strong> — Clickable playlist cards with detail panel. Analyzes up to 40 tracks via DeepSeek/OpenAI/Ollama for vibe, mood, energy, genres.</li>
+        <li style="margin-bottom:4px;"><strong>Admin Panel UI</strong> — Key login, stats dashboard, User/Playlist/Netease management with cascade delete and confirm dialog.</li>
+        <li style="margin-bottom:4px;"><strong>Email Verification</strong> — SMTP-based verification (Brevo/SendGrid). Verify/resend endpoints. Dashboard banner. Auto-login on verify.</li>
+      </ul>
+      <p><strong>Bugfixes:</strong> Fixed DELETE body ignored by WSGI (key moved to query param). Fixed FOREIGN KEY cascade on user delete. Fixed catch-all routing conflict with blueprint routes. Fixed missing <code>email_verified</code> column for existing databases via migration system.</p>
+    </div>
+  </div>
+
+  <!-- Phase 11 -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-number">Phase 11</span>
+      <h2 class="phase-title">🔧 Debugger Role Added</h2>
+    </div>
+    <div class="phase-body">
+      <p><strong>User</strong> added a third AI role: a <strong>Senior Debugging Engineer</strong> — diagnostics-only, never writes code. All findings go into <code>tasks.md</code> for DeepSeek to act on.</p>
+      <p>Pipeline updated: <em>Claude (Architect) → DeepSeek (Implementer) → Debugger (Diagnostics)</em>.</p>
+      <p>The debugger closes the loop: bugs found in production are diagnosed with a structured report, then handed to DeepSeek for the fix.</p>
+    </div>
+  </div>
+
+  <!-- Phase 12 -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-number">Phase 12</span>
+      <h2 class="phase-title">✉️ Email Verification Recovery Path</h2>
+    </div>
+    <div class="phase-body">
+      <p><strong>Problem:</strong> Two design defects prevented users from verifying their email when SMTP was down. The <code>verification_url</code> was only returned in dev mode — if SMTP was configured but broken, the URL disappeared with no recovery path.</p>
+      <p><strong>Fix:</strong> <code>verification_url</code> is now <strong>always</strong> returned (signup + resend), decoupled from SMTP status. The frontend shows a clickable fallback link whenever present. This is the recovery path when SMTP fails for any reason.</p>
+      <p><strong>Bonus:</strong> Signup and Login buttons now show spinner + "Creating account..." during submission — critical for Render's 15-20s cold start so users don't think the app is frozen.</p>
+    </div>
+  </div>
+
+  <!-- Phase 13 -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-number">Phase 13</span>
+      <h2 class="phase-title">🎨 Frontend UI Redesign (Apple-Style)</h2>
+    </div>
+    <div class="phase-body">
+      <p>The user called the original UI "too ugly." The architect designed a complete design system inspired by Apple's website: minimalist, typography-driven, generous whitespace, refined palette, subtle glass effects, smooth micro-interactions.</p>
+      <p><strong>Key design decisions:</strong></p>
+      <ul style="padding-left:18px;margin-bottom:12px;">
+        <li style="margin-bottom:4px;"><strong>Palette:</strong> Warm deep charcoal (#0d0d0f) with elevation layers. Glass cards with backdrop-filter blur. Gradient accent (indigo→violet) for CTAs.</li>
+        <li style="margin-bottom:4px;"><strong>Typography:</strong> Inter (Google Fonts) as primary. Full type scale from 12px to 39px. Light-weight display headlines.</li>
+        <li style="margin-bottom:4px;"><strong>Button system:</strong> Four variants — gradient primary, glass outline, ghost, danger. Pill-shaped.</li>
+        <li style="margin-bottom:4px;"><strong>Layout:</strong> Forms vertically centered. Glass sticky headers. Refined whitespace.</li>
+        <li style="margin-bottom:4px;"><strong>Animations:</strong> fadeInUp on mount, physical hover states, pulse-ring for QR. Respects prefers-reduced-motion.</li>
+      </ul>
+      <p><strong>Pages redesigned:</strong> Login, Signup, Verify, Dashboard, Admin, Toast component. All implemented, built, and deployed to Render.</p>
+    </div>
+  </div>
+
   <hr>
 
   <!-- Timeline -->
@@ -516,53 +579,28 @@
     <div class="timeline">
       <div class="tl-item">
         <div class="date">2026-07-15</div>
-        <div class="title">Project initialized</div>
-        <div class="desc">Folder set up, CLAUDE.md created.</div>
-      </div>
-      <div class="tl-item">
-        <div class="date">2026-07-15</div>
-        <div class="title">Python environment created</div>
-        <div class="desc">venv at project/venv/, all core libs installed (librosa, numpy, scipy, sklearn, matplotlib, seaborn, streamlit, jupyter, pymupdf).</div>
-      </div>
-      <div class="tl-item">
-        <div class="date">2026-07-15</div>
-        <div class="title">Two-model workflow defined</div>
-        <div class="desc">DeepSeek (implementation) + Claude Opus (architecture). GPT removed due to cost.</div>
-      </div>
-      <div class="tl-item">
-        <div class="date">2026-07-15</div>
-        <div class="title">Deep research report rejected</div>
-        <div class="desc">"Emotion reflection" was a solution looking for a problem. User called it nonsense. Architect agreed.</div>
-      </div>
-      <div class="tl-item">
-        <div class="date">2026-07-15</div>
-        <div class="title">Breakthrough — the raw idea</div>
-        <div class="desc">"Music is a reflection of how you perceive this world." Self-exploration first, then connection.</div>
-      </div>
-      <div class="tl-item">
-        <div class="date">2026-07-15</div>
-        <div class="title">Design questions answered</div>
-        <div class="desc">8 sections in project/design-questions.md. SOUL metaphor, no pressure, social masks.</div>
-      </div>
-      <div class="tl-item">
-        <div class="date">2026-07-15</div>
-        <div class="title">Pitch reframed</div>
-        <div class="desc">"Music as perception" — from cringe to sharp. Your lens, made visible.</div>
-      </div>
-      <div class="tl-item">
-        <div class="date">2026-07-15</div>
-        <div class="title">GitHub Pages published</div>
-        <div class="desc">Landing page + progress page + story page live at rex188.github.io/csmusic/.</div>
+        <div class="title">Project initialized &amp; direction chosen</div>
+        <div class="desc">8-phase exploration from blank workspace to Music-Self concept.</div>
       </div>
       <div class="tl-item">
         <div class="date">2026-07-16</div>
-        <div class="title">V1 skeleton implemented</div>
-        <div class="desc">Flask backend + React frontend built per spec. Pivoted from Spotify to Netease Cloud Music API (Spotify requires Premium). Netease API server runs on :3000.</div>
+        <div class="title">V1 skeleton implemented &amp; deployed to Render</div>
+        <div class="desc">Flask + React + Netease API. QR login, playlist import, admin, LLM analysis, email verification.</div>
       </div>
       <div class="tl-item">
-        <div class="date">2026-07-16</div>
-        <div class="title">Bugfix: /api/me route</div>
-        <div class="desc">Fixed signup/login → dashboard flow. Standalone /api/me route added outside auth blueprint. All three servers verified working end-to-end.</div>
+        <div class="date">2026-07-18</div>
+        <div class="title">Debugger role added</div>
+        <div class="desc">Three-model pipeline: Architect → Implementer → Debugger.</div>
+      </div>
+      <div class="tl-item">
+        <div class="date">2026-07-18</div>
+        <div class="title">Email verification recovery path fixed</div>
+        <div class="desc">verification_url always returned. Fallback link when SMTP fails. Loading states for cold-start UX.</div>
+      </div>
+      <div class="tl-item">
+        <div class="date">2026-07-18</div>
+        <div class="title">Frontend UI Redesign (Apple-Style)</div>
+        <div class="desc">Complete design token system, glass morphism cards, gradient accent, Inter typography. All pages redesigned and deployed.</div>
       </div>
     </div>
   </section>
