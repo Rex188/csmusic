@@ -2,14 +2,15 @@
 
 Project workspace at `D:/music thera`.
 
-## Two-Model Setup
+## Three-Model Setup
 
 | Model | Role | Script | Role File |
 |---|---|---|---|
-| **DeepSeek** | Senior Implementation Engineer | `project/deepseek.sh` | `project/ds role.md` |
 | **Claude (Opus 4.8)** | Principal Software Architect | `project/claude.sh` | `project/claude role.md` |
+| **DeepSeek** | Senior Implementation Engineer | `project/deepseek.sh` | `project/ds role.md` |
+| **Debugger** | Senior Debugging Engineer | — | `project/role debugger.md` |
 
-**Architecture → Implementation** pipeline. Opus designs the architecture, DeepSeek implements. GPT was removed (2026-07-15) due to cost — research advising is now handled by Claude as part of the architect role.
+**Architecture → Implementation → Diagnostics** pipeline. Opus designs the architecture, DeepSeek implements, Debugger diagnoses bugs. GPT was removed (2026-07-15) due to cost — research advising is now handled by Claude as part of the architect role. Debugger added (2026-07-18) as a diagnostics-only role — never writes code, all findings go into `tasks.md` for DeepSeek.
 
 ## Structure
 
@@ -85,6 +86,7 @@ D:/music thera/                        # ← Project root
     ├── gpt.sh                         # DEPRECATED (GPT removed 2026-07-15)
     ├── ds role.md                     # DeepSeek system prompt (Implementation Engineer)
     ├── claude role.md                 # Claude system prompt (Principal Architect)
+    ├── role debugger.md               # Debugger system prompt (Senior Debugging Engineer)
     └── gpt role.md                    # DEPRECATED
 ```
 
@@ -100,6 +102,7 @@ D:/music thera/                        # ← Project root
 | Change the database schema | `project/backend/models.py` — `init_db()` |
 | See what a route expects/returns | `project/tasks.md` — original spec with request/response formats |
 | See design decisions | `project/design-questions.md` |
+| Debug a bug / investigate a crash | `project/tasks.md` — Debugger writes all findings here for DeepSeek to act on |
 | Start the Netease API | `D:/music thera/api-enhanced/app.js` — `node app.js` from that directory |
 | Flask entry point | `D:/music thera/project/backend/app.py` |
 | React entry point | `D:/music thera/project/frontend/src/main.jsx` |
@@ -411,6 +414,77 @@ This re-frames everything:
 
 ---
 
+#### Phase 13 — Debugger Role Added (2026-07-18)
+
+**User** added a third AI role to the workflow: a **Senior Debugging Engineer** ("Debugger").
+
+**The role** (`project/role debugger.md`):
+- Diagnostics-only — never writes code, never edits source files
+- All findings and fix proposals go into `tasks.md` for DeepSeek to act on
+- Follows a strict 6-step process: Understand → Investigate → Root Cause → Minimal Fix → Regression Analysis → Testing
+- Structured output format: Problem Summary / Root Cause / Evidence / Minimal Fix / Potential Side Effects / Recommended Tests / Confidence
+- Respects the existing architecture — does not redesign unless the architecture itself is the bug
+
+**Pipeline updated to Three-Model:**
+
+```
+Claude (Architect) → DeepSeek (Implementer) → Debugger (Diagnostics)
+```
+
+The debugger closes the loop: bugs found in production or testing are diagnosed with a structured report, then handed to DeepSeek for the fix. No shell script needed — the debugger reads `tasks.md` directly.
+
+**Files updated:** `CLAUDE.md`, `tasks.md`, `README.md` — all structure descriptions now reflect the three-model setup.
+
+---
+
+#### Phase 14 — Email Verification Recovery + Cold-Start UX (2026-07-18)
+
+**Context:** Session opened with DeepSeek as Implementation Engineer. Read `CLAUDE.md`, `setup.md`, `tasks.md`.
+
+**Task from tasks.md:** Fix email verification recovery path — three bugs:
+
+| # | Where | Problem |
+|---|---|---|
+| 1 | `backend/.env` | No SMTP env vars — emails can't be sent |
+| 2 | `auth.py:55-60` (signup) | `verification_url` gated behind `if not config.SMTP_HOST:` — if SMTP is configured but broken, URL disappears |
+| 3 | `auth.py:152-189` (resend) | Response never includes `verification_url` — resend failure gives user no recovery path |
+
+**Architectural insight:** `verification_url` is NOT a dev-mode fallback. It's the **only recovery path** when SMTP fails for any reason. The fix was to always compute the URL, decoupling it from SMTP status.
+
+**Fixes applied:**
+
+1. **`auth.py` (signup)** — Removed `if not config.SMTP_HOST:` guard. `verification_url` now always returned.
+2. **`auth.py` (resend)** — Added `verification_url` to response JSON, same pattern as signup.
+3. **`Signup.jsx`** — Replaced binary sent/not-sent rendering with 3 independent states: sent with email icon ✅, failed but link available ⚠️, neither. Resend handler now captures `verificationUrl` from response.
+4. **`backend/.env`** — Populated with full production config (SECRET_KEY, NCM_API, ADMIN_KEY, LLM, Brevo SMTP). APP_URL set to Render for production; `http://localhost:5000` for local development.
+5. **`config.py`** — Changed `load_dotenv()` to `load_dotenv(Path(__file__).resolve().parent / ".env")` so it always finds `.env` in the `backend/` directory regardless of CWD.
+
+**Verification:** Local testing confirmed all 3 UI states render correctly. SMTP tested — Brevo works on Render but blocked by GFW in China (TCP handshake succeeds, SMTP protocol returns empty).
+
+**Deployment to Render — discovered cold-start UX bug:**
+
+When deploying, user reported signup button appeared to do nothing for 20+ seconds. Root cause: Render free-tier cold start (5-10s) + SMTP connection timeout (15s) blocked the request with no visual feedback.
+
+**Fix:** Added `submitting` state to both Signup and Login forms:
+- Button text changes to spinner + "Creating account..." / "Logging in..."
+- Button disabled during submission (prevents double-submit)
+- `finally` block resets state on success or error
+- Rebuilt `frontend/dist/` and deployed
+
+**Status:** All fixes verified working on Render. User confirmed signup now shows spinner during cold start, and the welcome page appears once the request completes. SMTP still timing out on Render (not GFW — Brevo SMTP server may need whitelisting). Fallback verification link works as intended.
+
+**Files changed across this session:**
+- `backend/auth.py` — verification_url always returned (signup + resend)
+- `backend/config.py` — explicit dotenv path
+- `backend/.env` — full production config
+- `frontend/src/pages/Signup.jsx` — 3-state verification UI + loading state
+- `frontend/src/pages/Login.jsx` — loading state
+- `frontend/dist/` — rebuilt
+- `project/tasks.md` — known issue #3 marked FIXED, done list updated
+- `project/CLAUDE.md` — timeline + Phase 14 added
+
+---
+
 ## Timeline
 
 | Date | Event |
@@ -438,3 +512,6 @@ This re-frames everything:
 | 2026-07-16 | **Admin panel UI.** `/admin` page with key login, stats cards, User/Playlist/Netease management. Cascade delete with confirm. Routing fixed (catch-all removed). New `admin_routes.py`, `Admin.jsx`. |
 | 2026-07-16 | **Email verification.** SMTP-based (Brevo/SendGrid). Verification table + column. Verify/resend endpoints. Dashboard banner. New `email_service.py`, `Verify.jsx`. |
 | 2026-07-16 | **All docs updated.** Phase 12 changes reflected in `tasks.md`, `progress.html`, `index.html`, `README.md`, `CLAUDE.md`. |
+| 2026-07-18 | **Debugger role added.** Third AI model (`project/role debugger.md`) — diagnostics-only, all findings go into `tasks.md` for DeepSeek. Three-model pipeline: Architect → Implementer → Debugger. CLAUDE.md, tasks.md, README.md updated. |
+| 2026-07-18 | **Email verification recovery path fixed.** Three bugs: (1) `verification_url` gated behind `SMTP_HOST` — removed guard so URL always returns. (2) Resend endpoint missing `verification_url` in response. (3) Frontend reduced to binary sent/not-sent display — now 3 independent states. SMTP configured in `.env` (Brevo). `config.py` updated with explicit dotenv path. Deployed to Render. |
+| 2026-07-18 | **Signup/Login loading states added.** Render cold start (5-10s) + SMTP timeout (15s) caused 20s+ delay with no visual feedback. Buttons now show spinner + "Creating account..." / "Logging in..." text during submission, disabled to prevent double-submit. `dist/` rebuilt and deployed. |

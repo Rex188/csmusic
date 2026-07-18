@@ -2,6 +2,7 @@
 
 **Assigned to:** DeepSeek (Senior Implementation Engineer)
 **Architecture by:** Claude Opus 4.8 (Principal Software Architect)
+**Debugging by:** Debugger (Senior Debugging Engineer)
 **Date:** 2026-07-16
 
 **Status:** Playlist selection + LLM analysis + admin panel + email verification all built and deployed to Render.
@@ -26,6 +27,7 @@ You are building the V1 skeleton of Music-Self. **Do not redesign anything.** Im
 | Backend routes | `D:/music thera/project/backend/` | auth.py, netease_routes.py, playlist_routes.py |
 | Database schema | `D:/music thera/project/backend/models.py` | `init_db()` creates all 5 tables |
 | Config | `D:/music thera/project/backend/config.py` | Loads env vars; `.env` file lives next to it |
+| Role files | `D:/music thera/project/` | `claude role.md` (architect), `ds role.md` (implementer), `role debugger.md` (debugger) |
 | Design docs | `D:/music thera/project/design-questions.md` | Full design decisions |
 | Architect record | `D:/music thera/CLAUDE.md` | Discussions, timeline, file tree cheatsheet |
 
@@ -117,6 +119,9 @@ No audio features table yet. Netease API doesn't expose energy/valence/tempo —
 - **Admin panel UI** — `/admin` page with key login, stats cards, User/Playlist/Netease management tables with Delete/Disconnect (confirm dialog)
 - **Email verification** — `email_verified` column + `email_verifications` table, signup sends verification email (SMTP / console fallback), `/auth/verify/<token>` endpoint, dashboard banner, admin shows verified status
 - **Schema migration system** — `_run_migrations_sqlite()` / `_run_migrations_postgres()` for adding columns to existing databases
+- **Email verification recovery path** — `verification_url` always returned (signup + resend), decoupled from SMTP status. Frontend shows clickable fallback link whenever present. (`backend/auth.py`, `frontend/src/pages/Signup.jsx`)
+- **Loading states for cold-start** — Signup and Login buttons now show spinner + text during submission, preventing confusion during Render's 15-20s cold start + SMTP timeout. (`frontend/src/pages/Signup.jsx`, `frontend/src/pages/Login.jsx`)
+- **Explicit dotenv path** — `config.py` now loads `.env` from `backend/` directory explicitly via `Path(__file__)`, avoiding CWD-dependent failures. (`backend/config.py`)
 
 ### ❌ Not Yet Built
 1. **Visual landscape / garden UI** — dashboard is still playlist cards, not the SOUL-inspired garden
