@@ -52,12 +52,12 @@ def signup():
         conn.commit()
         conn.close()
 
-        sent, _ = send_verification_email(email, token)
+        sent, smtp_error = send_verification_email(email, token)
         verification_sent = sent
-        # In dev mode, include the URL so the frontend can show it
-        if not config.SMTP_HOST:
-            app_url = config.APP_URL
-            verification_url = f"{app_url.rstrip('/')}/verify?token={token}"
+        # Always include the verification URL so the user can copy-paste it
+        # even if SMTP is misconfigured or the email never arrives
+        app_url = config.APP_URL
+        verification_url = f"{app_url.rstrip('/')}/verify?token={token}"
     except Exception as e:
         print(f"[auth] signup verification setup failed (non-fatal): {e}")
         try:
@@ -182,9 +182,12 @@ def resend_verification():
     conn.commit()
     conn.close()
 
-    sent, _ = send_verification_email(user["email"], token)
+    sent, smtp_error = send_verification_email(user["email"], token)
+    app_url = config.APP_URL
+    verification_url = f"{app_url.rstrip('/')}/verify?token={token}"
     return jsonify({
         "verification_sent": sent,
+        "verification_url": verification_url,
         "message": "Verification email sent." if sent else "Failed to send email."
     })
 

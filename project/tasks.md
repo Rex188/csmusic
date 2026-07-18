@@ -128,7 +128,168 @@ No audio features table yet. Netease API doesn't expose energy/valence/tempo —
 ### 🐛 Known Issues
 1. **QR state persistence across users (partial fix in place).** sessionStorage now binds QR state to user ID, but on a shared machine, switching users can still show stale UI if the previous user's QR was in 'waiting' state before logout. Full fix needs proper per-user state cleanup on logout — deferred.
 2. **Delete user then re-register works now** (fixed cascade deleting email_verifications).
+3. ~~Email verification not available.~~ — **FIXED.** SMTP configured in `.env`. `verification_url` is now always returned (signup + resend), frontend shows clickable fallback link when SMTP fails. (2026-07-18)
 
 ---
+
+---
+
+## Bugfix — Email Verification Recovery Path
+
+**Date:** 2026-07-18
+**Root cause:** Two design defects in the verification flow prevent users from verifying their email when SMTP is down or misconfigured.
+
+### The Three Issues
+
+| # | Where | Problem |
+|---|---|---|
+| 1 | `backend/.env` | No SMTP env vars — emails can't be sent |
+| 2 | `auth.py:55-60` (signup) | `verification_url` is gated behind `if not config.SMTP_HOST:` — if SMTP is configured but broken, the URL disappears and user has no recovery |
+| 3 | `auth.py:152-189` (resend) | Response never includes `verification_url` — once user leaves the signup page, "Resend" shows "Failed" with no fallback link |
+
+### Architectural Reasoning
+
+`verification_url` is NOT a dev-mode fallback. It's the **only recovery path** when SMTP fails for any reason (wrong creds, provider down, spam filter eats the email). The frontend already has the right structure — it reads both `verification_sent` (boolean) and `verification_url` (string|null) independently. The backend just needs to stop coupling them — always compute the URL, let `verification_sent` carry the "did email send" signal separately.
+
+### Fix 1 — `backend/auth.py` signup endpoint (line 55-60)
+
+**Current code:**
+```python
+        sent, _ = send_verification_email(email, token)
+        verification_sent = sent
+        # In dev mode, include the URL so the frontend can show it
+        if not config.SMTP_HOST:
+            app_url = config.APP_URL
+            verification_url = f"{app_url.rstrip('/')}/verify?token={token}"
+```
+
+**Replace with:**
+```python
+        sent, smtp_error = send_verification_email(email, token)
+        verification_sent = sent
+        # Always include the verification URL so the user can copy-paste it
+        # even if SMTP is misconfigured or the email never arrives
+        app_url = config.APP_URL
+        verification_url = f"{app_url.rstrip('/')}/verify?token={token}"
+```
+
+**What changes:** Remove the `if not config.SMTP_HOST:` guard. `verification_url` is now always set.
+
+### Fix 2 — `backend/auth.py` resend endpoint (line 185-189)
+
+**Current code:**
+```python
+    sent, _ = send_verification_email(user["email"], token)
+    return jsonify({
+        "verification_sent": sent,
+        "message": "Verification email sent." if sent else "Failed to send email."
+    })
+```
+
+**Replace with:**
+```python
+    sent, smtp_error = send_verification_email(user["email"], token)
+    app_url = config.APP_URL
+    verification_url = f"{app_url.rstrip('/')}/verify?token={token}"
+    return jsonify({
+        "verification_sent": sent,
+        "verification_url": verification_url,
+        "message": "Verification email sent." if sent else "Failed to send email."
+    })
+```
+
+**What changes:** Add `verification_url` to the response JSON. Same pattern as signup — always computed, always returned. Optional: if SMTP failed and we have the error, include it in the response so the frontend can show more detail.
+
+### Fix 3 — `frontend/src/pages/Signup.jsx` (line 65-80)
+
+The "Cannot send" warning currently shows only when `!verificationSent`. But `verificationUrl` may be present even when `verificationSent` is true — for example, if SMTP says "sent" but the email goes to spam. The UI should show the fallback link whenever `verificationUrl` is present.
+
+**Current logic (simplified):**
+```jsx
+{verificationSent && (<p>✉️ Verification email sent — check your inbox.</p>)}
+{!verificationSent && (
+  <div>  {/* warning with verificationUrl fallback link */}  </div>
+)}
+```
+
+**Replace with:**
+```jsx
+{verificationSent && (
+  <p style={{ color: '#4ade80', fontSize: 13, margin: '12px 0' }}>
+    ✉️ Verification email sent — check your inbox.
+  </p>
+)}
+
+{!verificationSent && verificationUrl && (
+  <div style={{ margin: '12px 0', padding: 12, borderRadius: 8, background: '#1a1a1a', fontSize: 13 }}>
+    <p style={{ color: '#fbbf24', marginBottom: 4 }}>⚠️ Email could not be sent</p>
+    <p style={{ color: '#888' }}>SMTP may not be configured. Use the link below to verify:</p>
+    <div style={{ marginTop: 8 }}>
+      <a href={verificationUrl} style={{ color: '#a78bfa', fontSize: 12, wordBreak: 'break-all' }}>
+        {verificationUrl}
+      </a>
+    </div>
+  </div>
+)}
+
+{!verificationSent && !verificationUrl && (
+  <div style={{ margin: '12px 0', padding: 12, borderRadius: 8, background: '#1a1a1a', fontSize: 13 }}>
+    <p style={{ color: '#fbbf24', marginBottom: 4 }}>⚠️ Cannot send verification email</p>
+    <p style={{ color: '#888' }}>SMTP not configured on the server. You can still use the app.</p>
+  </div>
+)}
+```
+
+### Fix 4 — `backend/.env`
+
+Add SMTP placeholder variables so the configuration gap is visible:
+
+```
+# SMTP for email verification (Brevo / SendGrid / etc.)
+# SMTP_HOST=smtp-relay.brevo.com
+# SMTP_PORT=587
+# SMTP_USER=your-login@brevo.com
+# SMTP_PASS=your-smtp-key
+```
+
+### ⚠️ Security — Keep Secrets Out of Git
+
+The real `.env` file (with actual API keys, SMTP credentials, `SECRET_KEY`, `ADMIN_KEY`) **must never be committed or pushed**. `.gitignore` already covers `.env`, but verify it before committing:
+
+```bash
+# Check what would be committed (run before every commit)
+git status
+
+# Verify .env is actually ignored
+git check-ignore backend/.env
+```
+
+**Before any `git commit`:**
+1. Run `git status` and confirm `backend/.env` is NOT in the staged list
+2. If it shows up, run: `git rm --cached backend/.env` (removes from tracking, keeps file on disk)
+3. Never use `git add .` or `git add -A` — stage files explicitly
+
+**What's already gitignored (verify these stay ignored):**
+- `*.env` (all env files)
+- `database.db` (local SQLite with real user data)
+- `venv/`, `node_modules/`, `dist/`, `__pycache__/`
+
+### Files Changed (summary)
+
+| File | Change |
+|---|---|
+| `backend/auth.py` | Remove `if not config.SMTP_HOST:` guard on `verification_url` (signup); add `verification_url` to resend response |
+| `frontend/src/pages/Signup.jsx` | Show `verificationUrl` fallback link whenever present, independent of `verificationSent` |
+| `backend/.env` | Add commented SMTP placeholders |
+
+### Acceptance Criteria
+
+- [ ] Signup always returns `verification_url` in the response (regardless of SMTP config)
+- [ ] Resend always returns `verification_url` in the response
+- [ ] Signup page shows clickable verification link when SMTP fails (not just when SMTP is unset)
+- [ ] Resend failure still gives the user a clickable link to verify
+- [ ] No behavior change when SMTP is working (existing flow untouched)
+- [ ] Production Render env vars unchanged (just `.env` placeholders added)
+
 
 ## 🚀 Try It Live

@@ -36,6 +36,8 @@ export default function Signup() {
     setResending(true);
     try {
       const result = await api.resendVerification();
+      if (result.verification_url) setVerificationUrl(result.verification_url);
+      setVerificationSent(result.verification_sent || false);
       addToast(result.verification_sent ? '📧 Verification email sent!' : '⚠️ Could not send email (SMTP not configured)', result.verification_sent ? 'success' : 'warning', 4000);
     } catch (err) {
       addToast(`❌ ${err.message}`, 'error');
@@ -62,20 +64,22 @@ export default function Signup() {
             </p>
           )}
 
-          {!verificationSent && (
+          {!verificationSent && verificationUrl && (
+            <div style={{ margin: '12px 0', padding: 12, borderRadius: 8, background: '#1a1a1a', fontSize: 13 }}>
+              <p style={{ color: '#fbbf24', marginBottom: 4 }}>⚠️ Email could not be sent</p>
+              <p style={{ color: '#888' }}>SMTP may not be configured. Use the link below to verify:</p>
+              <div style={{ marginTop: 8 }}>
+                <a href={verificationUrl} style={{ color: '#a78bfa', fontSize: 12, wordBreak: 'break-all' }}>
+                  {verificationUrl}
+                </a>
+              </div>
+            </div>
+          )}
+
+          {!verificationSent && !verificationUrl && (
             <div style={{ margin: '12px 0', padding: 12, borderRadius: 8, background: '#1a1a1a', fontSize: 13 }}>
               <p style={{ color: '#fbbf24', marginBottom: 4 }}>⚠️ Cannot send verification email</p>
-              <p style={{ color: '#888' }}>
-                SMTP not configured on the server. You can still use the app.
-              </p>
-              {verificationUrl && (
-                <div style={{ marginTop: 8 }}>
-                  <p style={{ color: '#888', marginBottom: 4 }}>Dev verification link:</p>
-                  <a href={verificationUrl} style={{ color: '#a78bfa', fontSize: 12, wordBreak: 'break-all' }}>
-                    {verificationUrl}
-                  </a>
-                </div>
-              )}
+              <p style={{ color: '#888' }}>SMTP not configured on the server. You can still use the app.</p>
             </div>
           )}
 

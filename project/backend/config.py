@@ -1,7 +1,11 @@
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+# Load .env from the backend/ directory explicitly,
+# since load_dotenv() by default only searches CWD and parent dirs
+dotenv_path = Path(__file__).resolve().parent / ".env"
+load_dotenv(dotenv_path)
 
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-change-me")
 DATABASE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "database.db")
