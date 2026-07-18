@@ -15,48 +15,76 @@ export default function Login() {
     try {
       const result = await api.login({ email, password });
       if (result.user && !result.user.email_verified) {
-        addToast('⚠️ Email not verified. Check your inbox.', 'warning', 6000);
+        addToast('Email not verified. Check your inbox.', 'warning', 6000);
       } else {
-        addToast('✅ Logged in', 'success', 2000);
+        addToast('Logged in', 'success', 2000);
       }
       setTimeout(() => navigate('/dashboard'), 300);
     } catch (err) {
-      addToast(`❌ ${err.message}`, 'error');
+      addToast(err.message, 'error');
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="container" style={{ maxWidth: 400, marginTop: 80 }}>
-      <h1 style={{ textAlign: 'center', marginBottom: 32 }}>music-self</h1>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit" disabled={submitting} style={submitting ? { opacity: 0.6, cursor: 'not-allowed' } : {}}>
-          {submitting ? (
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-              <span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }}></span>
-              Logging in...
-            </span>
-          ) : 'Log in'}
-        </button>
-      </form>
-      <p style={{ textAlign: 'center', marginTop: 16, color: '#888' }}>
-        No account? <Link to="/signup">Sign up</Link>
-      </p>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="container-narrow animate-fade-in-up" style={{ width: '100%' }}>
+        {/* Logo */}
+        <div style={{ textAlign: 'center', marginBottom: 'var(--space-10)' }}>
+          <h1 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'var(--text-2xl)',
+            fontWeight: 300,
+            letterSpacing: '-0.02em',
+            background: 'var(--accent-gradient)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            marginBottom: 'var(--space-2)'
+          }}>
+            music-self
+          </h1>
+          <p className="text-sm text-tertiary">Your lens, made visible</p>
+        </div>
+
+        {/* Form card */}
+        <div className="card" style={{ padding: 'var(--space-8)' }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+            <input
+              type="email"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button
+              type="submit"
+              className="btn-primary btn-lg"
+              style={{ width: '100%', marginTop: 'var(--space-2)' }}
+              disabled={submitting}
+            >
+              {submitting ? (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                  <span className="spinner spinner-sm spinner-light" />
+                  Signing in...
+                </span>
+              ) : 'Sign in'}
+            </button>
+          </form>
+        </div>
+
+        <p style={{ textAlign: 'center', marginTop: 'var(--space-6)' }} className="text-sm text-tertiary">
+          New to music-self?{' '}
+          <Link to="/signup" style={{ color: 'var(--accent)', fontWeight: 500 }}>Create an account</Link>
+        </p>
+      </div>
     </div>
   );
 }

@@ -77,7 +77,7 @@ A private space where your music becomes a **living landscape** — one that ref
 | Music source | Netease Cloud Music API Enhanced (Node.js) | Render (separate service) |
 | Admin | `/api/admin?key=xxx` + local CLI `python admin.py all` | Built-in |
 | ML stack (ready) | librosa, numpy, scipy, scikit-learn, Streamlit | Local |
-| AI workflow | DeepSeek (implementation) + Claude Opus (architecture) | — |
+| AI workflow | Claude Opus (architecture) + DeepSeek (implementation) + Debugger (diagnostics) | — |
 
 ---
 

@@ -485,7 +485,35 @@ When deploying, user reported signup button appeared to do nothing for 20+ secon
 
 ---
 
-## Timeline
+#### Phase 15 — UI Redesign (Apple-Style Design System) — 2026-07-18
+
+**Context:** User requested a frontend UI overhaul. Current UI is functional but "too ugly" — wants Apple-website-inspired design: minimalist, typography-driven, generous whitespace, refined palette, subtle glass effects.
+
+**Architect's design:** A complete design system with CSS custom properties, replacing the 85-line flat-black CSS with ~200 lines of token-based styling.
+
+**Key design decisions:**
+- **Palette:** Warm deep charcoal (`#0d0d0f`) with subtle elevation layers — not pure black. Glass cards with `backdrop-filter: blur(20px)`. Gradient accent (indigo→violet) for CTAs, warm amber sparingly for warmth.
+- **Typography:** Inter (Google Fonts) as primary, SF Pro fallback. Full type scale from `text-xs` (12px) to `text-3xl` (39px). Display-weight headlines with tight letter-spacing.
+- **Glass cards:** Semi-transparent backgrounds (`rgba(22,22,24,0.65)`) + backdrop-blur replace flat `#111` cards. This creates depth and the Apple "frosted glass" feel.
+- **Button system:** Four variants — `btn-primary` (gradient accent), `btn-secondary` (glass outline), `btn-ghost` (transparent), `btn-danger` (red). All use `border-radius: 9999px` (pill shape).
+- **Layout:** Forms vertically centered with `min-height: 100vh` instead of `marginTop: 80`. Narrower form container (420px). Generous whitespace throughout.
+- **Animations:** `fadeInUp` on mount, physical-feeling hover states (translateY + glow), pulse-ring for QR. All respect `prefers-reduced-motion`.
+- **No emoji as UI:** Clean text + color indicators replace emoji prefixes (✅ → green text, ❌ → red text).
+
+**The aesthetic risk taken:** A warm amber secondary accent (`#f59e0b`) used only in one or two places — prevents the "near-black + single purple accent" AI-default look. Music has both warmth and precision.
+
+**Complete spec written to `project/tasks.md`** — "Task — Frontend UI Redesign (Apple-Style)" with:
+- Design token system (complete CSS custom properties)
+- Full `index.css` rewrite (verbatim code)
+- Page-by-page redesign specs for all 5 pages (Login, Signup, Verify, Dashboard, Admin)
+- Animation table
+- Implementation order (8 steps, one file at a time)
+- Acceptance criteria (15 checkboxes)
+
+**Status:** Spec complete. Ready for DeepSeek to implement.
+
+---
+    ## Timeline
 
 | Date | Event |
 |---|---|
@@ -515,3 +543,4 @@ When deploying, user reported signup button appeared to do nothing for 20+ secon
 | 2026-07-18 | **Debugger role added.** Third AI model (`project/role debugger.md`) — diagnostics-only, all findings go into `tasks.md` for DeepSeek. Three-model pipeline: Architect → Implementer → Debugger. CLAUDE.md, tasks.md, README.md updated. |
 | 2026-07-18 | **Email verification recovery path fixed.** Three bugs: (1) `verification_url` gated behind `SMTP_HOST` — removed guard so URL always returns. (2) Resend endpoint missing `verification_url` in response. (3) Frontend reduced to binary sent/not-sent display — now 3 independent states. SMTP configured in `.env` (Brevo). `config.py` updated with explicit dotenv path. Deployed to Render. |
 | 2026-07-18 | **Signup/Login loading states added.** Render cold start (5-10s) + SMTP timeout (15s) caused 20s+ delay with no visual feedback. Buttons now show spinner + "Creating account..." / "Logging in..." text during submission, disabled to prevent double-submit. `dist/` rebuilt and deployed. |
+| 2026-07-18 | **UI Redesign spec written.** Architect designed complete Apple-inspired design system: token-based CSS (~200 lines), glass morphism cards, gradient accent, Inter typography, 4-button system, page-by-page specs for all 5 pages. Written to `tasks.md` as "Task — Frontend UI Redesign (Apple-Style)". Ready for DeepSeek to implement. |

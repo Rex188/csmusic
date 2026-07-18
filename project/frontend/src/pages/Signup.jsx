@@ -12,13 +12,13 @@ export default function Signup() {
   const [signupEmail, setSignupEmail] = useState('');
   const [verificationUrl, setVerificationUrl] = useState(null);
   const [verificationSent, setVerificationSent] = useState(false);
-  const [resending, setResending] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [resending, setResending] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirm) {
-      addToast('❌ Passwords do not match', 'error');
+      addToast('Passwords do not match', 'error');
       return;
     }
     setSubmitting(true);
@@ -28,9 +28,9 @@ export default function Signup() {
       setSignedUp(true);
       setVerificationUrl(result.verification_url || null);
       setVerificationSent(result.verification_sent || false);
-      addToast('✅ Account created!', 'success', 3000);
+      addToast('Account created!', 'success', 3000);
     } catch (err) {
-      addToast(`❌ ${err.message}`, 'error');
+      addToast(err.message, 'error');
     } finally {
       setSubmitting(false);
     }
@@ -42,9 +42,9 @@ export default function Signup() {
       const result = await api.resendVerification();
       if (result.verification_url) setVerificationUrl(result.verification_url);
       setVerificationSent(result.verification_sent || false);
-      addToast(result.verification_sent ? '📧 Verification email sent!' : '⚠️ Could not send email (SMTP not configured)', result.verification_sent ? 'success' : 'warning', 4000);
+      addToast(result.verification_sent ? 'Verification email sent!' : 'Could not send email (SMTP not configured)', result.verification_sent ? 'success' : 'warning', 4000);
     } catch (err) {
-      addToast(`❌ ${err.message}`, 'error');
+      addToast(err.message, 'error');
     }
     setResending(false);
   };
@@ -53,92 +53,138 @@ export default function Signup() {
 
   if (signedUp) {
     return (
-      <div className="container" style={{ maxWidth: 400, marginTop: 80, textAlign: 'center' }}>
-        <h1 style={{ marginBottom: 24 }}>music-self</h1>
-        <div className="card" style={{ padding: 32 }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>🎉</div>
-          <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>Welcome!</h2>
-          <p style={{ color: '#888', fontSize: 14, marginBottom: 4 }}>
-            Account created for <strong style={{ color: '#f5f5f5' }}>{signupEmail}</strong>
-          </p>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="container-narrow animate-fade-in-up" style={{ width: '100%' }}>
+          {/* Logo */}
+          <div style={{ textAlign: 'center', marginBottom: 'var(--space-8)' }}>
+            <h1 style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'var(--text-2xl)',
+              fontWeight: 300,
+              letterSpacing: '-0.02em',
+              background: 'var(--accent-gradient)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              marginBottom: 'var(--space-2)'
+            }}>
+              music-self
+            </h1>
+          </div>
 
-          {verificationSent && (
-            <p style={{ color: '#4ade80', fontSize: 13, margin: '12px 0' }}>
-              ✉️ Verification email sent — check your inbox.
+          {/* Success card */}
+          <div className="card" style={{ padding: 'var(--space-8)', textAlign: 'center' }}>
+            <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 600, marginBottom: 'var(--space-2)' }}>
+              Welcome!
+            </h2>
+            <p className="text-sm text-secondary" style={{ marginBottom: 'var(--space-4)' }}>
+              Account created for <strong style={{ color: 'var(--text-primary)' }}>{signupEmail}</strong>
             </p>
-          )}
 
-          {!verificationSent && verificationUrl && (
-            <div style={{ margin: '12px 0', padding: 12, borderRadius: 8, background: '#1a1a1a', fontSize: 13 }}>
-              <p style={{ color: '#fbbf24', marginBottom: 4 }}>⚠️ Email could not be sent</p>
-              <p style={{ color: '#888' }}>SMTP may not be configured. Use the link below to verify:</p>
-              <div style={{ marginTop: 8 }}>
-                <a href={verificationUrl} style={{ color: '#a78bfa', fontSize: 12, wordBreak: 'break-all' }}>
+            {verificationSent && (
+              <p className="text-sm text-success" style={{ margin: 'var(--space-4) 0' }}>
+                Verification email sent — check your inbox.
+              </p>
+            )}
+
+            {!verificationSent && verificationUrl && (
+              <div className="card" style={{ background: 'var(--bg-elevated)', backdropFilter: 'none', padding: 'var(--space-4)', margin: 'var(--space-4) 0', textAlign: 'left' }}>
+                <p className="text-sm" style={{ color: 'var(--warning)', marginBottom: 'var(--space-2)' }}>Email could not be sent</p>
+                <p className="text-xs text-tertiary" style={{ marginBottom: 'var(--space-2)' }}>SMTP may not be configured. Use the link below to verify:</p>
+                <a href={verificationUrl} style={{ color: 'var(--accent)', fontSize: 'var(--text-xs)', wordBreak: 'break-all' }}>
                   {verificationUrl}
                 </a>
               </div>
-            </div>
-          )}
+            )}
 
-          {!verificationSent && !verificationUrl && (
-            <div style={{ margin: '12px 0', padding: 12, borderRadius: 8, background: '#1a1a1a', fontSize: 13 }}>
-              <p style={{ color: '#fbbf24', marginBottom: 4 }}>⚠️ Cannot send verification email</p>
-              <p style={{ color: '#888' }}>SMTP not configured on the server. You can still use the app.</p>
-            </div>
-          )}
+            {!verificationSent && !verificationUrl && (
+              <p className="text-sm" style={{ color: 'var(--warning)', margin: 'var(--space-4) 0' }}>
+                Cannot send verification email. You can still use the app.
+              </p>
+            )}
 
-          <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <button onClick={handleGoDashboard}>Go to Dashboard</button>
-            <button onClick={handleResend} disabled={resending} style={{ background: '#1a1a1a', color: '#a78bfa', width: '100%' }}>
-              {resending ? 'Sending...' : 'Resend verification email'}
-            </button>
+            <div style={{ marginTop: 'var(--space-6)', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+              <button onClick={handleGoDashboard} className="btn-primary" style={{ width: '100%' }}>
+                Go to Dashboard
+              </button>
+              <button onClick={handleResend} disabled={resending} className="btn-ghost" style={{ width: '100%' }}>
+                {resending ? 'Sending...' : 'Resend verification email'}
+              </button>
+            </div>
+
+            <p style={{ marginTop: 'var(--space-6)' }} className="text-xs text-tertiary">
+              <Link to="/login" style={{ color: 'var(--text-tertiary)' }}>Back to login</Link>
+            </p>
           </div>
-
-          <p style={{ marginTop: 20, color: '#555', fontSize: 13 }}>
-            <Link to="/login" style={{ color: '#888' }}>Back to login</Link>
-          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container" style={{ maxWidth: 400, marginTop: 80 }}>
-      <h1 style={{ textAlign: 'center', marginBottom: 32 }}>music-self</h1>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Confirm password"
-          value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
-          required
-        />
-        <button type="submit" disabled={submitting} style={submitting ? { opacity: 0.6, cursor: 'not-allowed' } : {}}>
-          {submitting ? (
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-              <span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }}></span>
-              Creating account...
-            </span>
-          ) : 'Sign up'}
-        </button>
-      </form>
-      <p style={{ textAlign: 'center', marginTop: 16, color: '#888' }}>
-        Already have an account? <Link to="/login">Log in</Link>
-      </p>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="container-narrow animate-fade-in-up" style={{ width: '100%' }}>
+        {/* Logo */}
+        <div style={{ textAlign: 'center', marginBottom: 'var(--space-10)' }}>
+          <h1 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'var(--text-2xl)',
+            fontWeight: 300,
+            letterSpacing: '-0.02em',
+            background: 'var(--accent-gradient)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            marginBottom: 'var(--space-2)'
+          }}>
+            music-self
+          </h1>
+          <p className="text-sm text-tertiary">Your lens, made visible</p>
+        </div>
+
+        {/* Form card */}
+        <div className="card" style={{ padding: 'var(--space-8)' }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+            <input
+              type="email"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <input
+              type="password"
+              placeholder="Confirm password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              required
+            />
+            <button
+              type="submit"
+              className="btn-primary btn-lg"
+              style={{ width: '100%', marginTop: 'var(--space-2)' }}
+              disabled={submitting}
+            >
+              {submitting ? (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                  <span className="spinner spinner-sm spinner-light" />
+                  Creating account...
+                </span>
+              ) : 'Create account'}
+            </button>
+          </form>
+        </div>
+
+        <p style={{ textAlign: 'center', marginTop: 'var(--space-6)' }} className="text-sm text-tertiary">
+          Already have an account?{' '}
+          <Link to="/login" style={{ color: 'var(--accent)', fontWeight: 500 }}>Sign in</Link>
+        </p>
+      </div>
     </div>
   );
 }

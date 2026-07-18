@@ -6,25 +6,21 @@ import { addToast } from '../components/Toast';
 function PlaylistCard({ pl, selected, onSelect }) {
   return (
     <div
-      className="card"
+      className={`card card-interactive${selected ? ' card-selected' : ''}`}
       onClick={() => onSelect(pl)}
-      style={{
-        padding: 14, cursor: 'pointer',
-        border: selected ? '1px solid #a78bfa' : undefined,
-        transition: 'border-color 0.2s, box-shadow 0.2s'
-      }}
+      style={{ padding: 'var(--space-3)' }}
     >
       {pl.image_url ? (
-        <img src={pl.image_url} alt={pl.name} style={{ width: '100%', aspectRatio: '1/1', borderRadius: 8, objectFit: 'cover' }} />
+        <img src={pl.image_url} alt={pl.name} style={{ width: '100%', aspectRatio: '1/1', borderRadius: 'var(--radius-sm)', objectFit: 'cover' }} />
       ) : (
         <div style={{
-          width: '100%', aspectRatio: '1/1', borderRadius: 8,
+          width: '100%', aspectRatio: '1/1', borderRadius: 'var(--radius-sm)',
           background: 'radial-gradient(circle at 30% 30%, #2a2a3a, #1a1a2a)'
         }} />
       )}
-      <div style={{ marginTop: 8 }}>
-        <div style={{ fontWeight: 600, fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{pl.name}</div>
-        <div style={{ fontSize: 12, color: '#666' }}>{pl.track_count || 0} tracks</div>
+      <div style={{ marginTop: 'var(--space-2)' }}>
+        <div style={{ fontWeight: 500, fontSize: 'var(--text-sm)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{pl.name}</div>
+        <div className="text-xs text-tertiary">{pl.track_count || 0} tracks</div>
       </div>
     </div>
   );
@@ -43,7 +39,6 @@ function loadQrState(userId) {
     const raw = sessionStorage.getItem(QR_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    // Only restore if it belongs to the same user (different users on same machine)
     if (parsed.userId && parsed.userId === userId) return parsed;
     return null;
   } catch { return null; }
@@ -60,7 +55,6 @@ export default function Dashboard() {
   const pollRef = useRef(null);
   const countdownRef = useRef(null);
   const waitedRef = useRef(null);
-  const startedRef = useRef(null);
   const [user, setUser] = useState(null);
   const [netease, setNetease] = useState({ connected: false });
   const [playlists, setPlaylists] = useState([]);
@@ -79,7 +73,7 @@ export default function Dashboard() {
   const [qrKey, setQrKey] = useState(null);
   const [countdown, setCountdown] = useState(180);
 
-  // Keep sessionStorage in sync with QR state (binds to current user)
+  // Keep sessionStorage in sync with QR state
   useEffect(() => {
     if (!user) return;
     if (qrStatus && qrStatus !== '' && qrStatus !== 'connecting' && qrImg && qrKey) {
@@ -97,7 +91,7 @@ export default function Dashboard() {
 
     const waited = setTimeout(() => {
       addToast(
-        '⏳ Connecting to Netease server... This can take 1–3 minutes. Please stay on this page.',
+        'Connecting to Netease server... This can take 1–3 minutes.',
         'warning', 6000
       );
     }, 15000);
@@ -118,14 +112,14 @@ export default function Dashboard() {
           setQrStatus('');
           setQrImg(null);
           setQrKey(null);
-          addToast(`✅ Connected as ${connectResp.nickname}`, 'success');
+          addToast(`Connected as ${connectResp.nickname}`, 'success');
           clearQrState();
           return;
         }
 
         if (check.code === 802) {
           setQrStatus('scanning');
-          addToast('📱 Scanned! Please confirm on your phone.', 'info', 3000);
+          addToast('Scanned! Please confirm on your phone.', 'info', 3000);
         } else if (check.code === 800) {
           setQrStatus('expired');
           stopCountdown();
@@ -196,7 +190,6 @@ export default function Dashboard() {
       } catch {}
       setLoading(false);
 
-      // Resume QR polling if there's an active session (same user only)
       const saved = loadQrState(me.user?.id);
       if (saved && saved.key && saved.status === 'waiting') {
         setQrKey(saved.key);
@@ -249,16 +242,16 @@ export default function Dashboard() {
 
   const handleImport = async () => {
     setImporting(true);
-    addToast('⏳ Importing your playlists... This may take a while.', 'info', 999999);
+    addToast('Importing your playlists... This may take a while.', 'info', 999999);
     try {
       const result = await api.importPlaylists();
       setPlaylists(result.playlists);
       addToast(
-        `✅ Imported ${result.imported} tracks across ${result.playlists.length} playlists`,
+        `Imported ${result.imported} tracks across ${result.playlists.length} playlists`,
         'success', 5000
       );
     } catch (err) {
-      addToast(`❌ ${err.message}`, 'error', 5000);
+      addToast(err.message, 'error', 5000);
     }
     setImporting(false);
   };
@@ -292,9 +285,9 @@ export default function Dashboard() {
       setAnalysisResult(result);
       const a = result.analysis;
       const summary = a.vibe || `${a.total_tracks} tracks analyzed`;
-      addToast(`✅ ${summary}`, 'success', 5000);
+      addToast(summary, 'success', 5000);
     } catch (err) {
-      addToast(`❌ Analysis failed: ${err.message}`, 'error');
+      addToast(`Analysis failed: ${err.message}`, 'error');
     }
     setAnalyzing(false);
   };
@@ -303,9 +296,9 @@ export default function Dashboard() {
     setResendingVerification(true);
     try {
       await api.resendVerification();
-      addToast('📧 Verification email resent!', 'success', 3000);
+      addToast('Verification email resent!', 'success', 3000);
     } catch (err) {
-      addToast(`❌ ${err.message}`, 'error');
+      addToast(err.message, 'error');
     }
     setResendingVerification(false);
   };
@@ -319,293 +312,357 @@ export default function Dashboard() {
     navigate('/login');
   };
 
-  if (loading) return <div className="container" style={{ textAlign: 'center', paddingTop: 80 }}>Loading...</div>;
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="spinner" />
+      </div>
+    );
+  }
 
   return (
-    <div className="container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 700 }}>music-self</h1>
-        <button onClick={handleLogout} style={{ background: '#1a1a1a', color: '#888', padding: '8px 16px', fontSize: 14 }}>
-          Logout
-        </button>
-      </div>
-
-      {/* Verification banner */}
-      {user && !user.email_verified && (
-        <div className="card" style={{
-          marginBottom: 20, padding: '12px 16px',
-          background: '#1a1a2a', border: '1px solid #a78bfa44',
-          display: 'flex', alignItems: 'center', gap: 12, fontSize: 13
-        }}>
-          <span style={{ fontSize: 16 }}>✉️</span>
-          <span style={{ flex: 1, color: '#ccc' }}>
-            Please verify your email address. Check your inbox for the verification link.
-          </span>
-          <button onClick={handleResendVerification} disabled={resendingVerification}
-            style={{ background: '#a78bfa22', color: '#a78bfa', padding: '6px 14px', fontSize: 12, whiteSpace: 'nowrap' }}>
-            {resendingVerification ? 'Sending...' : 'Resend'}
+    <div>
+      {/* ── Glass sticky header ─────────────────────────────────── */}
+      <div style={{
+        position: 'sticky', top: 0, zIndex: 10,
+        background: 'var(--bg-glass)', backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderBottom: '1px solid var(--border-subtle)',
+        padding: 'var(--space-4) var(--space-6)'
+      }}>
+        <div style={{ maxWidth: 'var(--max-width-page)', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h1 style={{
+            fontFamily: 'var(--font-display)', fontSize: 'var(--text-lg)', fontWeight: 400,
+            background: 'var(--accent-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+          }}>
+            music-self
+          </h1>
+          <button onClick={handleLogout} className="btn-ghost btn-sm">
+            Logout
           </button>
         </div>
-      )}
-
-      {/* Welcome card */}
-      <div className="card" style={{ marginBottom: 24 }}>
-        <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 4 }}>
-          Welcome{netease.nickname ? `, ${netease.nickname}` : ''}
-        </h2>
-        <p style={{ color: '#888', fontSize: 14, marginBottom: 16 }}>
-          {netease.connected
-            ? 'Your Netease Cloud Music is connected. Import your playlists to see your music-self.'
-            : 'Connect Netease Cloud Music to start building your music-self.'}
-        </p>
-
-        <div style={{ display: 'flex', gap: 10, flexDirection: 'column', alignItems: 'start' }}>
-          {!netease.connected && qrStatus === '' && (
-            <button onClick={handleShowQr}>Connect Netease Cloud Music</button>
-          )}
-
-          {/* QR flow */}
-          {!netease.connected && qrStatus !== '' && (
-            <div style={{ textAlign: 'center' }}>
-              {qrStatus === 'generating' && (
-                <div>
-                  <div className="spinner" />
-                  <p style={{ fontSize: 13, color: '#888', marginTop: 8 }}>Generating QR code...</p>
-                </div>
-              )}
-
-              {qrImg && (qrStatus === 'waiting' || qrStatus === 'scanning') && (
-                <div>
-                  <div style={{ position: 'relative', display: 'inline-block' }}>
-                    <img src={qrImg} alt="QR code"
-                      style={{
-                        width: 180, height: 180, borderRadius: 8, background: '#fff', padding: 8,
-                        opacity: qrStatus === 'scanning' ? 0.5 : 1,
-                        transition: 'opacity 0.3s'
-                      }} />
-                    {qrStatus === 'waiting' && (
-                      <div style={{
-                        position: 'absolute', inset: -4, borderRadius: 12,
-                        border: '2px solid #a78bfa', animation: 'pulse 2s infinite'
-                      }} />
-                    )}
-                    {qrStatus === 'scanning' && (
-                      <div style={{
-                        position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                        fontSize: 48
-                      }}>✅</div>
-                    )}
-                  </div>
-                  <p style={{ fontSize: 13, color: '#888', marginTop: 8 }}>
-                    {qrStatus === 'scanning'
-                      ? '✅ Scanned! Confirm on your phone...'
-                      : '📱 Scan with Netease Cloud Music app'}
-                  </p>
-                  {qrStatus === 'waiting' && countdown > 0 && (
-                    <p style={{ fontSize: 12, color: '#555', marginTop: 4 }}>
-                      Expires in {Math.floor(countdown / 60)}:{String(countdown % 60).padStart(2, '0')}
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {qrStatus === 'connecting' && (
-                <div>
-                  <div className="spinner" />
-                  <p style={{ fontSize: 13, color: '#888', marginTop: 8 }}>Connecting to Netease...</p>
-                </div>
-              )}
-
-              {qrStatus === 'expired' && (
-                <div>
-                  <p style={{ fontSize: 14, color: '#f87171', marginBottom: 12 }}>QR code expired</p>
-                  <button onClick={handleRetryQr} style={{ background: '#1a1a1a', color: '#a78bfa' }}>
-                    Generate new QR code
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Import button */}
-          {netease.connected && !importing && (
-            <button onClick={handleImport}>Import Playlists</button>
-          )}
-        </div>
       </div>
 
-      {/* Playlist grid */}
-      {playlists.length > 0 && (
-        <>
-          <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12, color: '#888' }}>Your playlists</h2>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-            gap: 14
+      <div className="container" style={{ paddingTop: 'var(--space-8)', paddingBottom: 'var(--space-16)' }}>
+        {/* ── Verification banner ───────────────────────────────── */}
+        {user && !user.email_verified && (
+          <div className="card" style={{
+            marginBottom: 'var(--space-6)', padding: 'var(--space-3) var(--space-4)',
+            display: 'flex', alignItems: 'center', gap: 'var(--space-3)', fontSize: 'var(--text-sm)',
+            borderLeft: '3px solid var(--warning)',
+            background: 'rgba(251, 191, 36, 0.06)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
           }}>
-            {playlists.map(pl => (
-              <PlaylistCard
-                key={pl.id}
-                pl={pl}
-                selected={selectedPlaylist?.id === pl.id}
-                onSelect={handleSelectPlaylist}
-              />
-            ))}
+            <span className="text-sm text-tertiary" style={{ flex: 1 }}>
+              Please verify your email address.
+            </span>
+            <button onClick={handleResendVerification} disabled={resendingVerification}
+              className="btn-ghost btn-sm">
+              {resendingVerification ? 'Sending...' : 'Resend'}
+            </button>
           </div>
+        )}
 
-          {/* ── Selected playlist detail panel ─────────────────── */}
-          {selectedPlaylist && (
-            <div className="card" style={{ marginTop: 20, padding: 20, animation: 'fadeIn 0.2s' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
-                {selectedPlaylist.image_url && (
-                  <img src={selectedPlaylist.image_url} alt={selectedPlaylist.name}
-                    style={{ width: 56, height: 56, borderRadius: 8, objectFit: 'cover' }} />
+        {/* ── Welcome section ───────────────────────────────────── */}
+        <div style={{ marginBottom: 'var(--space-8)' }}>
+          <h2 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'var(--text-2xl)', fontWeight: 300,
+            letterSpacing: '-0.02em',
+            marginBottom: 'var(--space-1)'
+          }}>
+            Welcome{netease.nickname ? `, ${netease.nickname}` : ''}
+          </h2>
+          <p className="text-base text-secondary">Your music landscape</p>
+        </div>
+
+        {/* ── Connection / QR card ──────────────────────────────── */}
+        <div className="card" style={{ marginBottom: 'var(--space-8)', padding: 'var(--space-6)' }}>
+          <p className="text-sm text-secondary" style={{ marginBottom: 'var(--space-4)' }}>
+            {netease.connected
+              ? 'Your Netease Cloud Music is connected. Import your playlists to see your music-self.'
+              : 'Connect Netease Cloud Music to start building your music-self.'}
+          </p>
+
+          <div style={{ display: 'flex', gap: 'var(--space-3)', flexDirection: 'column', alignItems: 'flex-start' }}>
+            {!netease.connected && qrStatus === '' && (
+              <button onClick={handleShowQr} className="btn-primary">
+                Connect Netease Cloud Music
+              </button>
+            )}
+
+            {/* QR flow */}
+            {!netease.connected && qrStatus !== '' && (
+              <div style={{ textAlign: 'center', width: '100%' }}>
+                {qrStatus === 'generating' && (
+                  <div style={{ padding: 'var(--space-8) 0' }}>
+                    <div className="spinner" />
+                    <p className="text-sm text-tertiary" style={{ marginTop: 'var(--space-3)' }}>
+                      Preparing QR code...
+                    </p>
+                  </div>
                 )}
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: 16, fontWeight: 600 }}>{selectedPlaylist.name}</h3>
-                  <p style={{ fontSize: 13, color: '#888' }}>
-                    {selectedPlaylist.track_count || 0} tracks
-                  </p>
-                </div>
-                <button
-                  onClick={handleAnalyze}
-                  disabled={analyzing}
-                  style={{ background: analyzing ? '#333' : '#a78bfa', color: '#fff', padding: '8px 20px', fontSize: 14 }}
-                >
-                  {analyzing ? 'Analyzing...' : '🎵 Analyze'}
-                </button>
-              </div>
 
-              {/* Analysis results */}
-              {analysisResult && (() => {
-                const a = analysisResult.analysis || {};
-                return (
-                <div style={{
-                  marginBottom: 16, padding: 16, borderRadius: 8,
-                  background: '#1a1a1a', fontSize: 13, lineHeight: 1.7
-                }}>
-                  {/* Vibe / insight */}
-                  {a.vibe && (
-                    <div style={{ marginBottom: 12 }}>
-                      <div style={{ fontSize: 18, fontWeight: 700, color: '#a78bfa' }}>{a.vibe}</div>
-                      {a.insight && (
-                        <div style={{ color: '#888', fontSize: 13, marginTop: 4, fontStyle: 'italic' }}>
-                          "{a.insight}"
+                {qrImg && (qrStatus === 'waiting' || qrStatus === 'scanning') && (
+                  <div style={{ display: 'inline-block' }}>
+                    <div style={{ position: 'relative', display: 'inline-block' }}>
+                      <img src={qrImg} alt="QR code"
+                        style={{
+                          width: 180, height: 180, borderRadius: 'var(--radius-sm)',
+                          background: '#fff', padding: 8,
+                          opacity: qrStatus === 'scanning' ? 0.4 : 1,
+                          transition: 'opacity 0.3s'
+                        }} />
+                      {qrStatus === 'waiting' && (
+                        <div style={{
+                          position: 'absolute', inset: -4, borderRadius: 'var(--radius-md)',
+                          animation: 'pulse-ring 2s infinite'
+                        }} />
+                      )}
+                      {qrStatus === 'scanning' && (
+                        <div style={{
+                          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                          width: 48, height: 48, borderRadius: 'var(--radius-full)',
+                          background: 'rgba(52, 211, 153, 0.2)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center'
+                        }}>
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
                         </div>
                       )}
                     </div>
-                  )}
+                    <p className="text-sm text-tertiary" style={{ marginTop: 'var(--space-3)' }}>
+                      {qrStatus === 'scanning'
+                        ? 'Scanned! Confirm on your phone...'
+                        : 'Scan with Netease Cloud Music app'}
+                    </p>
+                    {qrStatus === 'waiting' && countdown > 0 && (
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--space-1)' }}>
+                        Expires in {Math.floor(countdown / 60)}:{String(countdown % 60).padStart(2, '0')}
+                      </p>
+                    )}
+                  </div>
+                )}
 
-                  {/* Mood tags */}
-                  {a.mood_tags?.length > 0 && (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
-                      {a.mood_tags.map((tag, i) => (
-                        <span key={i} style={{
-                          padding: '2px 10px', borderRadius: 12, fontSize: 12,
-                          background: '#2a1a4a', color: '#c4a8ff'
-                        }}>{tag}</span>
+                {qrStatus === 'connecting' && (
+                  <div style={{ padding: 'var(--space-8) 0' }}>
+                    <div className="spinner" />
+                    <p className="text-sm text-tertiary" style={{ marginTop: 'var(--space-3)' }}>
+                      Connecting to Netease...
+                    </p>
+                  </div>
+                )}
+
+                {qrStatus === 'expired' && (
+                  <div style={{ padding: 'var(--space-4) 0' }}>
+                    <p className="text-sm" style={{ color: 'var(--error)', marginBottom: 'var(--space-3)' }}>
+                      QR code expired
+                    </p>
+                    <button onClick={handleRetryQr} className="btn-secondary">
+                      Generate new QR code
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Import button */}
+            {netease.connected && !importing && (
+              <button onClick={handleImport} className="btn-primary">
+                Import Playlists
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* ── Playlist grid ─────────────────────────────────────── */}
+        {playlists.length > 0 && (
+          <>
+            <h2 className="text-sm text-tertiary font-semibold" style={{ marginBottom: 'var(--space-3)' }}>
+              Your playlists
+            </h2>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+              gap: 'var(--space-3)'
+            }}>
+              {playlists.map(pl => (
+                <PlaylistCard
+                  key={pl.id}
+                  pl={pl}
+                  selected={selectedPlaylist?.id === pl.id}
+                  onSelect={handleSelectPlaylist}
+                />
+              ))}
+            </div>
+
+            {/* ── Detail panel ──────────────────────────────────── */}
+            {selectedPlaylist && (
+              <div className="card animate-fade-in" style={{ marginTop: 'var(--space-5)', padding: 'var(--space-5)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', marginBottom: 'var(--space-4)' }}>
+                  {selectedPlaylist.image_url && (
+                    <img src={selectedPlaylist.image_url} alt={selectedPlaylist.name}
+                      style={{ width: 64, height: 64, borderRadius: 'var(--radius-sm)', objectFit: 'cover' }} />
+                  )}
+                  <div style={{ flex: 1 }}>
+                    <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 600 }}>{selectedPlaylist.name}</h3>
+                    <p className="text-sm text-tertiary">
+                      {selectedPlaylist.track_count || 0} tracks
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleAnalyze}
+                    disabled={analyzing}
+                    className="btn-primary"
+                    style={{ padding: 'var(--space-2) var(--space-5)' }}
+                  >
+                    {analyzing ? (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                        <span className="spinner spinner-sm spinner-light" />
+                        Analyzing...
+                      </span>
+                    ) : 'Analyze'}
+                  </button>
+                </div>
+
+                {/* Analysis results */}
+                {analysisResult && (() => {
+                  const a = analysisResult.analysis || {};
+                  return (
+                  <div className="card" style={{
+                    background: 'var(--bg-elevated)', backdropFilter: 'none',
+                    marginBottom: 'var(--space-4)', padding: 'var(--space-4)',
+                    fontSize: 'var(--text-sm)', lineHeight: 1.7
+                  }}>
+                    {/* Vibe + insight */}
+                    {a.vibe && (
+                      <div style={{ marginBottom: 'var(--space-4)' }}>
+                        <div style={{ fontSize: 'var(--text-xl)', fontWeight: 300, color: 'var(--accent)' }}>{a.vibe}</div>
+                        {a.insight && (
+                          <div className="text-sm text-secondary" style={{ marginTop: 'var(--space-1)', fontStyle: 'italic', borderLeft: '2px solid var(--border-visible)', paddingLeft: 'var(--space-3)' }}>
+                            &ldquo;{a.insight}&rdquo;
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Mood tags */}
+                    {a.mood_tags?.length > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-1)', marginBottom: 'var(--space-4)' }}>
+                        {a.mood_tags.map((tag, i) => (
+                          <span key={i} className="badge badge-accent">{tag}</span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Metrics */}
+                    {(a.energy || a.valence || a.tempo_pace) && (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-2)', marginBottom: 'var(--space-4)' }}>
+                        {a.energy && (
+                          <div className="card" style={{ background: 'var(--bg-glass)', backdropFilter: 'none', padding: 'var(--space-2)', textAlign: 'center' }}>
+                            <div className="text-xs text-tertiary font-semibold" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>Energy</div>
+                            <div className="text-base font-semibold" style={{ marginTop: 2 }}>{a.energy}</div>
+                          </div>
+                        )}
+                        {a.valence && (
+                          <div className="card" style={{ background: 'var(--bg-glass)', backdropFilter: 'none', padding: 'var(--space-2)', textAlign: 'center' }}>
+                            <div className="text-xs text-tertiary font-semibold" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>Mood</div>
+                            <div className="text-base font-semibold" style={{ marginTop: 2 }}>{a.valence}</div>
+                          </div>
+                        )}
+                        {a.tempo_pace && (
+                          <div className="card" style={{ background: 'var(--bg-glass)', backdropFilter: 'none', padding: 'var(--space-2)', textAlign: 'center' }}>
+                            <div className="text-xs text-tertiary font-semibold" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tempo</div>
+                            <div className="text-base font-semibold" style={{ marginTop: 2 }}>{a.tempo_pace}</div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Genres */}
+                    {a.primary_genres?.length > 0 && (
+                      <div className="text-sm" style={{ marginBottom: 'var(--space-2)' }}>
+                        <span className="text-tertiary">Genres: </span>
+                        <span className="text-secondary">{a.primary_genres.join(', ')}</span>
+                      </div>
+                    )}
+
+                    {/* Artists */}
+                    {a.standout_artists?.length > 0 && (
+                      <div className="text-sm" style={{ marginBottom: 'var(--space-2)' }}>
+                        <span className="text-tertiary">Key artists: </span>
+                        <span className="text-secondary">{a.standout_artists.join(', ')}</span>
+                      </div>
+                    )}
+
+                    {/* Footer metadata */}
+                    <div style={{ display: 'flex', gap: 'var(--space-3)', color: 'var(--text-tertiary)', fontSize: 'var(--text-xs)', marginTop: 'var(--space-3)' }}>
+                      {a.diversity && <span>Diversity: {a.diversity}</span>}
+                      {a.total_tracks && <span>Total: {a.total_tracks} tracks</span>}
+                      {a.sample_size && <span>Analyzed: {a.sample_size} tracks</span>}
+                    </div>
+                  </div>
+                  );
+                })()}
+
+                {/* Track list */}
+                {tracksLoading && (
+                  <div style={{ textAlign: 'center', padding: 'var(--space-6)' }}>
+                    <div className="spinner" />
+                    <p className="text-sm text-tertiary" style={{ marginTop: 'var(--space-3)' }}>Loading tracks...</p>
+                  </div>
+                )}
+                {selectedTracks && selectedTracks.length === 0 && !tracksLoading && (
+                  <p className="text-sm text-tertiary" style={{ textAlign: 'center', padding: 'var(--space-4)' }}>
+                    No tracks found for this playlist. Try importing playlists first.
+                  </p>
+                )}
+                {selectedTracks && selectedTracks.length > 0 && (
+                  <>
+                    <h4 className="text-sm text-tertiary font-semibold" style={{ marginBottom: 'var(--space-2)' }}>
+                      Tracks ({selectedTracks.length})
+                    </h4>
+                    <div style={{ maxHeight: 320, overflowY: 'auto' }}>
+                      {selectedTracks.map((t, i) => (
+                        <div key={t.id} style={{
+                          display: 'flex', alignItems: 'center', gap: 'var(--space-2)',
+                          padding: 'var(--space-1) 0', borderBottom: '1px solid var(--border-subtle)',
+                          fontSize: 'var(--text-sm)', transition: 'background var(--transition-fast)'
+                        }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <span className="text-xs text-tertiary" style={{ width: 24, textAlign: 'right', flexShrink: 0 }}>{i + 1}</span>
+                          {t.image_url ? (
+                            <img src={t.image_url} alt="" style={{ width: 36, height: 36, borderRadius: 4, objectFit: 'cover' }} />
+                          ) : (
+                            <div style={{ width: 36, height: 36, borderRadius: 4, background: 'var(--bg-elevated)' }} />
+                          )}
+                          <div style={{ flex: 1, overflow: 'hidden' }}>
+                            <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 500 }}>{t.name}</div>
+                            <div className="text-xs text-tertiary" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.artist}</div>
+                          </div>
+                        </div>
                       ))}
                     </div>
-                  )}
+                  </>
+                )}
+              </div>
+            )}
+          </>
+        )}
 
-                  {/* Metrics row */}
-                  {(a.energy || a.valence || a.tempo_pace) && (
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 12 }}>
-                      {a.energy && (
-                        <div style={{ textAlign: 'center', padding: '6px 0', borderRadius: 6, background: '#111' }}>
-                          <div style={{ fontSize: 10, color: '#666', textTransform: 'uppercase', letterSpacing: 1 }}>Energy</div>
-                          <div style={{ fontWeight: 600, marginTop: 2 }}>{a.energy}</div>
-                        </div>
-                      )}
-                      {a.valence && (
-                        <div style={{ textAlign: 'center', padding: '6px 0', borderRadius: 6, background: '#111' }}>
-                          <div style={{ fontSize: 10, color: '#666', textTransform: 'uppercase', letterSpacing: 1 }}>Mood</div>
-                          <div style={{ fontWeight: 600, marginTop: 2 }}>{a.valence}</div>
-                        </div>
-                      )}
-                      {a.tempo_pace && (
-                        <div style={{ textAlign: 'center', padding: '6px 0', borderRadius: 6, background: '#111' }}>
-                          <div style={{ fontSize: 10, color: '#666', textTransform: 'uppercase', letterSpacing: 1 }}>Tempo</div>
-                          <div style={{ fontWeight: 600, marginTop: 2 }}>{a.tempo_pace}</div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Genres */}
-                  {a.primary_genres?.length > 0 && (
-                    <div style={{ marginBottom: 8 }}>
-                      <span style={{ color: '#666', fontSize: 12 }}>Genres: </span>
-                      <span style={{ color: '#ccc' }}>{a.primary_genres.join(', ')}</span>
-                    </div>
-                  )}
-
-                  {/* Standout artists */}
-                  {a.standout_artists?.length > 0 && (
-                    <div style={{ marginBottom: 8 }}>
-                      <span style={{ color: '#666', fontSize: 12 }}>Key artists: </span>
-                      <span style={{ color: '#ccc' }}>{a.standout_artists.join(', ')}</span>
-                    </div>
-                  )}
-
-                  {/* Diversity & sample info */}
-                  <div style={{ display: 'flex', gap: 12, color: '#555', fontSize: 11, marginTop: 8 }}>
-                    {a.diversity && <span>Diversity: {a.diversity}</span>}
-                    {a.total_tracks && <span>Total: {a.total_tracks} tracks</span>}
-                    {a.sample_size && <span>Analyzed: {a.sample_size} tracks</span>}
-                  </div>
-                </div>
-                );
-              })()}
-
-              {/* Track list */}
-              {tracksLoading && (
-                <div style={{ textAlign: 'center', padding: 20 }}>
-                  <div className="spinner" />
-                  <p style={{ fontSize: 13, color: '#888', marginTop: 8 }}>Loading tracks...</p>
-                </div>
-              )}
-              {selectedTracks && selectedTracks.length === 0 && !tracksLoading && (
-                <p style={{ fontSize: 13, color: '#555', textAlign: 'center', padding: 16 }}>
-                  No tracks found for this playlist. Try importing playlists first.
-                </p>
-              )}
-              {selectedTracks && selectedTracks.length > 0 && (
-                <>
-                  <h4 style={{ fontSize: 13, fontWeight: 600, color: '#888', marginBottom: 8 }}>
-                    Tracks ({selectedTracks.length})
-                  </h4>
-                  <div style={{ maxHeight: 320, overflowY: 'auto' }}>
-                    {selectedTracks.map((t, i) => (
-                      <div key={t.id} style={{
-                        display: 'flex', alignItems: 'center', gap: 10,
-                        padding: '6px 0', borderBottom: '1px solid #1a1a1a', fontSize: 13
-                      }}>
-                        <span style={{ color: '#555', width: 24, textAlign: 'right', flexShrink: 0 }}>{i + 1}</span>
-                        {t.image_url ? (
-                          <img src={t.image_url} alt="" style={{ width: 32, height: 32, borderRadius: 4, objectFit: 'cover' }} />
-                        ) : (
-                          <div style={{ width: 32, height: 32, borderRadius: 4, background: '#1a1a1a' }} />
-                        )}
-                        <div style={{ flex: 1, overflow: 'hidden' }}>
-                          <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 500 }}>{t.name}</div>
-                          <div style={{ color: '#666', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.artist}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-        </>
-      )}
-
-      {playlists.length === 0 && netease.connected && !importing && (
-        <p style={{ textAlign: 'center', color: '#555', marginTop: 40 }}>
-          No playlists yet. Click "Import Playlists" to get started.
-        </p>
-      )}
+        {playlists.length === 0 && netease.connected && !importing && (
+          <div className="empty-state">
+            <div className="empty-state-icon">♪</div>
+            <p className="text-sm text-tertiary">
+              No playlists yet. Click &ldquo;Import Playlists&rdquo; to get started.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
