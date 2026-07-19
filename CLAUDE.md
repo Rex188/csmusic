@@ -510,10 +510,36 @@ When deploying, user reported signup button appeared to do nothing for 20+ secon
 - Implementation order (8 steps, one file at a time)
 - Acceptance criteria (15 checkboxes)
 
-**Status:** Spec complete. Ready for DeepSeek to implement.
+**Status:** ✅ **Implemented by DeepSeek** (2026-07-18). All 8 steps completed in one session: index.css redesigned, all 5 pages + Toast component rewritten. Built, committed, and deployed to Render.
+
+**⚠️ User rejected the purple/indigo palette after deployment.** User called it "ugly" — wanted monochrome (black/white/gray), Helvetica, and dramatic size contrast. DeepSeek reworked the entire design system the same day (see Phase 16).
 
 ---
-    ## Timeline
+
+#### Phase 16 — Monochrome Redesign (2026-07-18 → 2026-07-19)
+
+**Context:** User rejected the Apple-inspired purple/indigo gradient design immediately after seeing it deployed. Feedback: "我靠。好丑啊，这个傻逼的紫色渐变，我希望还是黑白灰，而且我希望有大小对比的设计，同时字体设计也太丑了，用Helvetica。"
+
+**Changes made:**
+- **Palette:** Warm deep charcoal → pure black (`#000000`). All purple/indigo/amber tokens removed.
+- **Typography:** Inter (Google Fonts) → Helvetica Neue. Removed Google Fonts dependency.
+- **Accent:** Gradient indigo→violet → pure white (`#ffffff`). Focus rings, borders, all accent references now white.
+- **Buttons:** Pill-shaped gradient buttons → sharp square-corner white buttons. No gradient, no border-radius.
+- **Type scale:** Dramatically enlarged. Body 16px → 18px. Headlines 31px → 44px, 39px → 64px.
+- **Spacing:** All spacing tokens increased proportionally for breathing room.
+- **Rounded corners:** User requested later — added back moderate radii (sm=10px, lg=18px).
+- **Glass transparency:** Cards reduced from 0.65 → 0.5 alpha, blur increased 20px → 24px.
+
+**Logos updated across all pages:** Removed `accent-gradient` from logo text (`WebkitBackgroundClip`, `WebkitTextFillColor`). All logos now solid white bold text.
+
+**Files changed:**
+- `frontend/src/index.css` — complete token rewrite (monochrome, Helvetica, larger type)
+- `frontend/src/pages/Login.jsx`, `Signup.jsx`, `Verify.jsx`, `Dashboard.jsx`, `Admin.jsx` — removed gradient references
+- `frontend/dist/` — rebuilt
+
+**Deployed to Render:** commit `87420da`.
+
+---
 
 | Date | Event |
 |---|---|
@@ -543,4 +569,7 @@ When deploying, user reported signup button appeared to do nothing for 20+ secon
 | 2026-07-18 | **Debugger role added.** Third AI model (`project/role debugger.md`) — diagnostics-only, all findings go into `tasks.md` for DeepSeek. Three-model pipeline: Architect → Implementer → Debugger. CLAUDE.md, tasks.md, README.md updated. |
 | 2026-07-18 | **Email verification recovery path fixed.** Three bugs: (1) `verification_url` gated behind `SMTP_HOST` — removed guard so URL always returns. (2) Resend endpoint missing `verification_url` in response. (3) Frontend reduced to binary sent/not-sent display — now 3 independent states. SMTP configured in `.env` (Brevo). `config.py` updated with explicit dotenv path. Deployed to Render. |
 | 2026-07-18 | **Signup/Login loading states added.** Render cold start (5-10s) + SMTP timeout (15s) caused 20s+ delay with no visual feedback. Buttons now show spinner + "Creating account..." / "Logging in..." text during submission, disabled to prevent double-submit. `dist/` rebuilt and deployed. |
-| 2026-07-18 | **UI Redesign spec written.** Architect designed complete Apple-inspired design system: token-based CSS (~200 lines), glass morphism cards, gradient accent, Inter typography, 4-button system, page-by-page specs for all 5 pages. Written to `tasks.md` as "Task — Frontend UI Redesign (Apple-Style)". Ready for DeepSeek to implement. |
+| 2026-07-18 | **UI Redesign spec written.** Architect designed complete Apple-inspired design system: token-based CSS (~200 lines), glass morphism cards, gradient accent, Inter typography, 4-button system, page-by-page specs for all 5 pages. Written to `tasks.md` as "Task — Frontend UI Redesign (Apple-Style)". |
+| 2026-07-18 | **Apple-style UI implemented and deployed.** DeepSeek completed all 8 steps: index.css rewritten, Login/Signup/Verify/Dashboard/Admin/Toast all redesigned. Built and deployed to Render. |
+| 2026-07-18 | **User rejected purple palette — Monochrome redesign.** Full pivot to black/white/gray, Helvetica, dramatic type scale (18px body, 64px headline), pure white accents. Buttons changed from gradient pill to sharp white. Logos updated across all pages. |
+| 2026-07-19 | **UI refinement: rounded corners + glass transparency.** User requested more rounding — radii increased (sm=6→10px, lg=14→18px). Glass cards more transparent (alpha 0.75→0.5, blur 16→24px). All progress docs synced. |

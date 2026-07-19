@@ -5,7 +5,7 @@
 **Debugging by:** Debugger (Senior Debugging Engineer)
 **Date:** 2026-07-16
 
-**Status:** 🔨 **Active: Frontend UI Redesign (Apple-Style).** See task spec below. Playlist selection + LLM analysis + admin panel + email verification all built and deployed to Render.
+**Status:** ✅ **All phases done.** Frontend UI Redesign (Apple-Style) implemented and then pivoted to monochrome (black/white/gray, Helvetica) per user feedback. Playlist selection + LLM analysis + admin panel + email verification all built and deployed to Render.
 
 You are building the V1 skeleton of Music-Self. **Do not redesign anything.** Implement exactly what's specified. If something is ambiguous or broken, flag it — don't improvise.
 
@@ -122,6 +122,8 @@ No audio features table yet. Netease API doesn't expose energy/valence/tempo —
 - **Email verification recovery path** — `verification_url` always returned (signup + resend), decoupled from SMTP status. Frontend shows clickable fallback link whenever present. (`backend/auth.py`, `frontend/src/pages/Signup.jsx`)
 - **Loading states for cold-start** — Signup and Login buttons now show spinner + text during submission, preventing confusion during Render's 15-20s cold start + SMTP timeout. (`frontend/src/pages/Signup.jsx`, `frontend/src/pages/Login.jsx`)
 - **Explicit dotenv path** — `config.py` now loads `.env` from `backend/` directory explicitly via `Path(__file__)`, avoiding CWD-dependent failures. (`backend/config.py`)
+- **Frontend UI Redesign (Apple-Style)** — Complete design token system (~200 lines CSS), glass cards, gradient accent, Inter typography, 4-button system. All 6 pages redesigned. Built and deployed.
+- **Monochrome Redesign (post-feedback)** — Apple palette rejected by user. Pivoted to pure black/white/gray, Helvetica Neue, dramatic type scale (body 18px, headline 64px), solid white accents. Rounded corners and glass transparency added after further feedback.
 
 ### ❌ Not Yet Built
 1. **Visual landscape / garden UI** — dashboard is still playlist cards, not the SOUL-inspired garden
