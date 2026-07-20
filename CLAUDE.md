@@ -63,6 +63,12 @@ D:/music thera/                        # ← Project root
     │   │   ├── api.js                 #     All backend API calls — find endpoints here
     │   │   ├── index.css              #     Global dark theme + .spinner + .card styles
     │   │   ├── assets/                #     Static images (React logo, etc.)
+    │   │   ├── components/
+    │   │   │   ├── Toast.jsx          #     Toast notification component
+    │   │   │   └── Garden.jsx         #     React wrapper for p5 garden sketch
+    │   │   ├── garden/
+    │   │   │   ├── mapping.js         #     LLM analysis → mood → preset key
+    │   │   │   └── sketch.js          #     p5 instance: Cowsert bg + Houston blobs
     │   │   └── pages/
     │   │       ├── Login.jsx          #     Email + password form → /dashboard
     │   │       ├── Signup.jsx         #     Signup with verification prompt
@@ -541,6 +547,616 @@ When deploying, user reported signup button appeared to do nothing for 20+ secon
 
 ---
 
+#### Phase 17 — Debugger Audit + 9 Bugfixes (2026-07-20)
+
+**Context:** Senior Debugging Engineer performed a full codebase audit across 28 source files.
+
+**Audit findings:** 9 bugs identified — 4 medium severity, 5 low. Zero critical or high-severity issues. The backend was solid; most issues were in the frontend UX layer.
+
+**Bugs found and fixed:**
+
+| ID | Sev | File | Issue | Fix |
+|---|---|---|---|---|
+| BUG-1 | M | `Signup.jsx:65` | Logo invisible on success page — `--accent-gradient` removed in monochrome redesign | Changed to `color: var(--text-primary)` |
+| BUG-2 | M | `Dashboard.jsx:295` | Resend always shows "sent" even when SMTP fails | Now reads `result.verification_sent` from response |
+| BUG-3 | M | `app.py:9` | Session cookie lacks Secure flag on HTTPS | Added `SESSION_COOKIE_SECURE/SAMESITE/HTTPONLY` |
+| BUG-4 | L | `app.py:11` | CORS origins hardcoded to localhost | Configurable via `CORS_ORIGIN` env var |
+| BUG-5 | L | `Dashboard.jsx:245` | Import toast had 17-min auto-dismiss | Changed to 120000ms |
+| BUG-6 | L | `index.html:6` | Browser tab title was "frontend" | Changed to "music-self" |
+| BUG-7 | L | `auth.py:55` | `verification_url` computed after email send | Moved before the send call |
+| BUG-8 | L | `Dashboard.jsx:152` | Countdown timer started at 300s (QR valid 180s) | Changed to 180s |
+| BUG-9 | L | `auth.py:36` | Redundant SELECT after INSERT | Uses `cur.lastrowid` |
+
+**New file:** `project/bug.md` — full bug report with reproduction steps, fix specs, and regression analysis.
+
+**Status:** All 9 bugs verified fixed. No regressions.
+
+---
+
+#### Phase 18 — Research Pivot: Inner Landscape (2026-07-20)
+
+**Context:** The garden/avatar prototype spec was written (see `tasks.md` → "Task — Garden/Avatar Prototype"), but before handing it off to DeepSeek for implementation, the user articulated a much deeper framing. This is not a feature spec — it's a research proposition grounded in HCI, affective computing, and philosophy of technology.
+
+The project has evolved from "build a visual garden from music data" to a research question:
+
+> **Can music-driven generative AI externalize human inner worlds, enabling deeper self-understanding and authentic social connection?**
+
+The user formalized this as a Project Concept Document: **"Inner Landscape: Using Music-Driven Generative AI to Externalize Human Inner Worlds and Reconstruct Meaningful Social Connection"** (内在景观：通过音乐驱动的生成式AI，将人的内心世界外化，并重新建立深层社交连接)
+
+---
+
+##### 18.1 — The Theoretical Framework
+
+The user grounded the project in six theoretical pillars spanning psychology and philosophy. Architect's analysis of how they connect:
+
+**A. Psychology Foundations**
+
+| Scholar | Concept | Project Connection |
+|---|---|---|
+| **Dan McAdams** | Narrative Identity Theory — the self is the story we continuously tell about our experiences | Music → Emotion → Symbol → Personal Narrative. The AI doesn't say "you are melancholic"; it says "your inner landscape resembles a quiet ocean at midnight, where memories remain visible beneath the surface." |
+| **Carl Jung** | Individuation — psychological growth requires integrating hidden parts of oneself. Modern humans live through social Personas ("I am my job/ grades/status") | Social media encourages Persona. This project explores the inward direction: emotion, memory, desire, meaning. The landscape is a visualization of the unconscious self — not a profile picture, but an encounter with the Shadow. |
+| **Deci & Ryan** | Self-Determination Theory — three needs: Autonomy, Competence, Relatedness. But people often seek Relatedness without first developing Autonomy | The project inverts the order: autonomy → competence → *then* relatedness. Encounter yourself first. Then share. Most social platforms do the reverse and wonder why people feel hollow. |
+
+**B. Philosophy Foundations**
+
+| Scholar | Concept | Project Connection |
+|---|---|---|
+| **Max Weber** | Disenchantment of the World — modern society replaces meaning with efficiency, rationalization, measurement | Modern platforms reduce humans to data (likes, followers, listening history). This project attempts the reverse: Data → Meaning, Behavior → Story, Music → Self. Re-enchantment through technology. |
+| **Jean-Paul Sartre** | Existentialism — humans must create meaning. People often inherit identities instead of constructing them | The AI does not tell users "who you are." It provides a space where users construct *their own* meaning. The landscape is not a diagnosis — it's a canvas for self-authorship. |
+| **Martin Heidegger** | Technology as *Bestand* (standing-reserve) — modern tech reduces everything to resources to be optimized. Spotify: listening → recommendation inputs. Instagram: identity → engagement metrics. | **The core philosophical move.** This project proposes technology as *revealing* rather than *enframing*. The AI doesn't extract value from the user — it holds up a mirror so the user can see themselves. Technology in service of Being, not the other way around. |
+
+**Architect's synthesis — why this framework works:**
+
+The six theories form a coherent diagnostic + prescription:
+
+1. **Diagnosis**: Modernity disenchants (Weber) → people lose access to inner worlds → they inherit personas rather than constructing selves (Sartre) → technology accelerates this by reducing everything to resources (Heidegger)
+2. **Mechanism**: Identity IS narrative (McAdams) — so the fix involves helping people construct narratives, not giving them labels. The unconscious self (Jung) needs a medium to become visible.
+3. **Constraint**: Autonomy must precede relatedness (Deci/Ryan) — so the product must be introspective first, social second. This is *the* design principle that distinguishes Inner Landscape from every social app ever built.
+
+---
+
+##### 18.2 — The Core Thesis
+
+> **In contemporary society, meaningful human connection is hindered by the loss of an accessible inner self. By using music as an emotional medium and generative AI as a reflective mirror, we can transform invisible psychological states into visible personal landscapes, enabling deeper self-understanding and authentic social interaction.**
+
+Simplified:
+
+> **Before connecting with others, humans need to encounter themselves.**
+
+This is a sharp refinement of the Phase 8 pitch ("A visual space that grows from your music — showing not what you listen to, but how you perceive the world"). The Phase 8 pitch was about *perception*. The Phase 18 thesis is about *being* — it goes deeper, from "how you see" to "who you are."
+
+---
+
+##### 18.3 — The Critique of Existing Platforms
+
+The user identified what current platforms ask vs. what they never ask:
+
+| Platform | Question |
+|---|---|
+| Instagram | "What did you do?" |
+| Spotify | "What did you listen to?" |
+| LinkedIn | "What did you achieve?" |
+
+**None ask: "Who are you internally?"**
+
+The problem is not that people lack communication opportunities. The problem is:
+
+> **People lack an internally constructed world that can be communicated.**
+
+This is a more fundamental diagnosis than anything in our earlier phases. It's not a UX problem or a feature gap — it's an epistemological gap. You can't share what you haven't built.
+
+---
+
+##### 18.4 — Four-Prototype Roadmap
+
+The user outlined a research trajectory in four stages:
+
+| Prototype | Name | Goal | Key Question |
+|---|---|---|---|
+| **P0** | Wizard-of-Oz | Validate core thesis — do people recognize themselves in music-derived landscapes? | "Does this feel like me?" |
+| **P1** | Music → Emotional Landscape Generator | Transform playlists into generated visual/textual landscapes | "Can AI translate music into a personal inner world?" |
+| **P2** | Personal Growth Ecosystem | Landscapes that evolve over time as music taste changes | "Can someone watch their inner self grow?" |
+| **P3** | Inner Landscape Social Platform | Users share landscapes, not profiles. Conversation begins from meaning | "Can inner landscapes create deeper connection than profiles?" |
+| **P4** | AI Reflection Companion | AI gently helps users interpret changes in their own landscape | "Can AI help us reflect without becoming a therapist?" |
+
+**Architect's note:** P0 (Wizard-of-Oz) is the critical gate. If people don't recognize themselves in music-derived landscapes, the entire thesis invalidates. This is the right instinct — validate the core assumption before building anything. The garden/avatar prototype spec in `tasks.md` should be deferred until P0 results are in, because P0 will determine *what* the visual form should be (particle blooms? text landscapes? something else entirely?).
+
+---
+
+##### 18.5 — Wizard-of-Oz Protocol (Draft)
+
+The next concrete step, per user's direction:
+
+1. **Recruit 10 participants** — varied in self-knowledge readiness (reflective listeners, casual listeners, people in transition)
+2. **Collect music data** — 10 most-listened tracks + optional context ("when do you listen to this?")
+3. **Generate landscapes** — human + AI produces inner landscape descriptions (NOT code, NOT canvas — text descriptions of places that don't exist but feel real)
+4. **Evaluate** — five questions:
+   - **Recognition**: "Is there something in this landscape that feels like it belongs to you?"
+   - **Surprise**: "Did anything surprise you — something you didn't expect but that made sense once you saw it?"
+   - **Resistance**: "Is there anything you want to argue with or reject?" (As informative as agreement)
+   - **Privacy**: "Would you show this to: a close friend? a stranger? no one?" (Tests the social mask hypothesis)
+   - **Return**: "Would you want to see how this landscape looks different in a month?"
+
+**Architect's notes on the WOZ protocol:**
+
+- The landscape generation should include something "wrong" — a detail that doesn't quite fit. Real self-knowledge includes contradiction. A landscape that's perfectly flattering feels like a horoscope.
+- Output format: LANDSCAPE NAME + VISUAL DESCRIPTION (3-5 sentences) + DOMINANT ELEMENT (what draws the eye first) + HIDDEN DETAIL (what you notice only after looking longer) + ATMOSPHERE (temperature, light quality, sound, time of day)
+- The evaluation question "would you show this to a stranger?" is the sharpest test of the social mask hypothesis from Phase 6/8. If people want to share with strangers but not friends, that means something different from wanting to share with friends but not strangers. Map the privacy gradient.
+
+---
+
+##### 18.6 — Research Questions (Formalized)
+
+| ID | Question | Method |
+|---|---|---|
+| **RQ1** | Can music-based AI generation help individuals better understand their own emotions? | P0 → P1 qualitative evaluation |
+| **RQ2** | Can visualizing inner states improve self-expression? | P2 longitudinal observation |
+| **RQ3** | Can sharing inner landscapes create deeper interpersonal connection compared with traditional profiles? | P3 comparative study |
+
+---
+
+##### 18.7 — What This Changes
+
+**Immediate impact on the garden/avatar spec in `tasks.md`:**
+
+The spec assumes the visual mapping (energy→orbit speed, valence→vertical position) is a design decision. But the WOZ proposal reframes it as a **research question**: *what mapping produces self-recognition?*
+
+The first prototype should NOT be a particle system. It should be a **language-first prototype** — text descriptions of inner landscapes, tested on real people. Only after P0 results should we decide:
+- Is the output visual, textual, or both?
+- Are particle blooms the right metaphor, or do people respond better to something else?
+- Does self-recognition come from specific details or from the overall atmosphere?
+
+**Three questions to answer before writing renderer code:**
+1. Do people recognize themselves in music-derived landscapes at all? (If no → invalidates everything)
+2. What kinds of details trigger recognition — specific, surprising, contradictory? (Shapes the generation prompt)
+3. Do people want to share these? With whom? (Shapes the social architecture)
+
+**The garden spec stays in `tasks.md`** as a reference design, but implementation is **deferred** pending P0 results.
+
+---
+
+##### 18.8 — One-Sentence Pitch (Final)
+
+> **Inner Landscape is a music-driven generative AI system that transforms personal listening experiences into evolving visual worlds, helping individuals discover themselves and connect with others through shared inner narratives.**
+
+Chinese: **内在景观是一个通过音乐驱动的生成式AI系统，将个人的听歌体验转化为不断演变的视觉世界，帮助个体发现自我，并通过共享的内在叙事与他人建立深层连接。**
+
+---
+
+##### 18.9 — Architect's Reflection on the Pivot
+
+This is the most significant conceptual evolution since the Phase 4-5 breakthrough (when the raw idea of "music-self" emerged from the rejected research report). Key differences from where we were:
+
+| Before (Phase 8-16) | After (Phase 18) |
+|---|---|
+| "A visual space" | "A medium for self-expression" |
+| "Music as perception" | "Music as a mirror for being" |
+| Design problem | Research proposition |
+| Build a product | Validate a thesis |
+| Particle blooms on canvas | Language-first, WOZ-tested landscapes |
+| "How you perceive the world" | "Who you are internally" |
+
+The trajectory is correct: the earlier phases established *what* we're building and *how* to build it technically. This phase establishes *why* it matters — the theoretical foundation that distinguishes Inner Landscape from every music visualization project that came before (Bloom, Sonosphere, Soundgaze — see Phase 7).
+
+Those projects generated cool visuals from music data. None of them had a theory of self. None of them asked whether the user recognized themselves in the output. That's the gap. That's what P0 tests.
+
+**Recommendation:** Keep the constellation garden spec in `tasks.md` as a fallback implementation plan. But P0 implementation is deferred — the user wants to resolve a more fundamental theoretical question first (see Phase 19).
+
+---
+
+#### Phase 19 — Multimodal Upgrade: From Music Visualization to Inner Self Modeling (2026-07-20)
+
+**Context:** The architect suggested P0 (Wizard-of-Oz) as the next step. The user rejected it — not because validation is wrong, but because a deeper theoretical question needs resolution first:
+
+> **How do you define a person's inner self representation? What should AI look at to understand a person?**
+
+This elevated the project from Phase 18's single-modal framing (music → self) to a **multimodal inner self modeling** framework. The user identified a critical theoretical weakness in music-only approaches and added three new philosophical pillars.
+
+---
+
+##### 19.1 — The Music-Only Problem
+
+Phase 18's thesis assumed:
+
+```
+Music → Personality
+```
+
+But the user identified a fundamental over-inference problem:
+
+> A person listens to Frank Ocean because of:
+> - Genuine emotional resonance
+> - A friend's recommendation
+> - It was popular at the time
+> - They just like the melody
+>
+> Music alone cannot tell you *why*.
+
+Music is a **proxy** (代理变量) for inner state — not the state itself. Using only music risks the same category error as Spotify Wrapped: it tells you what you listened to, not who you are.
+
+The fix:
+
+```
+Music
++
+Diary (personal narrative)
++
+Mood Tracking (temporal emotional patterns)
++
+Life Events (context and meaning)
++
+Reflection (self-interpretation)
+↓
+AI Inner Model
+↓
+Inner Landscape
+```
+
+Each modality answers a different question:
+
+| Modality | Question It Answers | Theoretical Grounding |
+|---|---|---|
+| **Music** | "What do I feel?" | Emotional atmosphere, aesthetic preference, subconscious attraction |
+| **Diary** | "What happened to me?" | Narrative Identity (McAdams) — the raw material for self-story |
+| **Mood Tracking** | "How does my inner world change over time?" | Temporal pattern — the forest has seasons |
+| **Life Events** | "What gives this meaning?" | Context — the same song means entirely different things depending on what you're living through |
+
+**Architect's example of why multimodality matters:**
+
+```
+Music: "Self Control" — Frank Ocean
+                    ↓
+Diary: "Today I saw my old friend after two years."
+                    ↓
+AI understands: Not sadness.
+                Memory + transition + unresolved relationship.
+```
+
+Single-modal would output: "melancholic." Multimodal outputs: "a harbor at dusk where ships that haven't sailed in years still have their lights on." The difference is the difference between a label and a landscape.
+
+---
+
+##### 19.2 — New Philosophical Pillars
+
+The user added three philosophers to the Phase 18 framework (McAdams, Jung, Deci/Ryan, Weber, Sartre, Heidegger):
+
+**1. Phenomenology — Maurice Merleau-Ponty (addition to Heidegger)**
+
+> The world is not objective data — it is *lived experience*.
+
+Traditional AI emotion modeling:
+```
+sadness = 0.8
+```
+
+Inner Landscape approach:
+```
+悲伤不是数字。
+而是一片冬天的森林。
+```
+
+This is the most radical design constraint in the project: **emotion is never a label, always a place.** Even if the underlying model computes numbers, the user-facing output must be phenomenological — a world to inhabit, not a score to read.
+
+**2. Carl Rogers — Self-Concept**
+
+> Mental health comes from congruence between real self and ideal self.
+
+Modern people increasingly cannot answer: "Who is the real me?" The system provides what Rogers couldn't: a **self-reflection mirror** that makes the real self visible, so the gap between real and ideal becomes something you can *see* rather than just feel.
+
+**3. Andy Clark — Extended Mind Theory**
+
+> Cognition extends beyond the brain. Tools can become part of thinking.
+
+A notebook extends memory. Inner Landscape becomes an **externalized self** — a second self that can be *observed*. You can't step outside your own mind to look at it. But you can step back from your landscape and say: "That mountain has been there every time I've checked. What is that mountain?"
+
+---
+
+##### 19.3 — Conceptual Model (Formalized)
+
+**What current social platforms do:**
+
+```
+Human → External Identity (photos, posts, achievements, likes) → Social Interaction
+```
+
+The output is **Persona** (social mask), not **Inner Self**.
+
+**What Inner Landscape does:**
+
+```
+         Music ──┐
+                  │
+       Diary ────┤
+                  ├── AI Inner Model ──→ Inner Landscape ──→ Self Reflection ──→ Meaningful Connection
+     Mood ───────┤
+                  │
+   Life Events ──┘
+```
+
+Each arrow is a research question in itself:
+- How do you fuse heterogeneous modalities into a coherent self-representation?
+- What does the landscape actually look like?
+- Does seeing your landscape change your self-understanding?
+- Does sharing a landscape create different kinds of conversation than sharing a profile?
+
+---
+
+##### 19.4 — Updated Prototype Roadmap
+
+P0 (Wizard-of-Oz) is **removed** per user's direction. The roadmap now begins from a theoretical foundation before any human testing.
+
+| Prototype | Name | What It Does | Key Question |
+|---|---|---|---|
+| **P1** | Multimodal Self Encoder | Fuse music embedding + text embedding + emotion timeline into a personal embedding vector. Generate a landscape from that vector. | "Can we represent a person from multiple self-expression signals?" |
+| **P2** | Dynamic Growing Landscape | Not a single image — a *world* that changes. Tree = long-term identity. Weather = current emotion. Plants = memories. Rivers = life trajectory. | "Can an inner world evolve with a person over time?" |
+| **P3** | Inner Social Network | Not Profile → Profile. World → World. Users enter each other's landscapes. Conversation begins from what they see. | "Do inner landscapes create deeper connection than profiles?" |
+
+**Architect's note:** P1 is the hard technical problem — multimodal fusion for self-representation. P2 is the hard temporal problem — how does a world change? P3 is the hard social problem — what happens when two inner worlds meet? Each is a research contribution in its own right.
+
+---
+
+##### 19.5 — The Real Research Question
+
+The user identified the most valuable question in the entire project:
+
+> **如何定义一个人的 inner self representation？**
+>
+> *How do you define a person's inner self representation?*
+>
+> If AI is going to understand a person, what should it look at?
+
+This is prior to all engineering. You can't build a self-model without defining what constitutes self-evidence. The project has moved from:
+
+| Stage | Question |
+|---|---|
+| "Build a garden" (before Phase 18) | "What color should the particles be?" |
+| "Validate the thesis" (Phase 18) | "Do people recognize themselves in music landscapes?" |
+| **"Define the construct" (Phase 19)** | **"What signals constitute a self, and how do they relate?"** |
+
+This is genuine HCI research. The answer determines everything downstream:
+- If self = narrative (McAdams) → diary is the primary signal, music is secondary
+- If self = emotional patterns (phenomenology) → mood tracking is primary, music is the expression
+- If self = lived experience (Merleau-Ponty) → life events + context are primary, everything else is texture
+- If self = all of the above → the fusion problem IS the research contribution
+
+---
+
+##### 19.6 — Final Vision
+
+The user's closing frame:
+
+| Platform | What It Knows |
+|---|---|
+| Facebook | "I know your life." |
+| Instagram | "I know your appearance." |
+| Spotify | "I know your taste." |
+| **Inner Landscape** | **"I know your inner landscape."** |
+
+The one-sentence pitch, updated:
+
+> **The future of social connection may not come from sharing more information about ourselves, but from developing richer inner worlds that are worth sharing.**
+
+This inverts the premise of every social platform ever built. They assume the self already exists and just needs a stage. Inner Landscape assumes the self needs to be *discovered and constructed* before it can be shared — and provides the tools for that construction.
+
+---
+
+##### 19.7 — Architect's Synthesis: Where We Stand
+
+The project has undergone three major conceptual transformations:
+
+| Phase | Era | Core Idea | Key Move |
+|---|---|---|---|
+| 4-8 | Music-Self | "Music shows how you perceive the world" | From emotion-explanation to perception-visualization |
+| 18 | Inner Landscape | "Before connecting with others, encounter yourself" | From product design to research proposition; 6-theory foundation |
+| **19** | **Multimodal Inner Self** | **"How do you define inner self representation?"** | **From music-only to multimodal fusion; 9-theory foundation; the research question IS the contribution** |
+
+Phase 19 is the deepest framing yet. It doesn't invalidate anything from 18 — it addresses 18's weakest link (music as sole proxy) by broadening the evidential base. And it identifies a research question that is genuinely novel: not "can AI generate art from music" (answered, boring) but "what would it mean to model a person from the inside?"
+
+The next step is not code. It's not even a WOZ test. It's a **theoretical paper or design document** that defines:
+
+1. What modalities constitute self-evidence (and why)
+2. How they relate to each other (hierarchy? peer signals? some more fundamental than others?)
+3. What a fusion model looks like architecturally
+4. What the output representation should capture (state? trajectory? contradiction? all of the above?)
+
+This document would be the foundation for P1-P4. Without it, we'd be building a system without knowing what it's modeling.
+
+**Status:** Theoretical framework expanded to 9 pillars (McAdams, Jung, Deci/Ryan, Weber, Sartre, Heidegger, Merleau-Ponty, Rogers, Clark). P0 deferred. Central research question identified. Project formally elevated from "music visualization" to "multimodal inner self modeling."
+
+---
+
+#### Phase 20 — Garden Visual Prototype: Cowsert + Houston p5.js Port (2026-07-20)
+
+**Context:** DeepSeek implemented the garden visual layer using p5.js instance mode, porting two reference artworks.
+
+**Architecture:**
+- **One p5 instance, one canvas** — Cowsert flowing noise bands as background, Houston organic blobs as overlay
+- `new P5(sketch)` with instance mode — no global p5 state
+- React communicates via custom methods on the p5 instance (`setBg()`, `setBlobs()`)
+
+**Reference ports:**
+- `docs/ref-simulated-feelings.html` (Cowsert) → animated noise-field background with emotion-specific palettes and motion parameters
+- `docs/ref-emotion-blob.html` (Houston) → 240-point noise-deformed organic blobs, 3 HSL-varying layers per blob, sine breathing, canvas shadow glow
+
+**Files created:**
+- `frontend/src/garden/sketch.js` — p5 instance sketch: Cowsert bg + Houston blobs
+- `frontend/src/garden/mapping.js` — LLM analysis → mood preset key
+- `frontend/src/components/Garden.jsx` — React wrapper, mounts p5, passes analyses as props
+- `backend/analysis_routes.py` — added `GET /api/analysis/garden` endpoint
+
+**Debugger audit (7 bugs found and fixed):**
+
+| Bug | Sev | Issue | Fix |
+|---|---|---|---|
+| BUG-11 | C | `moodToKey` arguments swapped — all blobs neutral | Fixed call order |
+| BUG-12 | H | Blob positions jump on re-layout | Added position lerp (0.08) |
+| BUG-13 | H | HSL offsets smaller than ref, zoff fixed | Restored ref values, per-emotion zoff |
+| BUG-14 | L | Dead code `houston.js`/`cowsert.js` | Deleted |
+| BUG-15 | H | Blob layers have black stroke | Added `noStroke()` in drawLayers |
+| BUG-16 | H | CSS background/border creates duplicate canvas look | Removed, canvas owns all pixels |
+| BUG-17 | L | Inline styles duplicate CSS | Removed inline style prop |
+| BUG-18 | C | StrictMode + async p5.setup() = 2 canvases | Empty cleanup, guard blocks remount |
+
+**Key technical insight — BUG-18 root cause:** p5.js `setup()` is asynchronous (rAF-scheduled), so React StrictMode's mount→unmount→remount cycle races: cleanup runs before setup() executes, making `p5.remove()` a no-op. Fix: leave cleanup empty, let the `if (p5Ref.current) return` guard block the second mount.
+
+**Status:** All 7 bugs fixed. Garden renders as one canvas with Cowsert background bands and per-playlist Houston blobs. Colors and animation vary by LLM-analyzed mood.
+
+---
+
+#### Phase 21 — Inner Room Design: From Garden to "A Room of One's Own" (2026-07-20)
+
+**Context:** Phase 19 identified the central research question — "How do you define inner self representation?" — but never answered it. Phase 20 built a garden visual prototype (blobs + noise bands) that was technically solid but philosophically misaligned: it mapped a single mood label to a single blob color, which contradicts the Phase 19 principle that the self is a composition, not a label.
+
+This phase resolved the question by having the user answer 10 specific design decisions, producing the Inner Room design.
+
+---
+
+##### 21.1 — The 10 Design Decisions
+
+The architect broke the theoretical question into concrete choices. User's answers:
+
+| # | Question | Answer |
+|---|---|---|
+| Q1 | Signal weight — which is most fundamental? | **Music.** Most honest — can't fake. Diaries can be performative, but what you press play on is behavioral truth. |
+| Q2 | Signal contradiction — what if music says calm but diary says chaos? | **Don't resolve.** Multiplicity IS the person. No single mood label. Different corners of the room can hold different emotional truths. |
+| Q3 | Diary input — what form? | **Free text.** Users write what they want. LLM extracts meaning. No structured forms, no mood pickers. |
+| Q4 | Visual metaphor — garden or what? | **A room. A living space. "A Room of One's Own" (Woolf).** Inhabited, not observed. Private, architectural. |
+| Q5 | Initial state — what does the user see first? | **Gray, dead, empty.** The room earns vitality as the user fills it with music and writing. Nothing is beautiful until you put yourself into it. |
+| 5.1 | 2D or 3D? | **2.5D pseudo-3D.** 2D drawing with depth cues. No 3D modeling needed. |
+| 5.2 | Perspective? | **God's-eye isometric.** Looking down into a diorama/dollhouse. Can see "themselves" inside. |
+| 5.3 | Change rhythm? | **Dual-tempo.** Atmosphere flows continuously (light, weather, particles). Objects are event-driven (new playlist = new shelf object). |
+| 5.4 | Render tech? | **p5.js** (already in use). |
+| 5.5 | Sound? | **Yes — ambient audio texture** from music amalgam. Not songs, atmosphere. (Deferred to P2.) |
+| 5.6 | Diary input UI? | **Floating glass overlay.** Semi-transparent, room visible behind. Summon/dismiss anytime. (Deferred to P2.) |
+| 5.7 | Social? | **Each user has their own room. Visit others. Chat.** Three privacy tiers (public / mutual / private). Mixed chat (real-time when both present,留言 when away). Abstract avatars (light/shadow), not photos. |
+
+---
+
+##### 21.2 — The Room Model (Formalized)
+
+**What the room is:**
+
+> A 2.5D isometric interior space — rendered in p5.js, viewed from above like a dollhouse — that grows from your music, your words, and your time. You can see yourself inside. Others can visit, talk, and leave traces. It becomes, slowly, a place that is unmistakably you.
+
+**Room elements and their sources:**
+
+| Element | Source Signal | Change Speed | Meaning |
+|---|---|---|---|
+| Walls (color, texture) | Music aggregate | Very slow (months) | Core identity |
+| Floor (material, grain) | Diary themes | Slow (weeks) | Narrative foundation |
+| Window (weather outside) | Recent mood aggregate | Fast (hours-days) | Current emotional weather |
+| Light quality | Current/recent music | Medium (days) | What you're listening to |
+| Shelf objects | Individual playlists | Accumulate over time | Each analyzed playlist becomes a geometric object |
+| Desk objects | Diary entries | Accumulate | Each entry leaves a small mark/folded note |
+| Ambient sound (P2) | Music amalgam | Real-time | Faint texture, not recognizable songs |
+| Door | Social masks | Static until used | Threshold to other rooms |
+| Avatar | Self-presence | Continuous subtle drift | A point of light on the floor — not a character |
+
+**Temporal logic — dual-tempo:**
+
+| Layer | Trigger | Speed |
+|---|---|---|
+| Atmosphere (light, weather, dust, sound) | Random flow within emotion-defined bounds | Continuous, subtle |
+| Objects (walls, shelves, desk, floor) | Event-driven — importing, analyzing, writing | Instant on event, then settled |
+
+**The saturation multiplier — earned vitality:**
+
+```
+Empty room:  saturationMul = 0.0  (gray walls, dim avatar, void window)
+5 playlists: saturationMul = 0.4  (hint of color, warmer light, weather appears)
+10 + diary:  saturationMul = 0.8  (rich color, bright avatar, dynamic weather)
+15+:         saturationMul = 1.0  (full color, full life)
+```
+
+This is the most important UX principle. The room doesn't start beautiful — it becomes beautiful through the user's investment. Every element has a reason for existing. Nothing is decoration.
+
+**No more single mood labels:**
+
+The current garden maps each analysis to a single mood key (`moodToKey()` → `moodToColor()`). This is philosophically wrong for the room. The room holds multiple truths:
+
+```
+Music says:      → wall tint shifts blue (contemplative)
+Diary says:      → desk object glows warm (nostalgic)
+Mood says:       → window shows rain (melancholic)
+This IS the person. Not the average. The composition.
+```
+
+---
+
+##### 21.3 — Social Architecture
+
+**Each user has their own room.** Not profiles. Not feeds. Rooms with doors.
+
+**Privacy tiers:**
+
+| Tier | Who Sees What |
+|---|---|
+| Public | Anyone can visit. Shows curated "living room." |
+| Mutual (互关好友) | Friends see more — additional objects, more atmosphere detail. |
+| Private | Only the user. Hidden corners, private objects, raw emotional data. |
+
+**Visiting:**
+
+```
+Your room                    Friend's room
+┌──────────────┐            ┌──────────────┐
+│              │            │              │
+│   (you)      │  ──door──► │   (them)     │
+│              │            │              │
+└──────────────┘            └──────────────┘
+```
+
+**Chat:** Real-time when both present, 留言 (leave a message) when away. Messages become objects in the room.
+
+**Abstract avatars:** When two people are in the same room, each sees the other as a point of light or soft shadow — not a photo, not a 3D character. Presence, not appearance.
+
+---
+
+##### 21.4 — From Current to Target
+
+**Current state (Phase 20):** Dashboard with 400px garden canvas — particles + colored blobs, single mood per playlist.
+
+**Target state (P1):** Full-screen 2.5D isometric room with walls, floor, window, shelf, desk, door, avatar, atmosphere particles. UI overlaid as glass panels. Playlist analysis drives room state (weather, objects, saturation, light).
+
+**What stays:** All backend API endpoints, auth system, playlist import, LLM analysis, QR login. The entire backend is untouched.
+
+**What changes:** Only `frontend/src/garden/` and `frontend/src/pages/Dashboard.jsx`. New room sketch in `room.js`, UI overlay architecture via `GlassPanel` component.
+
+**P2 deferred items:** Diary input system, ambient audio texture, mood tracking UI.
+
+**P3 deferred items:** Social features (door, visiting, chat).
+
+---
+
+##### 21.5 — Architect's Notes on the Pivot
+
+This is the most significant conceptual shift since Phase 18-19. The garden prototype was a necessary experiment — it proved p5.js instance mode works, that LLM analysis can drive visuals, that React StrictMode needs the empty-cleanup + guard pattern. But the garden itself was the wrong metaphor.
+
+| Garden (Phase 20) | Room (Phase 21) |
+|---|---|
+| Exterior — observed | Interior — inhabited |
+| Nature — grows on its own | Architecture — you furnish it |
+| Passive — you watch it | Active — you live in it |
+| Shared public space | Private space with a door |
+| Blobs float in open canvas | Objects have a place (shelf, desk) |
+| Single mood color per blob | Multiple emotional layers in different room elements |
+| Starts alive (animated by default) | Starts dead (gray void, earned vitality) |
+| Flat 2D particles | 2.5D isometric depth |
+
+The room metaphor is stronger for five reasons:
+
+1. **Sovereignty.** A room is yours. You control who enters. The garden is open — anyone can walk through.
+2. **Furnishing = self-expression.** Adding a shelf object is more intentional than spawning a blob. Objects have placement, weight, permanence.
+3. **Earned beauty.** An empty room is honest. An empty garden is just... empty. The room's transformation from gray to colorful is meaningful because it tracks the user's investment.
+4. **Social clarity.** Visiting someone's room is a clear social act with cultural precedent. Visiting someone's garden is ambiguous — are you a tourist? A gardener? A trespasser?
+5. **Multiple truths in one space.** The room can hold different emotional currents in different corners (bleak window + warm shelf + cool floor) without contradiction. The garden's blobs had to each be one thing.
+
+**The P1 tech spec** is written to `tasks.md` as "Task — P1: Inner Room (2.5D Isometric, Full-Screen)" with 18 sections covering isometric projection math, wall/floor/window/desk/shelf rendering, weather system, lighting, avatar, atmosphere particles, saturation multiplier, UI glass overlay architecture, data flow, file changes, 13 implementation steps, and acceptance criteria.
+
+**Status:** Design complete. P1 tech spec written. Ready for DeepSeek implementation.
+
+---
+
 | Date | Event |
 |---|---|
 | 2026-07-15 | **Project initialized.** Folder `D:/music thera` set up as CS + music therapy workspace. |
@@ -573,3 +1189,8 @@ When deploying, user reported signup button appeared to do nothing for 20+ secon
 | 2026-07-18 | **Apple-style UI implemented and deployed.** DeepSeek completed all 8 steps: index.css rewritten, Login/Signup/Verify/Dashboard/Admin/Toast all redesigned. Built and deployed to Render. |
 | 2026-07-18 | **User rejected purple palette — Monochrome redesign.** Full pivot to black/white/gray, Helvetica, dramatic type scale (18px body, 64px headline), pure white accents. Buttons changed from gradient pill to sharp white. Logos updated across all pages. |
 | 2026-07-19 | **UI refinement: rounded corners + glass transparency.** User requested more rounding — radii increased (sm=6→10px, lg=14→18px). Glass cards more transparent (alpha 0.75→0.5, blur 16→24px). All progress docs synced. |
+| 2026-07-20 | **Debugger audit + 9 bugfixes.** Full codebase audit identified 9 bugs (4 medium, 5 low). All fixed: invisible Signup logo, Dashboard resend false success, session cookie security, CORS config, toast duration, page title, verification_url ordering, countdown timer, redundant SELECT query. Full report in `project/bug.md`. |
+| 2026-07-20 | **Phase 18 — Research Pivot: Inner Landscape.** User formalized the project as a research proposition grounded in HCI + affective computing + philosophy. Six-theory framework (McAdams, Jung, Deci/Ryan, Weber, Sartre, Heidegger). Core thesis: *Before connecting with others, humans need to encounter themselves.* Four-prototype roadmap proposed but P0 (Wizard-of-Oz) was rejected — user identified a more fundamental question that needs resolution first (see Phase 19). |
+| 2026-07-20 | **Phase 19 — Multimodal Upgrade.** User identified critical weakness in music-only approach: music is a proxy for inner state, not the complete self. Framework now spans 9 theorists. Central research question: *How do you define a person's inner self representation?* |
+| 2026-07-20 | **Phase 20 — Garden Visual Prototype.** DeepSeek implemented p5.js garden (Cowsert bands + Houston blobs). Debugger found 7 bugs (1 critical, 4 high, 2 low) — all fixed in same session. Key fix: StrictMode + async p5.setup() caused duplicate canvases. Garden now live: animated noise background + colored organic blobs per analyzed playlist. |
+| 2026-07-20 | **Phase 22 — Docs Redesign &amp; Landscape Within Essay.** All GitHub Pages redesigned with Aeon/*New Yorker* inspired typography system (Source Serif 4 + Inter, adaptive measure, light/dark mode). First essay "Landscape Within" published. Shared `style.css` for all 4 pages. Type scale refined (body 20→18px, H1 52→44px). Index hero CTA → prototype. |
