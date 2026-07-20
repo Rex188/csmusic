@@ -93,10 +93,15 @@ Extract deep musical and emotional patterns from the track list. Consider:
 - Energy & tempo patterns: whether the playlist is consistent or varied
 - Cultural/texture clues: languages, eras, production styles implied by artist/album names
 
+IMPORTANT: mood_tags must be SPECIFIC and DIVERSE. Avoid overusing "melancholic" or "contemplative".
+Good examples: dreamy, bittersweet, ethereal, playful, groovy, anxious, hopeful, cozy, nostalgic,
+romantic, mysterious, epic, tender, peaceful, warm, soulful, brooding, ecstatic, euphoric,
+hypnotic, soothing, uplifting, joyful, longing, calm, wistful, whimsical, radiant, fierce.
+
 Return this exact JSON structure:
 {
   "vibe": "one-line description of the overall atmosphere",
-  "mood_tags": ["3-5 mood keywords like energetic, melancholic, contemplative, upbeat, dark"],
+  "mood_tags": ["3-5 specific mood keywords from the diverse list above"],
   "energy": "low | medium-low | medium | medium-high | high",
   "valence": "sad | melancholic | neutral | happy | euphoric",
   "tempo_pace": "slow | moderate | upbeat | fast | varied",
@@ -311,6 +316,67 @@ def analyze_playlist(playlist_id):
         "analysis": summary
     })
 
+
+@analysis_bp.route("/garden", methods=["GET"])
+def get_garden():
+    """Return all completed analyses for the current user, garden-ready."""
+    uid, err = _require_auth()
+    if err:
+        return err
+
+    conn = models.get_db()
+    rows = conn.execute("""
+        SELECT aj.id, aj.playlist_id, aj.summary, p.name AS playlist_name,
+               p.image_url, p.track_count
+        FROM analysis_jobs aj
+        JOIN playlists p ON p.id = aj.playlist_id
+        WHERE aj.user_id = ? AND aj.status = 'completed' AND aj.summary IS NOT NULL
+        ORDER BY aj.created_at DESC
+    """, (uid,)).fetchall()
+    conn.close()
+
+    analyses = []
+    for r in rows:
+        try:
+            s = json.loads(r["summary"]) if isinstance(r["summary"], str) else r["summary"]
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if not s or not s.get("vibe"):
+            continue
+        analyses.append({
+            "id": r["id"],
+            "playlist_id": r["playlist_id"],
+            "playlist_name": r["playlist_name"],
+            "image_url": r["image_url"],
+            "track_count": r["track_count"],
+            "energy": s.get("energy", ""),
+            "valence": s.get("valence", ""),
+            "mood_tags": s.get("mood_tags", []),
+            "tempo_pace": s.get("tempo_pace", ""),
+            "vibe": s.get("vibe", ""),
+            "diversity": s.get("diversity", ""),
+            "primary_genres": s.get("primary_genres", []),
+        })
+
+    return jsonify({"analyses": analyses})
+
+
+@analysis_bp.route("/clear", methods=["DELETE"])
+def clear_analyses():
+    """Delete all analysis jobs for the current user."""
+    uid, err = _require_auth()
+    if err:
+        return err
+
+    conn = models.get_db()
+    conn.execute(
+        "DELETE FROM track_features WHERE analysis_job_id IN "
+        "(SELECT id FROM analysis_jobs WHERE user_id = ?)", (uid,)
+    )
+    conn.execute("DELETE FROM analysis_jobs WHERE user_id = ?", (uid,))
+    conn.commit()
+    conn.close()
+    return jsonify({"status": "ok", "cleared": True})
 
 @analysis_bp.route("/status/<int:job_id>", methods=["GET"])
 def get_analysis_status(job_id):

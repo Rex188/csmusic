@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import { addToast } from '../components/Toast';
+import Garden from '../components/Garden';
 
 function PlaylistCard({ pl, selected, onSelect }) {
   return (
@@ -66,6 +67,7 @@ export default function Dashboard() {
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [resendingVerification, setResendingVerification] = useState(false);
+  const [gardenAnalyses, setGardenAnalyses] = useState([]);
 
   // QR login state
   const [qrStatus, setQrStatus] = useState('');
@@ -173,8 +175,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     (async () => {
+      let me;
       try {
-        const me = await api.me();
+        me = await api.me();
         setUser(me.user);
       } catch {
         navigate('/login');
@@ -187,6 +190,10 @@ export default function Dashboard() {
       try {
         const pl = await api.getPlaylists();
         setPlaylists(pl.playlists);
+      } catch {}
+      try {
+        const g = await api.getGarden();
+        if (g.analyses) setGardenAnalyses(g.analyses);
       } catch {}
       setLoading(false);
 
@@ -286,10 +293,60 @@ export default function Dashboard() {
       const a = result.analysis;
       const summary = a.vibe || `${a.total_tracks} tracks analyzed`;
       addToast(summary, 'success', 5000);
+      // Refresh garden after analysis
+      try {
+        const g = await api.getGarden();
+        if (g.analyses) setGardenAnalyses(g.analyses);
+      } catch {}
     } catch (err) {
       addToast(`Analysis failed: ${err.message}`, 'error');
     }
     setAnalyzing(false);
+  };
+
+  const handleClearGarden = async () => {
+    try {
+      await api.clearAnalyses();
+      setGardenAnalyses([]);
+      addToast('Garden cleared', 'success', 2000);
+    } catch (err) {
+      addToast(`Failed to clear: ${err.message}`, 'error');
+    }
+  };
+
+  const handleBlobClick = async (blob) => {
+    addToast(`Clicked: ${blob.playlistName}`, 'success', 1500);
+    // Find playlist — construct from garden data if not in playlists state
+    let pl = playlists.find(p => p.id === blob.playlist_id);
+    if (!pl) {
+      pl = { id: blob.playlist_id, name: blob.playlistName, track_count: 0, image_url: '' };
+    }
+
+    // If already showing this playlist's analysis, just scroll
+    if (selectedPlaylist?.id === pl.id && analysisResult) {
+      document.querySelector('.garden-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
+    setSelectedPlaylist(pl);
+    setAnalysisResult(null);
+    setTracksLoading(true);
+    try {
+      const [tracksData, analysisData] = await Promise.all([
+        api.getPlaylistTracks(pl.id),
+        api.analyzePlaylist(pl.id),
+      ]);
+      setSelectedTracks(tracksData.tracks);
+      setAnalysisResult(analysisData);
+      addToast(analysisData.analysis?.vibe || 'Analysis loaded', 'success', 2000);
+      // Scroll to detail panel
+      setTimeout(() => {
+        document.querySelector('.garden-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    } catch (err) {
+      addToast(`Failed to load: ${err.message}`, 'error');
+    }
+    setTracksLoading(false);
   };
 
   const handleResendVerification = async () => {
@@ -364,17 +421,16 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* ── Welcome section ───────────────────────────────────── */}
-        <div style={{ marginBottom: 'var(--space-8)' }}>
-          <h2 style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'var(--text-2xl)', fontWeight: 300,
-            letterSpacing: '-0.02em',
-            marginBottom: 'var(--space-1)'
-          }}>
-            Welcome{netease.nickname ? `, ${netease.nickname}` : ''}
-          </h2>
-          <p className="text-base text-secondary">Your music landscape</p>
+        {/* ── Garden (primary visual layer) ──────────────────────── */}
+        <div style={{ position: 'relative' }}>
+          <Garden analyses={gardenAnalyses} onBlobClick={handleBlobClick} />
+          {gardenAnalyses.length > 0 && (
+            <button onClick={handleClearGarden}
+              className="btn-ghost btn-sm"
+              style={{ position: 'absolute', top: 'var(--space-2)', right: 'var(--space-2)', zIndex: 5 }}>
+              Clear
+            </button>
+          )}
         </div>
 
         {/* ── Connection / QR card ──────────────────────────────── */}

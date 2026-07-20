@@ -345,6 +345,46 @@ a:hover {
   opacity: 0.4;
 }
 
+/* ── Garden ────────────────────────────────────────────────── */
+
+.garden-container {
+  position: relative;
+  width: 100%;
+  min-height: 500px;
+  overflow: hidden;
+  margin-bottom: var(--space-6);
+}
+
+.garden-empty-text {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  color: var(--text-tertiary);
+  font-weight: 300;
+  letter-spacing: -0.01em;
+}
+
+.garden-empty-hint {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-top: var(--space-1);
+  opacity: 0.6;
+}
+
+.garden-blob-count {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Mobile garden: smaller height */
+@media (max-width: 640px) {
+  .garden-container {
+    min-height: 200px;
+  }
+}
+
 /* ── Animations ─────────────────────────────────────────────── */
 
 @keyframes fadeIn {

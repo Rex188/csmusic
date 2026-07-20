@@ -43,6 +43,8 @@ export const api = {
   getPlaylistTracks: (playlistId) => request(`/analysis/tracks/${playlistId}`),
   analyzePlaylist: (playlistId) => request(`/analysis/analyze/${playlistId}`, { method: 'POST' }),
   getAnalysisStatus: (jobId) => request(`/analysis/status/${jobId}`),
+  getGarden: () => request('/analysis/garden'),
+  clearAnalyses: () => request('/analysis/clear', { method: 'DELETE' }),
 
   // Admin (protected by ADMIN_KEY env var)
   adminDashboard: (key) => request(`/admin?key=${key}`),
