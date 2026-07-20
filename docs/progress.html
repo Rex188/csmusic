@@ -1,592 +1,349 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Music-Self — Progress</title>
-  <style>
-    :root {
-      --bg: #0b0d14;
-      --surface: #13171f;
-      --surface-hover: #1b202b;
-      --border: #1f2533;
-      --text: #e8eaf0;
-      --text-dim: #7a8099;
-      --accent: #a78bfa;
-      --accent-soft: #a78bfa10;
-      --green: #6ee7b7;
-      --yellow: #fcd34d;
-      --red: #f87171;
-      --blue: #60a5fa;
-      --radius: 10px;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      padding: 24px;
-      min-height: 100vh;
-    }
-    .container { max-width: 880px; margin: 0 auto; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Progress — Inner Landscape</title>
+<link rel="stylesheet" href="style.css">
+<style>
+/* ── Progress-specific styles ── */
 
-    header {
-      text-align: center;
-      padding: 48px 0 36px;
-    }
-    header h1 {
-      font-size: 2rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, #a78bfa, #c084fc);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    header p {
-      color: var(--text-dim);
-      margin-top: 8px;
-      font-size: 1rem;
-    }
-    .back-link {
-      display: inline-block;
-      margin-top: 12px;
-      font-size: 0.85rem;
-      color: var(--accent);
-      text-decoration: none;
-      opacity: 0.7;
-    }
-    .back-link:hover { opacity: 1; text-decoration: underline; }
+.progress-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 3rem;
+  margin: 2rem 0;
+  padding: 2rem 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
 
-    /* Top nav */
-    .topnav {
-      display: flex;
-      justify-content: center;
-      gap: 24px;
-      padding: 20px 20px 0;
-      font-size: 0.85rem;
-    }
-    .topnav a {
-      color: var(--text-dim);
-      text-decoration: none;
-      transition: color 0.15s;
-    }
-    .topnav a:hover { color: var(--accent); }
-    .topnav a.active { color: var(--accent); font-weight: 600; }
+.stat-item {
+  text-align: center;
+  min-width: 80px;
+}
 
-    .status-summary {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 12px;
-      margin-bottom: 32px;
-    }
-    .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px 18px;
-      text-align: center;
-    }
-    .stat-card .number { font-size: 1.6rem; font-weight: 700; }
-    .stat-card .label { font-size: 0.78rem; color: var(--text-dim); margin-top: 2px; }
+.stat-item .number {
+  font-family: var(--font-serif);
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
 
-    section { margin-bottom: 28px; }
-    .section-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .section-title .badge {
-      font-size: 0.7rem;
-      font-weight: 500;
-      padding: 2px 8px;
-      border-radius: 20px;
-      background: var(--accent-soft);
-      color: var(--accent);
-    }
+.stat-item .label {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-top: 0.5rem;
+}
 
-    .tag {
-      display: inline-block;
-      font-size: 0.72rem;
-      font-weight: 600;
-      padding: 2px 10px;
-      border-radius: 20px;
-      letter-spacing: 0.02em;
-    }
-    .tag-done { background: #064e3b; color: var(--green); }
-    .tag-wip   { background: #422f12; color: var(--yellow); }
-    .tag-pending { background: #1e293b; color: var(--text-dim); }
-    .tag-decided { background: #1e3a5f; color: var(--blue); }
+.task-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin: 1.5rem 0;
+}
 
-    .timeline { position: relative; padding-left: 28px; }
-    .timeline::before {
-      content: '';
-      position: absolute; left: 8px; top: 8px; bottom: 8px;
-      width: 2px; background: var(--border);
-    }
-    .timeline-item {
-      position: relative;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 14px 16px;
-      margin-bottom: 10px;
-    }
-    .timeline-item::before {
-      content: '';
-      position: absolute; left: -22px; top: 18px;
-      width: 10px; height: 10px; border-radius: 50%;
-      background: var(--accent); border: 2px solid var(--bg);
-    }
-    .timeline-item .date { font-size: 0.75rem; color: var(--text-dim); margin-bottom: 4px; }
-    .timeline-item .title { font-weight: 600; font-size: 0.92rem; }
-    .timeline-item .desc { font-size: 0.84rem; color: var(--text-dim); margin-top: 4px; }
+@media (max-width: 640px) {
+  .task-columns { grid-template-columns: 1fr; }
+}
 
-    .task-board { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    @media (max-width: 600px) { .task-board { grid-template-columns: 1fr; } }
-    .task-col h3 {
-      font-size: 0.82rem; font-weight: 600; color: var(--text-dim);
-      margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.06em;
-    }
-    .task-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px 14px;
-      margin-bottom: 8px;
-      font-size: 0.84rem;
-    }
-    .task-card .task-title { font-weight: 500; }
-    .task-card .task-meta { font-size: 0.74rem; color: var(--text-dim); margin-top: 3px; }
+.task-column h3 {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 1rem;
+}
 
-    .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    @media (max-width: 600px) { .card-grid { grid-template-columns: 1fr; } }
-    .ref-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px 14px;
-    }
-    .ref-card h4 { font-size: 0.85rem; font-weight: 600; margin-bottom: 2px; }
-    .ref-card p { font-size: 0.8rem; color: var(--text-dim); }
+.task-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.75rem;
+  font-family: var(--font-serif);
+}
 
-    footer {
-      text-align: center; padding: 40px 0 20px;
-      font-size: 0.78rem; color: var(--text-dim);
-    }
+.task-card .title {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
 
-    .log-entry {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 10px 14px;
-      margin-bottom: 6px;
-      font-size: 0.82rem;
-      font-family: 'SF Mono', 'Fira Code', monospace;
-    }
-    .log-entry .log-date { color: var(--text-dim); }
-    .log-entry .log-msg { color: var(--text); margin-top: 2px; }
+.task-card .meta {
+  font-size: var(--text-small);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
 
-    hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+.log-entry {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-left: 2px solid var(--border);
+  line-height: 1.5;
+}
 
-    .pitch-mini {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 0;
-      border-radius: var(--radius); overflow: hidden;
-      border: 1px solid var(--border);
-    }
-    .pitch-mini .side { padding: 12px 14px; font-size: 0.84rem; }
-    .pitch-mini .side.old { background: #1a1111; color: #fca5a5; }
-    .pitch-mini .side.new { background: #11181f; color: var(--text); }
-    .pitch-mini .side h5 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
-    .pitch-mini .side.old h5 { color: #f87171; }
-    .pitch-mini .side.new h5 { color: var(--green); }
-  </style>
+.log-entry .date {
+  color: var(--text-tertiary);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.log-entry .msg {
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
+.log-entry.highlight {
+  border-left-color: var(--text);
+}
+
+.inspiration-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.inspiration-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  padding: 1.25rem;
+}
+
+.inspiration-card h4 {
+  font-family: var(--font-serif);
+  font-size: var(--h4-size);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.inspiration-card p {
+  font-family: var(--font-serif);
+  font-size: var(--text-small);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.inspiration-card.gap {
+  border: 1px solid var(--text);
+}
+</style>
 </head>
 <body>
-<div class="container">
-
-  <div class="topnav">
-    <a href="index.html">Home</a>
+<nav>
+  <a href="index.html">Inner Landscape</a>
+  <div class="nav-links">
     <a href="story.html">Story</a>
+    <a href="interior.html">Essays</a>
     <a href="progress.html" class="active">Progress</a>
-    <a href="https://music-self.onrender.com" target="_blank">Live App</a>
-    <a href="https://github.com/Rex188/csmusic">GitHub</a>
   </div>
+</nav>
 
-  <header>
-    <h1>🌱 Music-Self</h1>
-    <p>Project progress — tracking the build from concept to launch</p>
-    <p style="margin-top:10px;"><a href="https://music-self.onrender.com" target="_blank" style="color:var(--accent);font-weight:600;">🚀 Try the live app →</a></p>
+<div class="page">
+  <header class="page-header">
+    <div class="page-category">Status</div>
+    <h1 class="page-title">Progress Tracker</h1>
+    <p class="page-subtitle">Current status, design decisions, and what&rsquo;s coming next.</p>
   </header>
 
-  <!-- Status -->
-  <div class="status-summary">
-    <div class="stat-card">
-      <div class="number" style="color:var(--green)">1</div>
-      <div class="label">Direction Chosen</div>
+  <div class="progress-stats">
+    <div class="stat-item">
+      <div class="number">5</div>
+      <div class="label">Days</div>
     </div>
-    <div class="stat-card">
-      <div class="number" style="color:var(--green)">1</div>
-      <div class="label">V1 Skeleton Done</div>
+    <div class="stat-item">
+      <div class="number">2</div>
+      <div class="label">Redesigns</div>
     </div>
-    <div class="stat-card">
-      <div class="number" style="color:var(--green)">2</div>
-      <div class="label">Services Deployed</div>
-    </div>
-    <div class="stat-card">
-      <div class="number" style="color:var(--yellow)">5</div>
-      <div class="label">Major Features Built</div>
-    </div>
-    <div class="stat-card">
-      <div class="number" style="color:var(--green)">20</div>
+    <div class="stat-item">
+      <div class="number">27</div>
       <div class="label">Bugs Fixed</div>
     </div>
-    <div class="stat-card">
-      <div class="number" style="color:var(--accent)">2</div>
-      <div class="label">UI Redesigns</div>
-    </div>
-    <div class="stat-card">
-      <div class="number" style="color:var(--green)">22</div>
-      <div class="label">Commits</div>
+    <div class="stat-item">
+      <div class="number">21</div>
+      <div class="label">Phases</div>
     </div>
   </div>
 
-  <!-- Core pitch -->
-  <section>
-    <div class="section-title">🎯 The Core Idea</div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;">
-      <p style="font-size:0.95rem;font-weight:600;margin-bottom:8px;">Music is how you perceive the world. Your lens, made visible.</p>
-      <p style="font-size:0.84rem;color:var(--text-dim);">
-        The way you hear music <em>is</em> the way you see everything else. Show someone your music-self and you're showing them your perspective — not your taste, your <em>lens</em>. Consensus isn't agreeing on facts. It's recognizing a shared way of perceiving.
-      </p>
-    </div>
-    <div class="pitch-mini" style="margin-top:10px;">
-      <div class="side old">
-        <h5>✗ Old framing (cringe)</h5>
-        Discover yourself through music<br>
-        Your emotional support garden<br>
-        Share your feelings<br>
-        The app understands you
-      </div>
-      <div class="side new">
-        <h5>✓ New framing (sharp)</h5>
-        Music IS how you perceive the world<br>
-        Your lens, made visible<br>
-        Share your perspective<br>
-        You see yourself — and others see you too
-      </div>
-    </div>
-  </section>
-
-  <!-- Design decisions -->
-  <section>
-    <div class="section-title">⚙️ Design Decisions</div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;">
-      <ul style="font-size:0.84rem; color:var(--text-dim); padding-left:18px; display:flex; flex-direction:column; gap:6px;">
-        <li><strong>Music source:</strong> Netease Cloud Music (QR login via api-enhanced), local files supported</li>
-        <li><strong>Identity model:</strong> One evolving self — "like bringing up a kid"</li>
-        <li><strong>Deep analysis:</strong> Heavy ML under the hood so the landscape feels accurate — users never see charts unless they dig</li>
-        <li><strong>Reflection:</strong> User recognizes themselves in the visual. Optional notes encouraged, not required.</li>
-        <li><strong>Social:</strong> Share a facet of your music-self via social masks. Different masks for different people.</li>
-        <li><strong>Platform:</strong> Web first, then iOS. Simple email/password.</li>
-        <li><strong>Vibe:</strong> Apple-style minimalism, dark, interactive, scroll-reactive. No p5.js.</li>
-        <li><strong>No-go:</strong> No ads, no force, no pop-ups, no gamification, no feed, no AI explaining emotions.</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- Inspirations -->
-  <section>
-    <div class="section-title">📚 Inspirations</div>
-    <div class="card-grid">
-      <div class="ref-card">
-        <h4>🎬 SOUL (Pixar)</h4>
-        <p>Souls as abstract personalities developing through experience. Your music-self is <em>becoming</em>, not finished.</p>
-      </div>
-      <div class="ref-card">
-        <h4>🌸 n-gen art (Bloom)</h4>
-        <p>Spotify → flower per artist/genre. Garden metaphor proven. Went viral.</p>
-      </div>
-      <div class="ref-card">
-        <h4>🌍 Sonosphere</h4>
-        <p>3D world from listening <em>behavior</em> (repetition, exploration, curation). Behavior shapes landscape.</p>
-      </div>
-      <div class="ref-card">
-        <h4>🔮 Soundgaze</h4>
-        <p>UMAP on audio features → 3D point cloud. Similar songs = close together.</p>
-      </div>
-      <div class="ref-card" style="border:1px dashed var(--accent);">
-        <h4>✨ The gap we fill</h4>
-        <p>None evolve over time. None incorporate user reflection. None feel like a relationship. That's where Music-Self sits.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- What's Next -->
-  <section>
-    <div class="section-title">🔮 What's Next</div>
-    <div class="task-board">
-      <div class="task-col">
-        <h3>Pending</h3>
-        <div class="task-card">
-          <div class="task-title">Visual landscape / garden UI</div>
-          <div class="task-meta">The core visual metaphor — how features map to visual elements. The big one.</div>
-        </div>
-        <div class="task-card">
-          <div class="task-title">Librosa audio analysis pipeline</div>
-          <div class="task-meta">Extract tempo, key, energy, timbre from local/original files. Custom ML.</div>
-        </div>
-        <div class="task-card">
-          <div class="task-title">Social masks &amp; sharing</div>
-          <div class="task-meta">Share a facet of your music-self. Different masks for different people.</div>
-        </div>
-        <div class="task-card">
-          <div class="task-title">iOS app (post-V1)</div>
-          <div class="task-meta">Native mobile experience planned.</div>
-        </div>
-      </div>
-      <div class="task-col">
-        <h3>Decided ✓</h3>
-        <div class="task-card">
-          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Monochrome Redesign (post-feedback)</div>
-          <div class="task-meta">Pivoted from purple to black/white/gray, Helvetica, dramatic type scale (18px body → 64px headline). Rounded corners + glass transparency added.</div>
-        </div>
-        <div class="task-card">
-          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Frontend UI Redesign (Apple-Style)</div>
-          <div class="task-meta">Complete design token system, glass cards, gradient accent, Inter typography, 4-button variants. All 6 pages redesigned.</div>
-        </div>
-        <div class="task-card">
-          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Email verification recovery path</div>
-          <div class="task-meta">verification_url always returned. Fallback link when SMTP fails. Loading states for cold-start UX.</div>
-        </div>
-        <div class="task-card">
-          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Admin panel UI</div>
-          <div class="task-meta">/admin page with key login, stats cards, User/Playlist/Netease management tables with cascade delete + confirm</div>
-        </div>
-        <div class="task-card">
-          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Email verification flow</div>
-          <div class="task-meta">Signup sends verification via SMTP (Brevo/SendGrid) or console fallback. Dashboard banner. Admin shows verified status.</div>
-        </div>
-        <div class="task-card">
-          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Playlist analysis (LLM)</div>
-          <div class="task-meta">Sample up to 40 tracks, send to LLM (DeepSeek/OpenAI/Ollama), structured analysis: vibe, mood, energy, valence, tempo, genres, insight.</div>
-        </div>
-        <div class="task-card">
-          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Playlist selection + detail panel</div>
-          <div class="task-meta">Clickable cards with purple highlight. Detail panel shows track list with covers/artists + Analyze button.</div>
-        </div>
-        <div class="task-card">
-          <div class="task-title"><span class="tag tag-done" style="margin-right:6px;">DONE</span>Deployed to Render</div>
-          <div class="task-meta">2 services: api-enhanced (Node.js) + music-self (Flask). Live at music-self.onrender.com.</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Timeline -->
-  <section>
-    <div class="section-title">📅 Timeline</div>
-    <div class="timeline">
-      <div class="timeline-item">
-        <div class="date">2026-07-15</div>
-        <div class="title">Project initialized</div>
-        <div class="desc">Folder, CLAUDE.md, Python venv created.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2026-07-15</div>
-        <div class="title">Two-model workflow defined</div>
-        <div class="desc">DeepSeek (implementation) + Claude Opus (architecture). GPT removed due to cost.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2026-07-15</div>
-        <div class="title">Deep research report rejected</div>
-        <div class="desc">"Emotion reflection" was a solution looking for a problem. User called it nonsense. Architect agreed.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2026-07-15</div>
-        <div class="title">Breakthrough — the raw idea</div>
-        <div class="desc">"Music is a reflection of how you perceive this world." Self-exploration first, then connection.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2026-07-15</div>
-        <div class="title">Design questions answered</div>
-        <div class="desc">8 sections in project/design-questions.md. SOUL metaphor, no pressure, social masks.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2026-07-15</div>
-        <div class="title">Pitch reframed</div>
-        <div class="desc">"Music as perception" — from cringe to sharp. Your lens, made visible.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2026-07-15</div>
-        <div class="title">GitHub Pages published</div>
-        <div class="desc">Landing page + progress page live.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2026-07-16</div>
-        <div class="title">V1 skeleton implemented</div>
-        <div class="desc">Flask backend (auth, Netease QR login, playlist import) + React frontend (login/signup/dashboard). Pivoted from Spotify to Netease Cloud Music API. 3-server stack verified working.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2026-07-16</div>
-        <div class="title">Bugfix: /api/me route</div>
-        <div class="desc">Separate /api/me added outside auth blueprint. Signup/login → dashboard flow now working end-to-end.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2026-07-16</div>
-        <div class="title">SQLite + QR login fixed</div>
-        <div class="desc">Old database with Spotify schema deleted. QR polling changed from setInterval to recursive setTimeout. Netease connection verified working.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2026-07-16</div>
-        <div class="title">Bug: playlist import not displaying</div>
-        <div class="desc">Import API returns data but playlist grid stays empty on dashboard. Frontend state update issue — deferred to next session.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2026-07-16</div>
-        <div class="title">QR unwrapping fix + loading UX</div>
-        <div class="desc">Fixed _proxy() response unwrapping for api-enhanced double-wrapped responses. Added generating/waiting/scanning/connecting/expired states with animated spinner, pulsing QR border, and countdown timer.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2026-07-16</div>
-        <div class="title">Playlist import fixes</div>
-        <div class="desc">Added parallel ThreadPoolExecutor (5 workers) for fetching tracks across playlists. Fixed artist NoneType crash. Raised all timeouts to 120s. DB lock recovery.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2026-07-16</div>
-        <div class="title">JSON-safe API client + error resilience</div>
-        <div class="desc">Fixed "body stream already read" error in api.js by checking content-type before .json(). Added _unwrap() helper to both netease_routes.py and playlist_routes.py for consistent response handling.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2026-07-16</div>
-        <div class="title">Deployed to Render (production)</div>
-        <div class="desc">2 services on Render: api-enhanced (Node, free) + music-self (Flask Python, free). Flask serves built React frontend statically. NCM_API env var configurable. SPA catch-all route for client-side routing.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2026-07-16</div>
-        <div class="title">Admin endpoint + CLI script</div>
-        <div class="desc">Added /api/admin?key=xxx endpoint protected by ADMIN_KEY env var. Returns all users, netease connections, playlists, track count. Local admin.py CLI (python admin.py all) for database inspection.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2026-07-16</div>
-        <div class="title">Playlist selection + LLM analysis</div>
-        <div class="desc">Clickable playlist cards with track detail panel. Analyze button samples tracks and sends to DeepSeek/OpenAI LLM for structured analysis (vibe, mood, energy, valence, tempo, genres, insight).</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2026-07-16</div>
-        <div class="title">Admin panel UI + routing fixes</div>
-        <div class="desc">Full /admin page: key login, stats cards, User/Playlist/Netease tables with cascade delete. Fixed catch-all route conflicts with blueprint POST/DELETE routes. Added user_id to admin netease query.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2026-07-16</div>
-        <div class="title">Email verification system</div>
-        <div class="desc">Signup triggers verification email (SMTP/Brevo). /auth/verify/&lt;token&gt; endpoint auto-login. Dashboard banner with resend. Admin shows verified/unverified status. Migration system for existing databases.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2026-07-18</div>
-        <div class="title">Debugger role added</div>
-        <div class="desc">Three-model pipeline: Architect → Implementer → Debugger.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2026-07-18</div>
-        <div class="title">Email verification recovery path fixed</div>
-        <div class="desc">verification_url always returned. Frontend shows fallback link when SMTP fails. Loading states added for cold-start UX.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2026-07-18</div>
-        <div class="title">Frontend UI Redesign (Apple-Style)</div>
-        <div class="desc">Complete design token system, glass cards, gradient accent, Inter typography, 4-button system. All 6 pages redesigned, built, and deployed.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2026-07-18</div>
-        <div class="title">⚠️ Monochrome Redesign (post-feedback)</div>
-        <div class="desc">User rejected purple palette. Pivoted to pure black/white/gray, Helvetica Neue, dramatic type scale (body 18px, headline 64px). Rebuilt and deployed.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2026-07-19</div>
-        <div class="title">Rounded corners + glass transparency added</div>
-        <div class="desc">User requested more rounding. Radii bumped, glass transparency increased (0.75→0.5 alpha, blur 16→24px). Docs synced.</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Activity -->
-  <section>
-    <div class="section-title">📝 Activity Log</div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-18</span>
-      <div class="log-msg">Frontend UI Redesign (Apple-Style): complete design token system (~200 lines CSS), glass cards, gradient accent, Inter typography, 4-button variants. All 6 pages (Login, Signup, Verify, Dashboard, Admin, Toast) redesigned, built, and deployed to Render.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-18</span>
-      <div class="log-msg">Email verification recovery path fixed: verification_url always returned (signup + resend). Frontend shows clickable fallback link when SMTP fails. Signup/Login loading states added for cold-start UX.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-18</span>
-      <div class="log-msg">Debugger role added: diagnostics-only Senior Debugging Engineer. Three-model pipeline: Architect → Implementer → Debugger.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-16</span>
-      <div class="log-msg">Email verification: signup sends email (SMTP/console), /auth/verify/&lt;token&gt; endpoint, dashboard banner, admin verification status. Migration system for existing DBs.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-16</span>
-      <div class="log-msg">Admin panel routing fixed: removed catch-all /&lt;path:path&gt;, explicit static routes + 404 SPA fallback. Fixed DELETE body ignored by WSGI (key now in query params). Fixed cascade delete FOREIGN KEY constraint on email_verifications.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-16</span>
-      <div class="log-msg">Admin panel UI: /admin page with key auth, stats cards, User/Playlist/Netease tables with cascade delete and confirm dialog.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-16</span>
-      <div class="log-msg">Playlist analysis (LLM): samples tracks, sends to DeepSeek/OpenAI/Ollama, returns structured analysis (vibe, mood, energy, valence, tempo, genres). Dropped slow audio URL checking.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-16</span>
-      <div class="log-msg">Deployed to Render: 2 services (api-enhanced Node + Flask Python). Flask serves built React frontend statically. Live at <a href="https://music-self.onrender.com" target="_blank" style="color:var(--accent);">music-self.onrender.com</a>.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-16</span>
-      <div class="log-msg">QR login UX overhaul + playlist import fixes: 5 visual states, parallel ThreadPoolExecutor, timeouts raised, DB lock recovery.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-16</span>
-      <div class="log-msg">V1 skeleton implemented: Flask backend (auth, Netease QR login, playlist import) + React frontend (login/signup/dashboard). Pivoted from Spotify to Netease Cloud Music API.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-15</span>
-      <div class="log-msg">Music-Self concept locked. Pitch reframed: "Music as perception." GitHub Pages published.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-19</span>
-      <div class="log-msg">UI refinement: rounded corners + more glass transparency added per user feedback. All progress docs synced.</div>
-    </div>
-    <div class="log-entry">
-      <span class="log-date">2026-07-18</span>
-      <div class="log-msg">Monochrome redesign: user rejected purple palette. Pivoted to pure black/white/gray, Helvetica, dramatic type scale (18px body → 64px headline). All pages updated.</div>
-    </div>
-  </section>
-
-  <!-- Feedback -->
-  <section>
-    <div class="section-title">💬 Thoughts?</div>
-    <div style="background:var(--accent-soft);border:1px solid var(--accent);border-radius:var(--radius);padding:20px 22px;text-align:center;">
-      <p style="font-size:0.9rem;color:var(--text-dim);margin-bottom:12px;">
-        The concept is fresh — your take shapes where it goes next.
-      </p>
-      <a href="https://github.com/Rex188/csmusic/issues/new" target="_blank" style="display:inline-block;background:var(--accent);color:#0b0d14;font-weight:700;font-size:0.85rem;padding:10px 24px;border-radius:40px;text-decoration:none;">Open an Issue</a>
-    </div>
-  </section>
+  <h2>The Core Idea</h2>
+  <blockquote><p>Music is how you perceive the world. Your lens, made visible.</p></blockquote>
+  <p>The way you hear music <em>is</em> the way you see everything else. Show someone your music-self and you&rsquo;re showing them your perspective&mdash;not your taste, your <em>lens</em>. Consensus isn&rsquo;t agreeing on facts. It&rsquo;s recognizing a shared way of perceiving.</p>
 
   <hr>
 
-  <footer>
-    Music-Self &nbsp;·&nbsp; <a href="https://music-self.onrender.com" target="_blank">Try the App</a> &nbsp;·&nbsp; Last updated 2026-07-19 (v4)
-  </footer>
+  <h2>Design Decisions</h2>
+  <ul>
+    <li><strong>Music source:</strong> Netease Cloud Music (QR login via api-enhanced), local files supported</li>
+    <li><strong>Identity model:</strong> One evolving self&mdash;&ldquo;like bringing up a kid&rdquo;</li>
+    <li><strong>Analysis:</strong> Heavy LLM under the hood so the landscape feels accurate&mdash;users never see charts unless they dig</li>
+    <li><strong>Reflection:</strong> User recognizes themselves in the visual. Optional notes encouraged, not required</li>
+    <li><strong>Social:</strong> Share a facet of your music-self via social masks. Different masks for different people</li>
+    <li><strong>Platform:</strong> Web first, then iOS. Simple email/password</li>
+    <li><strong>Visual metaphor:</strong> 2.5D isometric room (p5.js). Earned vitality&mdash;starts gray, fills with color through use</li>
+    <li><strong>No-go:</strong> No ads, no force, no pop-ups, no gamification, no feed, no AI explaining emotions</li>
+  </ul>
 
+  <hr>
+
+  <h2>Inspirations</h2>
+  <div class="inspiration-grid">
+    <div class="inspiration-card">
+      <h4>SOUL (Pixar)</h4>
+      <p>Souls as abstract personalities developing through experience. Your music-self is <em>becoming</em>, not finished.</p>
+    </div>
+    <div class="inspiration-card">
+      <h4>n-gen art (Bloom)</h4>
+      <p>Spotify → flower per artist/genre. Garden metaphor proven. Went viral.</p>
+    </div>
+    <div class="inspiration-card">
+      <h4>Sonosphere</h4>
+      <p>3D world from listening <em>behavior</em> (repetition, exploration, curation). Behavior shapes landscape.</p>
+    </div>
+    <div class="inspiration-card">
+      <h4>Soundgaze</h4>
+      <p>UMAP on audio features → 3D point cloud. Similar songs = close together.</p>
+    </div>
+    <div class="inspiration-card gap">
+      <h4>The gap we fill</h4>
+      <p>None evolve over time. None incorporate user reflection. None feel like a relationship. That&rsquo;s where Inner Landscape sits.</p>
+    </div>
+  </div>
+
+  <hr>
+
+  <h2>What&rsquo;s Next</h2>
+  <div class="task-columns">
+    <div class="task-column">
+      <h3>Pending</h3>
+      <div class="task-card">
+        <div class="title">P1 — Inner Room (2.5D Isometric)</div>
+        <div class="meta">Full-screen p5.js room with walls, floor, window, shelf, desk, door, avatar, atmosphere particles. Saturation multiplier from gray to full color.</div>
+      </div>
+      <div class="task-card">
+        <div class="title">Diary input system</div>
+        <div class="meta">Free text input via floating glass overlay. LLM extracts meaning and themes. Desk objects accumulate from entries.</div>
+      </div>
+      <div class="task-card">
+        <div class="title">Ambient audio texture</div>
+        <div class="meta">Faint atmospheric audio from music amalgam. Not recognizable songs, just texture. Deferred to P2.</div>
+      </div>
+      <div class="task-card">
+        <div class="title">Social architecture</div>
+        <div class="meta">Door, privacy tiers, room visiting, real-time + offline chat, abstract avatars. Deferred to P3.</div>
+      </div>
+    </div>
+    <div class="task-column">
+      <h3>Done ✓</h3>
+      <div class="task-card">
+        <div class="title">Landscape Within essay</div>
+        <div class="meta">First published essay introducing the project&rsquo;s philosophical foundation and research question.</div>
+      </div>
+      <div class="task-card">
+        <div class="title">Docs redesign</div>
+        <div class="meta">All GitHub Pages (index, story, progress, interior) now share the Aeon-inspired serif typography design system.</div>
+      </div>
+      <div class="task-card">
+        <div class="title">Garden visual prototype</div>
+        <div class="meta">p5.js Cowsert noise background + Houston blobs per playlist. LLM mood drives color/animation. 7 bugfixes including StrictMode duplicate canvas fix.</div>
+      </div>
+      <div class="task-card">
+        <div class="title">Inner Room design spec</div>
+        <div class="meta">Complete 18-section spec: isometric projection math, room elements, weather, lighting, avatar, saturation multiplier, glass UI overlay architecture.</div>
+      </div>
+      <div class="task-card">
+        <div class="title">Monochrome redesign</div>
+        <div class="meta">Pivoted from purple to black/white/gray, Helvetica, dramatic type scale. Rounded corners + glass transparency added.</div>
+      </div>
+      <div class="task-card">
+        <div class="title">Email verification recovery path</div>
+        <div class="meta"><code>verification_url</code> always returned. Fallback link when SMTP fails. Loading states for cold-start UX.</div>
+      </div>
+      <div class="task-card">
+        <div class="title">Admin panel UI</div>
+        <div class="meta">Key login, stats dashboard, user/playlist/Netease management with cascade delete and confirm dialog.</div>
+      </div>
+      <div class="task-card">
+        <div class="title">LLM playlist analysis</div>
+        <div class="meta">Sample up to 40 tracks, send to DeepSeek/OpenAI/Ollama, structured analysis: vibe, mood, energy, genres.</div>
+      </div>
+      <div class="task-card">
+        <div class="title">V1 skeleton</div>
+        <div class="meta">Flask + React + Netease API. QR login, playlist import, deployed to Render.</div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <h2>Activity Log</h2>
+
+  <div class="log-entry highlight">
+    <div class="date">2026-07-20</div>
+    <div class="msg">Docs redesign — all GitHub Pages now share Aeon-inspired serif typography design. interior.html (Landscape Within essay) published.</div>
+  </div>
+
+  <div class="log-entry">
+    <div class="date">2026-07-20</div>
+    <div class="msg">Phase 21 — Inner Room design spec completed. Garden → room pivot. Earned vitality, dual-tempo, social architecture.</div>
+  </div>
+
+  <div class="log-entry">
+    <div class="date">2026-07-20</div>
+    <div class="msg">Phase 20 — Garden Visual Prototype. p5.js Cowsert + Houston. Debugger found 7 bugs, all fixed.</div>
+  </div>
+
+  <div class="log-entry">
+    <div class="date">2026-07-20</div>
+    <div class="msg">Phases 18-19 — Research pivot. 6→9 theorists. Central question: &ldquo;How do you define inner self representation?&rdquo;</div>
+  </div>
+
+  <div class="log-entry">
+    <div class="date">2026-07-19</div>
+    <div class="msg">UI refinement: rounded corners + more glass transparency per user feedback.</div>
+  </div>
+
+  <div class="log-entry">
+    <div class="date">2026-07-18</div>
+    <div class="msg">Monochrome redesign: user rejected purple palette. Pivoted to pure black/white/gray, Helvetica, dramatic type scale.</div>
+  </div>
+
+  <div class="log-entry">
+    <div class="date">2026-07-18</div>
+    <div class="msg">Frontend UI Redesign (Apple-Style): token-based CSS, glass cards, gradient accent, Inter typography. All 6 pages redesigned.</div>
+  </div>
+
+  <div class="log-entry">
+    <div class="date">2026-07-18</div>
+    <div class="msg">Email verification recovery path fixed. verification_url always returned. Loading states for cold-start UX.</div>
+  </div>
+
+  <div class="log-entry">
+    <div class="date">2026-07-18</div>
+    <div class="msg">Debugger role added. Three-model pipeline: Architect → Implementer → Debugger.</div>
+  </div>
+
+  <div class="log-entry">
+    <div class="date">2026-07-16</div>
+    <div class="msg">V1 deployed: Email verification, admin panel, LLM analysis, QR login, playlist import. All verified working.</div>
+  </div>
 </div>
+
+<footer class="site-footer">
+  <span>&copy; 2026 Rex</span>
+  <span>Inner Landscape &middot; Updated 2026-07-20</span>
+</footer>
 </body>
 </html>
