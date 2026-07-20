@@ -73,7 +73,6 @@ body {
   line-height: var(--line-height-body);
   color: var(--text);
   background: var(--bg);
-  overflow-x: hidden;
   transition: background 0.3s, color 0.3s;
 }
 
