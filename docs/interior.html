@@ -9,19 +9,153 @@
 /* ── Essay-specific overrides ── */
 
 article {
-  padding-top: 2rem;
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 2rem 1.5rem 6rem;
 }
 
-.has-dropcap::first-letter {
-  float: left;
-  font-size: 4.2em;
-  line-height: 0.85;
+.article-header {
+  margin-bottom: 3.5rem;
+  padding-bottom: 2.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.article-category {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.article-title {
+  font-family: var(--font-serif);
+  font-size: var(--h1-size);
   font-weight: 700;
-  margin-right: 0.5rem;
-  margin-top: 0.15rem;
+  line-height: var(--line-height-heading);
+  letter-spacing: -0.02em;
+  margin-bottom: 1.25rem;
   color: var(--text);
 }
 
+.article-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  font-family: var(--font-sans);
+  font-size: var(--text-small);
+  color: var(--text-tertiary);
+}
+
+.article-meta .author {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.article-meta .separator {
+  color: var(--border);
+}
+
+article p {
+  margin-bottom: var(--space-paragraph);
+  orphans: 3;
+  widows: 3;
+}
+
+article p:last-child {
+  margin-bottom: 0;
+}
+
+article h2 {
+  font-family: var(--font-serif);
+  font-size: var(--h2-size);
+  font-weight: 700;
+  line-height: var(--line-height-heading);
+  letter-spacing: -0.01em;
+  margin-top: 3.5rem;
+  margin-bottom: 1.25rem;
+  padding-top: 0.5rem;
+}
+
+article h3 {
+  font-family: var(--font-serif);
+  font-size: var(--h3-size);
+  font-weight: 600;
+  line-height: var(--line-height-tight);
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+article a {
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent-underline);
+  transition: border-color 0.2s;
+}
+
+article a:hover {
+  border-bottom-color: var(--text);
+}
+
+article hr {
+  border: none;
+  height: 1px;
+  background: var(--border);
+  margin: 3.5rem 0;
+}
+
+article ul, article ol {
+  margin: 1.5rem 0;
+  padding-left: 1.75rem;
+}
+
+article li {
+  margin-bottom: 0.5rem;
+}
+
+article li:last-child {
+  margin-bottom: 0;
+}
+
+.article-footer {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+  font-family: var(--font-sans);
+  font-size: var(--text-small);
+  color: var(--text-secondary);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.article-tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.article-tags a {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.article-tags a:hover {
+  border-color: var(--text);
+  color: var(--text);
+}
+
+/* ── Pull quote ── */
 .pullquote {
   font-family: var(--font-serif);
   font-size: 1.75rem;
@@ -44,6 +178,18 @@ article {
   color: var(--text-tertiary);
 }
 
+/* ── Drop cap ── */
+.has-dropcap::first-letter {
+  float: left;
+  font-size: 4.2em;
+  line-height: 0.85;
+  font-weight: 700;
+  margin-right: 0.5rem;
+  margin-top: 0.15rem;
+  color: var(--text);
+}
+
+/* ── Related empty ── */
 .related-empty {
   padding: 3rem 0;
   text-align: center;
@@ -51,6 +197,42 @@ article {
   font-family: var(--font-serif);
   font-style: italic;
   font-size: var(--text-lead);
+}
+
+/* ── Related section ── */
+.related-section {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+  font-family: var(--font-sans);
+}
+.related-section h2 {
+  font-family: var(--font-serif);
+  font-size: var(--h3-size);
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 640px) {
+  article {
+    padding: 1.5rem 1.25rem 4rem;
+  }
+  .article-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+  }
+  article h2 {
+    margin-top: 2.5rem;
+  }
+  .pullquote {
+    font-size: 1.375rem;
+    padding: 1.25rem 0;
+  }
+  article hr {
+    margin: 2.5rem 0;
+  }
 }
 </style>
 </head>
